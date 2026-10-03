@@ -2,15 +2,38 @@
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import urlparse
-import json, random, math, time, uuid
+import json, random, math, time, uuid, sqlite3
 
 ROOT = Path(__file__).resolve().parents[1]
 RULES = json.loads((ROOT / "config" / "changeover_rules.json").read_text())
 AUDIT = []
+DB_PATH = ROOT / "data" / "aquaflux_demo.db"
+
+def init_db():
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("""CREATE TABLE IF NOT EXISTS audit_logs (
+            event_id TEXT PRIMARY KEY, timestamp TEXT NOT NULL, action TEXT NOT NULL,
+            detail TEXT NOT NULL, classification TEXT NOT NULL)""")
+
+def audit_events():
+    try:
+        init_db()
+        with sqlite3.connect(DB_PATH) as conn:
+            rows=conn.execute("SELECT event_id, timestamp, action, detail, classification FROM audit_logs ORDER BY timestamp DESC").fetchall()
+        return [dict(zip(["event_id","timestamp","action","detail","classification"],row)) for row in rows]
+    except sqlite3.Error:
+        return list(reversed(AUDIT))
 
 def record(action, detail):
     event={"event_id":str(uuid.uuid4()),"timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "action": action, "detail": detail, "classification": "SIMULATED"}
     AUDIT.append(event)
+    try:
+        init_db()
+        with sqlite3.connect(DB_PATH) as conn:
+            conn.execute("INSERT INTO audit_logs VALUES (?, ?, ?, ?, ?)",tuple(event.values()))
+        event["persistence"]="sqlite"
+    except sqlite3.Error:
+        event["persistence"]="memory_fallback"
     return event
 
 def batches(seed=2030, count=12):
@@ -123,6 +146,28 @@ def impact(body):
     adapt=min(max(0,requested_adapt),prevent)
     return {"classification":"MODEL_OUTPUT","notice":"Modeled synthetic scenario, not L'Oréal production data.","common_baseline_l":base,"prevent_incremental_l":round(max(0,base-prevent),1),"adapt_incremental_l":adapt,"adapt_requested_l":requested_adapt,"cascade_potential_l":recovered,"water_demand_after_prevent_adapt_l":round(max(0,prevent-adapt),1),"accounting_note":"Cascade is reported separately as potential reuse and is not added to water-demand avoidance."}
 
+def business_case(body):
+    fields=["changeovers_per_year","water_avoided_per_changeover_l","water_cost_per_l","implementation_cost","annual_software_cost"]
+    missing=[]; values={}
+    for field in fields:
+        try: values[field]=float(body[field])
+        except (KeyError, TypeError, ValueError): missing.append(field)
+    if missing:
+        return {"classification":"ILLUSTRATIVE_SCENARIO","status":"INSUFFICIENT DATA","notice":"Enter verified site inputs. This prototype contains no L'Oréal costs or savings assumptions.","required_fields":missing}
+    if any(not math.isfinite(value) or value < 0 for value in values.values()):
+        return {"classification":"ILLUSTRATIVE_SCENARIO","status":"INSUFFICIENT DATA","notice":"All business-case inputs must be finite and non-negative."}
+    direct=values["changeovers_per_year"]*values["water_avoided_per_changeover_l"]*values["water_cost_per_l"]
+    annual_net=direct-values["annual_software_cost"]
+    capex=values["implementation_cost"]
+    payback_years=None if annual_net<=0 else round(capex/annual_net,2)
+    roi=None if capex<=0 else round(annual_net/capex*100,1)
+    scenarios=[]
+    for label,factor in [("Conservative",.7),("Base",1),("Optimistic",1.3)]:
+        benefit=direct*factor-values["annual_software_cost"]
+        scenarios.append({"scenario":label,"water_avoidance_factor":factor,"annual_net_benefit":round(benefit,2),"payback_years":None if benefit<=0 else round(capex/benefit,2)})
+    record("BUSINESS_CASE","Illustrative calculator run with user-entered site inputs")
+    return {"classification":"ILLUSTRATIVE_SCENARIO","status":"CALCULATED","notice":"Illustrative calculation from user-entered inputs. Not L'Oréal economics and not a guaranteed outcome.","inputs":values,"direct_water_cost_benefit":round(direct,2),"annual_net_benefit":round(annual_net,2),"payback_years":payback_years,"annual_roi_percent":roi,"sensitivity":scenarios,"limitation":"Capacity, chemical, energy and revenue effects are excluded until their methodology and source data are defined."}
+
 def pilot():
     return {"classification":"ARCHITECTED","notice":"Target integration architecture — not connected to L'Oréal systems.","mode":"Advisory only; existing validated procedure remains authoritative.","scope":"One line and selected quality-approved transitions.","success_criteria":["No unacceptable quality deviation","Deadline compliance","Measurable comparable baseline","Operational acceptance","Adequate data availability"],"stop_conditions":["Quality deviation","Sensor failure","Unvalidated reuse route","Critical system error","Production risk"]}
 
@@ -137,10 +182,11 @@ class App(SimpleHTTPRequestHandler):
         route=urlparse(self.path).path
         if route=="/api/batches": return self.send_json({"classification":"SYNTHETIC_DATA","items":batches()})
         if route=="/api/cleaning": return self.send_json(cleaning())
-        if route=="/api/audit-log": return self.send_json({"items":AUDIT})
+        if route=="/api/audit-log": return self.send_json({"items":audit_events(),"storage":"sqlite with in-memory fallback"})
         if route=="/api/assumptions": return self.send_json({"classification":"ENGINEERING_ASSUMPTION","rules":RULES})
         if route=="/api/pilot": return self.send_json(pilot())
         if route=="/api/models": return self.send_json(models())
+        if route=="/api/business-case": return self.send_json({"classification":"ILLUSTRATIVE_SCENARIO","status":"INPUT REQUIRED","required_fields":["changeovers_per_year","water_avoided_per_changeover_l","water_cost_per_l","implementation_cost","annual_software_cost"],"notice":"Enter verified site inputs. This prototype contains no L'Oréal costs or savings assumptions."})
         if route=="/api/health": return self.send_json({"status":"ok","classification":"REAL","storage":"in-memory demonstration session"})
         if route.startswith("/api/"): return self.send_json({"error":"Unknown route"},404)
         self.path="/frontend/index.html" if route=="/" else route
@@ -154,6 +200,7 @@ class App(SimpleHTTPRequestHandler):
         if route=="/api/cleaning/start": record("CLEANING_SIMULATION","Started"); return self.send_json(cleaning(body.get("seed",2030),body.get("failure")))
         if route=="/api/water/analyze": record("WATER_SCREEN","Illustrative reuse screen"); return self.send_json(cascade(body))
         if route=="/api/impact/calculate": return self.send_json(impact(body))
+        if route=="/api/business-case": return self.send_json(business_case(body))
         if route=="/api/optimization/decision":
             decision=body.get("decision") if isinstance(body,dict) else None
             if decision not in {"accept_recommendation","retain_baseline"}:
@@ -163,5 +210,5 @@ class App(SimpleHTTPRequestHandler):
         return self.send_json({"error":"Unknown route"},404)
 
 if __name__=="__main__":
-    import os; os.chdir(ROOT); print("AquaFlux running at http://localhost:8000")
+    import os; os.chdir(ROOT); init_db(); print("AquaFlux running at http://localhost:8000")
     ThreadingHTTPServer(("",8000),App).serve_forever()

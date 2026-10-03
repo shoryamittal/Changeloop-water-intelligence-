@@ -1,7 +1,7 @@
 import sys, unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from backend.server import batches, burden, sequence_payload, cleaning, cascade, impact, pilot, models
+from backend.server import batches, burden, sequence_payload, cleaning, cascade, impact, pilot, models, business_case, record, audit_events
 
 class CoreTests(unittest.TestCase):
     def test_deterministic_batches(self): self.assertEqual(batches(), batches())
@@ -39,5 +39,11 @@ class CoreTests(unittest.TestCase):
         ledger=impact({'adapt_incremental_l':999999,'recovered_l':-1})
         self.assertGreaterEqual(ledger['water_demand_after_prevent_adapt_l'],0); self.assertGreaterEqual(ledger['cascade_potential_l'],0)
         self.assertEqual(cascade({'volume_l':-1})['available_volume_l'],0)
+    def test_business_case_requires_site_inputs(self): self.assertEqual(business_case({})['status'],'INSUFFICIENT DATA')
+    def test_business_case_is_input_driven(self):
+        r=business_case({'changeovers_per_year':10,'water_avoided_per_changeover_l':20,'water_cost_per_l':1,'implementation_cost':100,'annual_software_cost':10})
+        self.assertEqual(r['status'],'CALCULATED'); self.assertEqual(r['direct_water_cost_benefit'],200)
+    def test_audit_event_is_durable_when_sqlite_available(self):
+        event=record('TEST_EVENT','database test'); self.assertTrue(any(x['event_id']==event['event_id'] for x in audit_events()))
 
 if __name__ == '__main__': unittest.main()

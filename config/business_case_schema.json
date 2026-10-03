@@ -1,0 +1,12 @@
+{
+  "classification": "ILLUSTRATIVE_SCENARIO",
+  "notice": "No L'Oréal cost, savings, ROI, or payback values are provided. Enter verified site inputs.",
+  "required_inputs": [
+    "changeovers_per_year",
+    "water_avoided_per_changeover_l",
+    "water_cost_per_l",
+    "implementation_cost",
+    "annual_software_cost"
+  ],
+  "excluded": ["capacity value", "chemical impact", "energy impact", "CO2e impact"]
+}
