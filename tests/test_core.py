@@ -11,6 +11,7 @@ class CoreTests(unittest.TestCase):
                 x=burden(a,b); self.assertGreaterEqual(x['litres'], 0); self.assertGreaterEqual(x['minutes'], 0)
     def test_optimizer_preserves_batches(self):
         r=sequence_payload({}); self.assertEqual(set(r['baseline']['order']), set(r['optimized']['order']))
+    def test_optimizer_has_traceable_run_id(self): self.assertTrue(sequence_payload({})['optimization_id'])
     def test_default_optimizer_never_worsens_water(self):
         for seed in range(2026, 2046):
             r=sequence_payload({'seed':seed})

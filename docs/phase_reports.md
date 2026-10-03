@@ -119,3 +119,27 @@
 | What remains | Real-data holdout validation, production-scale performance testing, browser accessibility audit and durable integration tests. |
 | Risks discovered | The complete solver quality and real endpoint model cannot be inferred from synthetic tests. |
 | Quality gate | **PASS for reproducible prototype validation; NOT VALIDATED for plant performance.** |
+
+## Phase 10 — Red team
+
+| Required report | Record |
+|---|---|
+| What was built | Full five-judge hostile review in `war_room_round_2.md`. |
+| What was tested | Plant, sustainability, AI/ML, finance and competition rejection cases were evaluated against implemented behavior and documentation. |
+| Test results | The review identified credible boundaries and specific gaps; no unsupported production, ML, financial or reuse claim was accepted. |
+| Assumptions | The review relies on publicly available context and synthetic prototype evidence. |
+| What remains | Official rubric review, real pilot constraints, durable audit storage, and real endpoint labels. |
+| Risks discovered | The absent official brief remains the largest competition-alignment risk. |
+| Quality gate | **PASS — documented weaknesses are actionable and not hidden.** |
+
+## Phase 11 — Improvement
+
+| Required report | Record |
+|---|---|
+| What was built | Traceable optimization IDs, explicit planner advisory decision endpoint, session audit event, exploratory synthetic queue control, and additional malformed-input checks. |
+| What was tested | 14 core tests; local planner decision API flow and audit retrieval. |
+| Test results | 14/14 tests passed. A planner decision generated a `PLANNER_DECISION` audit event; no plant schedule was changed. |
+| Assumptions | The decision is a synthetic in-memory demonstration event. |
+| What remains | Durable audit records, authenticated actors, plant approval workflow and official-rubric changes. |
+| Risks discovered | Session-only audit data must not be treated as a compliance record. |
+| Quality gate | **PASS for local advisory workflow; NOT READY for operational approval workflow.** |

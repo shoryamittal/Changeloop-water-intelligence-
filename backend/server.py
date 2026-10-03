@@ -9,7 +9,9 @@ RULES = json.loads((ROOT / "config" / "changeover_rules.json").read_text())
 AUDIT = []
 
 def record(action, detail):
-    AUDIT.append({"event_id":str(uuid.uuid4()),"timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "action": action, "detail": detail, "classification": "SIMULATED"})
+    event={"event_id":str(uuid.uuid4()),"timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "action": action, "detail": detail, "classification": "SIMULATED"}
+    AUDIT.append(event)
+    return event
 
 def batches(seed=2030, count=12):
     r = random.Random(seed)
@@ -83,8 +85,9 @@ def sequence_payload(body):
     candidate_objective, trans=evaluate_order(ordered,w,d)
     retained = candidate_objective >= baseline_objective
     if retained: ordered, trans, candidate_objective = q, baseline, baseline_objective
-    result={"status":"FEASIBLE", "classification":"SYNTHETIC_DATA", "notice":"Simulation — not L'Oréal production data.", "baseline": {"order":[x["id"] for x in q],"water_demand_l":round(sum(x["litres"] for x in baseline),1),"objective":round(baseline_objective,1)}, "optimized":{"order":[x["id"] for x in ordered],"water_demand_l":round(sum(x["litres"] for x in trans),1),"objective":round(candidate_objective,1),"transitions":trans}, "method":"Greedy constructive heuristic; baseline candidate retained when the heuristic cannot improve the configured objective. It does not prove global optimality.","baseline_retained":retained}
-    record("OPTIMIZE", "Synthetic batch queue optimized")
+    optimization_id=str(uuid.uuid4())
+    result={"status":"FEASIBLE", "optimization_id":optimization_id, "classification":"SYNTHETIC_DATA", "notice":"Simulation — not L'Oréal production data.", "baseline": {"order":[x["id"] for x in q],"water_demand_l":round(sum(x["litres"] for x in baseline),1),"objective":round(baseline_objective,1)}, "optimized":{"order":[x["id"] for x in ordered],"water_demand_l":round(sum(x["litres"] for x in trans),1),"objective":round(candidate_objective,1),"transitions":trans}, "method":"Greedy constructive heuristic; baseline candidate retained when the heuristic cannot improve the configured objective. It does not prove global optimality.","baseline_retained":retained}
+    record("OPTIMIZE", f"Synthetic optimization run {optimization_id}")
     return result
 
 def cleaning(seed=2026, failure=None):
@@ -151,6 +154,12 @@ class App(SimpleHTTPRequestHandler):
         if route=="/api/cleaning/start": record("CLEANING_SIMULATION","Started"); return self.send_json(cleaning(body.get("seed",2030),body.get("failure")))
         if route=="/api/water/analyze": record("WATER_SCREEN","Illustrative reuse screen"); return self.send_json(cascade(body))
         if route=="/api/impact/calculate": return self.send_json(impact(body))
+        if route=="/api/optimization/decision":
+            decision=body.get("decision") if isinstance(body,dict) else None
+            if decision not in {"accept_recommendation","retain_baseline"}:
+                return self.send_json({"error":"Decision must be accept_recommendation or retain_baseline."},400)
+            event=record("PLANNER_DECISION",f"{decision} for synthetic optimization {body.get('optimization_id','unknown')}")
+            return self.send_json({"classification":"SIMULATED","notice":"Planner decision recorded in this in-memory demonstration session; no plant schedule was changed.","event":event})
         return self.send_json({"error":"Unknown route"},404)
 
 if __name__=="__main__":
