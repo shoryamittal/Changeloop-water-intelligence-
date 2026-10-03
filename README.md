@@ -1,10 +1,10 @@
-# AquaFlux — Zero-Waste Changeover Engine
+# ClearLoop — Zero-Waste Changeover Engine
 
 **A synthetic, executable decision-support prototype for the L'Oréal Sustainability Challenge 2026.**
 
 > Simulation — not L'Oréal production data. Target integration architecture — not connected to L'Oréal systems.
 
-AquaFlux explores one hypothesis: production sequencing, process-signal monitoring, and reuse opportunity screening can reduce **modeled** changeover water demand before water enters an existing circular loop. It does not replace validated cleaning, quality release, water treatment, or plant controls.
+ClearLoop explores one hypothesis: production sequencing, process-signal monitoring, and reuse opportunity screening can reduce **modeled** changeover water demand before water enters an existing circular loop. It does not replace validated cleaning, quality release, water treatment, or plant controls.
 
 ## Run
 

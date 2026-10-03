@@ -1,4 +1,4 @@
-"""AquaFlux local demonstration server. All operating data is synthetic."""
+"""ClearLoop local demonstration server. All operating data is synthetic."""
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import urlparse
@@ -7,7 +7,7 @@ import json, random, math, time, uuid, sqlite3
 ROOT = Path(__file__).resolve().parents[1]
 RULES = json.loads((ROOT / "config" / "changeover_rules.json").read_text())
 AUDIT = []
-DB_PATH = ROOT / "data" / "aquaflux_demo.db"
+DB_PATH = ROOT / "data" / "clearloop_demo.db"
 
 def init_db():
     with sqlite3.connect(DB_PATH) as conn:

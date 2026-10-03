@@ -1,7 +1,7 @@
 services:
-  aquaflux:
+  clearloop:
     build: .
     ports:
       - "8000:8000"
     environment:
-      AQUAFLUX_ENV: demo
+      CLEARLOOP_ENV: demo
