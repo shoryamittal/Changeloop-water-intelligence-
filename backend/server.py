@@ -25,7 +25,9 @@ def validate_queue(queue):
     for batch in queue:
         if not isinstance(batch,dict) or required-set(batch): return "A batch is missing required fields."
         if batch["residue"] not in RULES["base_litres_by_residue"]: return "Unknown residue class."
-        if float(batch["deadline_h"]) < 0: return f"Deadline is already infeasible for {batch['id']}."
+        try: deadline=float(batch["deadline_h"])
+        except (TypeError, ValueError): return f"Deadline is invalid for {batch['id']}."
+        if not math.isfinite(deadline) or deadline < 0: return f"Deadline is already infeasible for {batch['id']}."
         ids.append(batch["id"])
     if len(ids)!=len(set(ids)): return "Duplicate batch identifiers are not allowed."
     return None
@@ -63,12 +65,19 @@ def evaluate_order(order, water_weight=1, deadline_weight=1):
     return objective, transitions
 
 def sequence_payload(body):
+    if not isinstance(body,dict):
+        record("OPTIMIZE_REJECTED","Request body must be an object.")
+        return {"status":"NO FEASIBLE PLAN UNDER CURRENT CONSTRAINTS", "classification":"SYNTHETIC_DATA", "notice":"Simulation — not L'Oréal production data.", "constraint_explanation":"Request body must be an object."}
     q=body["batches"] if "batches" in body else batches(body.get("seed",2030))
     error=validate_queue(q)
     if error:
         record("OPTIMIZE_REJECTED",error)
         return {"status":"NO FEASIBLE PLAN UNDER CURRENT CONSTRAINTS", "classification":"SYNTHETIC_DATA", "notice":"Simulation — not L'Oréal production data.", "constraint_explanation":error}
-    w=float(body.get("water_weight",1)); d=float(body.get("deadline_weight",1))
+    try: w=float(body.get("water_weight",1)); d=float(body.get("deadline_weight",1))
+    except (TypeError, ValueError):
+        return {"status":"NO FEASIBLE PLAN UNDER CURRENT CONSTRAINTS", "classification":"SYNTHETIC_DATA", "notice":"Simulation — not L'Oréal production data.", "constraint_explanation":"Objective weights must be numeric."}
+    if not math.isfinite(w) or not math.isfinite(d) or w < 0 or d < 0:
+        return {"status":"NO FEASIBLE PLAN UNDER CURRENT CONSTRAINTS", "classification":"SYNTHETIC_DATA", "notice":"Simulation — not L'Oréal production data.", "constraint_explanation":"Objective weights must be finite and non-negative."}
     ordered, trans=score_order(q,w,d)
     baseline_objective, baseline=evaluate_order(q,w,d)
     candidate_objective, trans=evaluate_order(ordered,w,d)
@@ -92,15 +101,22 @@ def cleaning(seed=2026, failure=None):
     return {"classification":"SYNTHETIC_DATA","notice":"Simulation — not L'Oréal production data.","baseline_minutes":42,"predicted_endpoint_minute":None if critical else endpoint,"endpoint_probability":probability,"confidence":"INSUFFICIENT DATA" if critical else ("moderate" if probability<.75 else "high"),"safety_gate":{"model_message":"INSUFFICIENT DATA — HUMAN/VALIDATED PROCEDURE REQUIRED" if critical else "Endpoint likely reached — requires human approval.","automatic_release":False,"required":"Site-specific validated criteria and human approval"},"readings":readings}
 
 def cascade(body):
-    volume=float(body.get("volume_l",120)); ph=body.get("quality","unknown")
+    try: volume=float(body.get("volume_l",120))
+    except (TypeError, ValueError): volume=-1
+    ph=body.get("quality","unknown")
     if volume < 0:
         return {"classification":"ILLUSTRATIVE_SCENARIO","notice":"Simulation — not L'Oréal production data.","screening":"INSUFFICIENT INFORMATION","available_volume_l":0,"recommended_destination":None,"required_checks":["Correct invalid negative volume before screening"]}
     status="INSUFFICIENT INFORMATION" if ph=="unknown" else ("POTENTIALLY REUSABLE SUBJECT TO VALIDATION" if ph=="screened" else "TREATMENT REQUIRED")
     return {"classification":"ILLUSTRATIVE_SCENARIO","notice":"Simulation — not L'Oréal production data. No reuse is approved.","available_volume_l":volume,"screening":status,"recommended_destination":"Non-product-contact utility use — illustrative only" if status.startswith("POTENTIALLY") else None,"required_checks":["site water-quality criteria","regulatory review","cross-contamination review","human approval"]}
 
 def impact(body):
-    seq=sequence_payload(body); base=seq["baseline"]["water_demand_l"]; prevent=seq["optimized"]["water_demand_l"]
-    requested_adapt=float(body.get("adapt_incremental_l", 24)); recovered=max(0,float(body.get("recovered_l", 42)))
+    seq=sequence_payload(body)
+    if seq["status"] != "FEASIBLE":
+        return {"classification":"MODEL_OUTPUT","notice":"Modeled synthetic scenario, not L'Oréal production data.","status":seq["status"],"constraint_explanation":seq["constraint_explanation"]}
+    base=seq["baseline"]["water_demand_l"]; prevent=seq["optimized"]["water_demand_l"]
+    try: requested_adapt=float(body.get("adapt_incremental_l", 24)); recovered=max(0,float(body.get("recovered_l", 42)))
+    except (TypeError, ValueError):
+        return {"classification":"MODEL_OUTPUT","notice":"Modeled synthetic scenario, not L'Oréal production data.","status":"INSUFFICIENT DATA","constraint_explanation":"Impact inputs must be numeric."}
     adapt=min(max(0,requested_adapt),prevent)
     return {"classification":"MODEL_OUTPUT","notice":"Modeled synthetic scenario, not L'Oréal production data.","common_baseline_l":base,"prevent_incremental_l":round(max(0,base-prevent),1),"adapt_incremental_l":adapt,"adapt_requested_l":requested_adapt,"cascade_potential_l":recovered,"water_demand_after_prevent_adapt_l":round(max(0,prevent-adapt),1),"accounting_note":"Cascade is reported separately as potential reuse and is not added to water-demand avoidance."}
 

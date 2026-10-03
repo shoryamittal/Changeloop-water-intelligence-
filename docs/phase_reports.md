@@ -107,3 +107,15 @@
 | What remains | Durable data integration, database persistence, identity controls and plant-system connection. |
 | Risks discovered | A local process restart removes the audit history. |
 | Quality gate | **PASS for local end-to-end demonstration; NOT READY for deployment integration.** |
+
+## Phase 9 — Validation
+
+| Required report | Record |
+|---|---|
+| What was built | Expanded malformed-input and accounting-invariant tests, 100-scenario ablation script, and local timing script. |
+| What was tested | Python compilation; 13 unit/invariant tests; 100 scenario experiment; 100 scenario ablation; local function timing. |
+| Test results | 13/13 tests passed. Optimizer experiment: 100/100 feasible synthetic scenarios; mean modeled Prevent reduction 158.66 L. Ablation output preserves separate Cascade potential. Local means: optimize 0.378 ms, cleaning 0.223 ms, impact 0.270 ms. |
+| Assumptions | Scenario, adaptive and cascade values are synthetic / illustrative. Timing is local development-machine timing only. |
+| What remains | Real-data holdout validation, production-scale performance testing, browser accessibility audit and durable integration tests. |
+| Risks discovered | The complete solver quality and real endpoint model cannot be inferred from synthetic tests. |
+| Quality gate | **PASS for reproducible prototype validation; NOT VALIDATED for plant performance.** |

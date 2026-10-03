@@ -24,6 +24,10 @@ flowchart LR
 
 The ledger reports Prevent and Adapt as incremental reductions against the preceding layer. Cascade is shown separately; it is never added to avoided demand.
 
+## Ablation protocol
+
+`scripts/run_ablations.py` compares the same 100 synthetic queues under baseline, Prevent, illustrative Adapt-only, and Prevent + illustrative Adapt. The 24 L Adapt value is an `ILLUSTRATIVE_SCENARIO`, not a measured endpoint benefit. Cascade potential remains separate in every row. The output is retained in `data/synthetic_ablation_2026.1.json`.
+
 ## Experiment protocol
 
 Use seeds 2026–2125 to generate 100 deterministic synthetic queues. For each seed, retain the fixed-order baseline and optimized sequence, report mean, median, standard deviation, min, max, feasibility rate and all configuration versions. Do not claim a result until this experiment has been run and retained in `data/`.

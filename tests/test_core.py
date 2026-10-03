@@ -19,6 +19,12 @@ class CoreTests(unittest.TestCase):
         q=batches()[:2]; q[1]['id']=q[0]['id']
         r=sequence_payload({'batches':q})
         self.assertEqual(r['status'],'NO FEASIBLE PLAN UNDER CURRENT CONSTRAINTS')
+    def test_invalid_objective_and_deadline_are_rejected(self):
+        self.assertEqual(sequence_payload({'water_weight':'bad'})['status'],'NO FEASIBLE PLAN UNDER CURRENT CONSTRAINTS')
+        q=batches()[:1]; q[0]['deadline_h']='bad'
+        self.assertEqual(sequence_payload({'batches':q})['status'],'NO FEASIBLE PLAN UNDER CURRENT CONSTRAINTS')
+    def test_impact_propagates_infeasibility(self):
+        r=impact({'batches':[]}); self.assertEqual(r['status'],'NO FEASIBLE PLAN UNDER CURRENT CONSTRAINTS')
     def test_pilot_and_model_are_architected(self):
         self.assertEqual(pilot()['classification'],'ARCHITECTED'); self.assertEqual(models()['classification'],'ARCHITECTED')
     def test_missing_sensor_blocks_release(self):
