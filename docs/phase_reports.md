@@ -143,3 +143,39 @@
 | What remains | Durable audit records, authenticated actors, plant approval workflow and official-rubric changes. |
 | Risks discovered | Session-only audit data must not be treated as a compliance record. |
 | Quality gate | **PASS for local advisory workflow; NOT READY for operational approval workflow.** |
+
+## Phase 12 — Competition mode
+
+| Required report | Record |
+|---|---|
+| What was built | In-product guided judge mode with nine ordered story steps, deterministic seed 2030, explicit safety demonstration and source/assumption prompt. |
+| What was tested | The default synthetic scenario and reset behavior remain deterministic; the guided route maps to existing working sections. |
+| Test results | The demo is local and dependency-free except for optional web-font loading; core functions run without external APIs. |
+| Assumptions | The official time limit and submission format are not verified, so the script targets the requested 3–5 minute range only. |
+| What remains | Official-rubric-specific narration, video, slides and final submission packaging. |
+| Risks discovered | The competition mode cannot prove official alignment until the official brief is supplied. |
+| Quality gate | **PASS for deterministic local demo; CONDITIONAL for official submission.** |
+
+## Phase 13 — Final audit
+
+| Required report | Record |
+|---|---|
+| What was built | Security review, UX review, post-competition roadmap, pitch, final completion-gate audit and source/assumption/claim cross-check. |
+| What was tested | Rendered UI review, current documentation coverage, current claim vocabulary, deterministic demo controls and recorded validation results. |
+| Test results | Prototype claim boundary passes; local functionality and earlier 14-test validation pass. Security, database, ML, business-case and official-rubric gates remain explicitly open. |
+| Assumptions | The absence of official materials prevents requirement-level completion. |
+| What remains | Official challenge ingestion, durable deployment controls, real pilot data, validated economics and any official submission artifacts. |
+| Risks discovered | Calling the project a final official submission would be unsupported without the official brief. |
+| Quality gate | **PASS for prototype audit; BLOCKED for official final audit.** |
+
+## Phase 14 — Final delivery
+
+| Required report | Record |
+|---|---|
+| What was built | Local runnable prototype, documentation bundle, reproducible synthetic artifacts, Docker configuration and deterministic judge-mode journey. |
+| What was tested | Core test suite, synthetic experiment, ablation, local timing, end-to-end API journey and rendered UI controls. |
+| Test results | Recorded in Phases 8–13; latest core test count was 14 passing before final-audit documentation. |
+| Assumptions | Product remains a synthetic advisory demonstration. |
+| What remains | Official-material alignment and plant validation gates. |
+| Risks discovered | Official delivery cannot be truthfully declared complete while the source challenge material is absent. |
+| Quality gate | **CONDITIONAL DELIVERY — prototype complete within current evidence; official competition delivery blocked.** |
