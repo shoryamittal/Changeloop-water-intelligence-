@@ -53,12 +53,15 @@
           Circular clean-in-place telemetry and valve sequencing calibrated for luxury emulsions.
         </p>
 
-        <!-- Fluidics Visual Card -->
-        <div class="fluidics-card">
+        <!-- Fluidics Visual Card (Interactive Inspection) -->
+        <div class="fluidics-card" onclick="inspectSpectroscopy()" title="Click to inspect real-time in-line spectroscopy wavelength curve">
           <img src="/frontend/cip_fluidics.jpg" alt="Circular Hydraulic Fluidics" class="fluidics-img">
           <div class="fluidics-scanline"></div>
           <div class="fluidics-overlay-top">
             🔬 CIRCULAR HYDRAULIC FLUIDICS // IN-LINE REALTIME SPECTROSCOPY
+          </div>
+          <div class="fluidics-crosshair">
+            <span>λ 580 nm • Abs 0.012 AU • 100 Hz</span>
           </div>
           <div class="fluidics-overlay-bottom">
             <div class="scan-tag">✓ 100 Hz OPTICAL SCAN</div>
@@ -85,28 +88,33 @@
             <div class="skid-metric-cell">
               <div class="skid-metric-label">WATER SAVED (SHIFT)</div>
               <div class="skid-metric-value green" id="skidWaterSaved">1,284 <span class="unit">L</span></div>
+              <div class="skid-metric-trend green" id="skidSavedTrend">▲ +14.2% vs Std SOP</div>
             </div>
             <div class="skid-metric-cell">
               <div class="skid-metric-label">TURBIDITY INDEX</div>
               <div class="skid-metric-value" id="skidTurbidity">0.02 <span class="unit">NTU</span></div>
+              <div class="skid-metric-trend green" id="skidTurbTrend">● Clean Asymptote Flat</div>
             </div>
             <div class="skid-metric-cell">
               <div class="skid-metric-label">SEQUENCE DEV.</div>
               <div class="skid-metric-value" id="skidSeqDev">0.00 <span class="unit">ppm</span></div>
+              <div class="skid-metric-trend" id="skidDevTrend">0.00% Tolerable Var</div>
             </div>
             <div class="skid-metric-cell">
               <div class="skid-metric-label">SAFETY INTERLOCK</div>
               <div class="skid-metric-value interlock" id="skidInterlock">ENGAGED</div>
+              <div class="skid-metric-trend green" id="skidLockTrend">21 CFR 11 Locked</div>
             </div>
           </div>
         </div>
 
-        <!-- Operator Profile Footer -->
-        <div class="gateway-operator-bar">
+        <!-- Operator Profile Footer (Interactive Site Persona Cycling) -->
+        <div class="gateway-operator-bar" onclick="cyclePersona()" title="Click to cycle active site operator (Aulnay / Burgos / Settimo / Vorselaar)">
           <div class="operator-avatar" id="gwOperatorAvatar">CL</div>
           <div class="operator-meta">
             <b id="gwOperatorName">Dr. Camille Laurent</b>
             <small id="gwOperatorTitle">Head of Sustainable Changeovers • Operations Paris</small>
+            <div class="persona-switch-hint">↻ Click avatar to cycle site persona</div>
           </div>
           <div class="iso-seal">
             🛡️ ISO 14046 • SHA-256 SEALED
@@ -134,7 +142,10 @@
         <!-- Form -->
         <form class="gateway-form" onsubmit="handleAuthenticate(event)">
           <div class="field-group">
-            <label id="authIdLabel">OPERATOR CORPORATE ID / EMAIL</label>
+            <div class="label-row">
+              <label id="authIdLabel">OPERATOR CORPORATE ID / EMAIL</label>
+              <span class="fido-ready" id="authModeBadge">● AZURE AD SSO</span>
+            </div>
             <div class="input-with-icon">
               <span class="field-icon" id="authIdIcon">🪪</span>
               <input type="text" id="authEmail" value="camille.laurent@loreal.com" required>
@@ -154,7 +165,10 @@
           </div>
 
           <div class="field-group">
-            <label>PLANT & FORMULATION SKID ASSIGNMENT</label>
+            <div class="label-row">
+              <label>PLANT & FORMULATION SKID ASSIGNMENT</label>
+              <span class="fido-ready" id="skidLiveStatus" style="color:#059669">● TELEMETRY ONLINE</span>
+            </div>
             <div class="input-with-icon">
               <span class="field-icon">🏭</span>
               <select id="authSkidSelect" onchange="handleSkidChange(this.value)">
@@ -345,6 +359,109 @@
         <button class="button ghost" onclick="prevSlide()">‹ Previous Slide</button>
         <button class="button primary" onclick="nextSlide()">Next Slide ›</button>
         <button class="button gold" id="slideActionBtn" onclick="jumpToCurrentSlideView()">▶ Live Product Moment</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<!-- Real-Time Optical Spectroscopy Telemetry Inspection Modal -->
+<dialog id="spectroscopyDialog" class="spectroscopy-modal">
+  <div class="spectroscopy-shell">
+    <div class="spectroscopy-header">
+      <div class="spectroscopy-header-title">
+        <span class="pulsing-green-dot"></span>
+        <b>IN-LINE UV-VIS SPECTROSCOPY // 100 Hz OPTICAL TELEMETRY</b>
+      </div>
+      <button class="close-x" onclick="closeSpectroscopy()">×</button>
+    </div>
+
+    <div class="spectroscopy-body">
+      <div class="spectroscopy-meta-bar">
+        <div>
+          <small>MONITORED LINE</small>
+          <b id="specPlantSkid">Plant Aulnay-sous-Bois • Skid 04</b>
+        </div>
+        <div>
+          <small>FORMULATION MATRIX</small>
+          <b id="specBatch">Lancôme L'Absolu Rouge Flush</b>
+        </div>
+        <div>
+          <small>OPTICAL DETECTION PEAK</small>
+          <b>λ = 580 nm (Lake Pigment Band)</b>
+        </div>
+        <div>
+          <small>SENSOR HARDWARE</small>
+          <b>Maya2000 Pro Flow Cell (100 Hz)</b>
+        </div>
+      </div>
+
+      <div class="spectroscopy-chart-box">
+        <div class="chart-tag">REAL-TIME CLEAN-IN-PLACE RINSE ABSORPTION DECAY CURVE (0 — 42 MIN)</div>
+        <svg viewBox="0 0 680 220" class="spectroscopy-svg">
+          <!-- Background Grid Lines -->
+          <line x1="60" y1="30" x2="650" y2="30" stroke="rgba(255,255,255,0.08)" stroke-dasharray="4 4"/>
+          <line x1="60" y1="80" x2="650" y2="80" stroke="rgba(255,255,255,0.08)" stroke-dasharray="4 4"/>
+          <line x1="60" y1="130" x2="650" y2="130" stroke="rgba(255,255,255,0.08)" stroke-dasharray="4 4"/>
+          <line x1="60" y1="180" x2="650" y2="180" stroke="rgba(255,255,255,0.18)"/>
+
+          <!-- Axis Labels -->
+          <text x="18" y="34" fill="#9bb7ad" font-family="DM Mono" font-size="10">2.5 AU</text>
+          <text x="18" y="84" fill="#9bb7ad" font-family="DM Mono" font-size="10">1.5 AU</text>
+          <text x="18" y="134" fill="#9bb7ad" font-family="DM Mono" font-size="10">0.5 AU</text>
+          <text x="18" y="184" fill="#9bb7ad" font-family="DM Mono" font-size="10">0.0 AU</text>
+
+          <text x="60" y="202" fill="#9bb7ad" font-family="DM Mono" font-size="10">0m</text>
+          <text x="210" y="202" fill="#9bb7ad" font-family="DM Mono" font-size="10">10m</text>
+          <text x="360" y="202" fill="#9bb7ad" font-family="DM Mono" font-size="10">20m</text>
+          <text x="495" y="202" fill="#34d399" font-family="DM Mono" font-size="10" font-weight="bold">29m (Cutoff)</text>
+          <text x="630" y="202" fill="#9bb7ad" font-family="DM Mono" font-size="10">42m (SOP)</text>
+
+          <!-- Standard Blind SOP Timer Area (Wasted Rinse) -->
+          <rect x="495" y="30" width="155" height="150" fill="rgba(239, 68, 68, 0.12)" stroke="rgba(239, 68, 68, 0.35)" stroke-dasharray="4 4"/>
+          <text x="505" y="52" fill="#f87171" font-family="DM Mono" font-size="10" font-weight="bold">13 MIN BLIND TIMER OVER-RINSE</text>
+          <text x="505" y="68" fill="#fca5a5" font-family="DM Mono" font-size="9.5">130 L Fresh Water Saved by Cutoff</text>
+
+          <!-- Safe Baseline Release Threshold Line -->
+          <line x1="60" y1="174" x2="650" y2="174" stroke="#eab308" stroke-dasharray="6 4" stroke-width="1.5"/>
+          <text x="70" y="168" fill="#fde047" font-family="DM Mono" font-size="9.5">Clean Baseline Release Threshold (&lt; 0.015 AU)</text>
+
+          <!-- Actual Optical Absorbance Curve -->
+          <path d="M 60,35 C 100,60 160,140 240,165 C 320,172 400,174 495,174 C 550,174 600,174 650,174" fill="none" stroke="#34d399" stroke-width="3"/>
+
+          <!-- Cutoff Point Marker -->
+          <circle cx="495" cy="174" r="6" fill="#10b981" stroke="#ffffff" stroke-width="2"/>
+        </svg>
+      </div>
+
+      <div class="spectroscopy-kpis">
+        <div class="spec-kpi">
+          <small>CURRENT ABSORBANCE</small>
+          <b class="green" id="specCurrAbs">0.012 <span class="unit">AU</span></b>
+          <span>Threshold: &lt; 0.015 AU</span>
+        </div>
+        <div class="spec-kpi">
+          <small>RINSE TURBIDITY</small>
+          <b class="green" id="specCurrTurb">0.02 <span class="unit">NTU</span></b>
+          <span>Incoming baseline: 0.02 NTU</span>
+        </div>
+        <div class="spec-kpi">
+          <small>CONDUCTIVITY PLATEAU</small>
+          <b>&lt; 0.04 <span class="unit">mS/cm</span></b>
+          <span>Stable across &gt;120s window</span>
+        </div>
+        <div class="spec-kpi">
+          <small>CUTOFF RECOMMENDATION</small>
+          <b class="safe">TERMINATE RINSE</b>
+          <span>Early release validated</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="spectroscopy-footer">
+      <span class="cert-text">🛡️ ISO 14046 / GAMP 5 VALIDATED OPTICAL FLOW CELL ALGORITHM</span>
+      <div class="button-row">
+        <button class="button ghost" onclick="closeSpectroscopy()">Close Readout</button>
+        <button class="button primary" onclick="closeSpectroscopy(); handleAuthenticate();">Enter Cockpit with Active Skid ➔</button>
       </div>
     </div>
   </div>
