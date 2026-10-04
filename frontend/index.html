@@ -1,13 +1,155 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ClearLoop | Zero-Waste Changeover Engine</title><link rel="stylesheet" href="/frontend/style.css"></head>
-<body><div class="app-shell">
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ClearLoop | Zero-Waste Changeover Engine — L'Oréal Sustainability Challenge</title>
+  <link rel="stylesheet" href="/frontend/style.css">
+</head>
+<body>
+<div class="app-shell">
   <aside class="sidebar" id="sidebar">
-    <div class="brand"><span class="brand-mark">C</span><div><b>CLEARLOOP</b><small>CHANGEOVER INTELLIGENCE</small></div><button class="icon-button collapse" onclick="toggleSidebar()" aria-label="Collapse navigation">‹</button></div>
+    <div class="brand">
+      <span class="brand-mark">C</span>
+      <div>
+        <b>CLEARLOOP</b>
+        <small>ZERO-WASTE CHANGEOVER</small>
+      </div>
+      <button class="icon-button collapse" onclick="toggleSidebar()" aria-label="Collapse navigation">‹</button>
+    </div>
+    
+    <div class="loreal-tag">
+      <span>L'ORÉAL CHALLENGE 2026</span>
+      <small>Upstream Demand Reduction</small>
+    </div>
+
     <nav class="nav" aria-label="Primary navigation">
-      <button data-view="overview" class="active" onclick="showView('overview')"><i>◫</i><span>Overview</span></button><button data-view="planning" onclick="showView('planning')"><i>▤</i><span>Planning</span></button><button data-view="optimizer" onclick="showView('optimizer')"><i>↝</i><span>Changeover optimizer</span></button><button data-view="cleaning" onclick="showView('cleaning')"><i>⌁</i><span>Adaptive cleaning</span></button><button data-view="cascade" onclick="showView('cascade')"><i>◌</i><span>Water cascade</span></button><button data-view="analytics" onclick="showView('analytics')"><i>▥</i><span>Analytics</span></button><button data-view="scenarios" onclick="showView('scenarios')"><i>◈</i><span>Scenarios</span></button><button data-view="business" onclick="showView('business')"><i>◲</i><span>Business case</span></button><button data-view="pilot" onclick="showView('pilot')"><i>◷</i><span>Pilot</span></button><button data-view="alerts" onclick="showView('alerts')"><i>◉</i><span>Alerts & audit</span></button>
+      <button data-view="overview" class="active" onclick="showView('overview')"><i>◫</i><span>Overview</span></button>
+      <button data-view="planning" onclick="showView('planning')"><i>▤</i><span>Planning & Batches</span></button>
+      <button data-view="optimizer" onclick="showView('optimizer')"><i>↝</i><span>Changeover Optimizer</span></button>
+      <button data-view="cleaning" onclick="showView('cleaning')"><i>⌁</i><span>Adaptive CIP Cleaning</span></button>
+      <button data-view="cascade" onclick="showView('cascade')"><i>◌</i><span>Circular Waterloop</span></button>
+      <button data-view="analytics" onclick="showView('analytics')"><i>▥</i><span>ESG & Impact Ledger</span></button>
+      <button data-view="scenarios" onclick="showView('scenarios')"><i>◈</i><span>What-If Lab</span></button>
+      <button data-view="business" onclick="showView('business')"><i>◲</i><span>Business Case & ROI</span></button>
+      <button data-view="pilot" onclick="showView('pilot')"><i>◷</i><span>6-Week Pilot Plan</span></button>
+      <button data-view="alerts" onclick="showView('alerts')"><i>◉</i><span>Audit Trail & Logs</span></button>
+      <button data-view="defense" onclick="showView('defense')"><i>⚖</i><span>Judge Q&A Defense</span></button>
+      <button data-view="dossier" onclick="showView('dossier')"><i>🖹</i><span>Executive Dossier</span></button>
+      <button data-view="trust" onclick="showView('trust')"><i>✓</i><span>Data Trust & Scope</span></button>
     </nav>
-    <div class="sidebar-bottom"><button class="status-panel" onclick="showView('trust')"><span class="status-dot"></span><div><b>Simulation mode</b><small>Demo Plant 01 · Line 04</small></div></button><button class="profile"><span>SM</span><div><b>Demo operator</b><small>Advisory access</small></div></button></div>
+    <div class="sidebar-bottom">
+      <button class="status-panel" onclick="showView('trust')">
+        <span class="status-dot"></span>
+        <div>
+          <b>Advisory Engine Active</b>
+          <small id="sidebarPlant">Burgos Plant · Line 04</small>
+        </div>
+      </button>
+      <button class="profile" onclick="showView('alerts')">
+        <span>SM</span>
+        <div>
+          <b>Operations Lead</b>
+          <small>Advisory Decision Access</small>
+        </div>
+      </button>
+    </div>
   </aside>
-  <main class="workspace"><header class="topbar"><div class="crumb"><span id="viewEyebrow">COMMAND CENTER</span><b id="viewName">Overview</b></div><div class="topbar-actions"><span class="data-pill"><i></i> SIMULATION MODE</span><button class="selector">Demo Plant 01 <b>⌄</b></button><button class="selector">Line 04 <b>⌄</b></button><span class="run-state"><i></i> RUNNING</span><button class="icon-button" onclick="showView('alerts')" aria-label="Open alerts">◉</button><button class="avatar">SM</button></div></header><div class="page" id="page"><div class="loading"><span></span> Preparing deterministic demonstration…</div></div></main>
+
+  <main class="workspace">
+    <header class="topbar">
+      <div class="crumb">
+        <span id="viewEyebrow">COMMAND CENTER</span>
+        <b id="viewName">Overview</b>
+      </div>
+      <div class="topbar-actions">
+        <span class="data-pill"><i></i> SIMULATION MODE</span>
+        <select class="selector" id="plantSelector" onchange="changePlant(this.value)">
+          <option value="burgos">L'Oréal Burgos Plant (Spain)</option>
+          <option value="settimo">L'Oréal Settimo Torinese (Italy)</option>
+          <option value="vorselaar">L'Oréal Vorselaar Plant (Belgium)</option>
+          <option value="pilot">Demo Pilot Plant 01</option>
+        </select>
+        <select class="selector" id="lineSelector" onchange="changeLine(this.value)">
+          <option value="line04">Packaging Line 04 (Emulsions)</option>
+          <option value="line02">Packaging Line 02 (Color Makeup)</option>
+          <option value="line01">Packaging Line 01 (Surfactants)</option>
+        </select>
+        <button class="button gold" onclick="openPitchDeck()" style="padding:7px 13px;font-size:11px;" title="Full Screen Presentation Slide Deck">
+          📺 Pitch Deck
+        </button>
+        <button class="button primary" onclick="startJudgeMode()" style="padding:7px 12px;font-size:11px;">
+          ★ 3-Min Tour
+        </button>
+        <button class="button ghost" onclick="showView('dossier')" title="View Executive Technical Brief">
+          🖹 Dossier
+        </button>
+        <button class="icon-button" id="soundToggle" onclick="toggleAudio()" title="Toggle Audio Sound Feedback">🔊</button>
+        <button class="icon-button" onclick="showView('alerts')" aria-label="Open alerts" title="Audit Trail">◉</button>
+        <div class="avatar" title="Logged in as Advisory Operator">SM</div>
+      </div>
+    </header>
+
+    <div class="page" id="page">
+      <div class="loading"><span></span> Preparing deterministic demonstration…</div>
+    </div>
+  </main>
 </div>
-<dialog id="judgeDialog"><p class="eyebrow">DETERMINISTIC 3–5 MINUTE JOURNEY</p><h2 id="judgeTitle"></h2><p id="judgeText"></p><div class="judge-progress" id="judgeProgress"></div><div class="dialog-actions"><button class="button ghost" onclick="judgePrevious()">Previous</button><button class="button primary" onclick="judgeNext()">Next step</button><button class="button ghost" onclick="judgeFinish()">Exit</button></div></dialog><div class="toast" id="toast" role="status"></div><script src="/frontend/app.js"></script></body></html>
+
+<!-- Interactive Guided Judge Tour Modal -->
+<dialog id="judgeDialog">
+  <div class="dialog-header">
+    <span class="eyebrow" id="judgeEyebrow">L'ORÉAL CHALLENGE 2026 — 3-MINUTE WINNING TOUR</span>
+    <button class="close-x" onclick="judgeFinish()">×</button>
+  </div>
+  <h2 id="judgeTitle"></h2>
+  <div class="judge-content">
+    <p id="judgeText"></p>
+    <div id="judgeActionArea" class="judge-actions-area"></div>
+  </div>
+  <div class="judge-footer">
+    <div class="judge-progress" id="judgeProgress"></div>
+    <div class="dialog-actions">
+      <button class="button ghost" onclick="judgePrevious()">‹ Previous</button>
+      <button class="button primary" onclick="judgeNext()">Next Step ›</button>
+      <button class="button ghost" onclick="judgeFinish()">Exit Tour</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Full-Screen Pitch Presentation Deck Modal -->
+<dialog id="pitchDialog" class="pitch-modal">
+  <div class="pitch-modal-shell">
+    <div class="pitch-topbar">
+      <div class="pitch-brand">
+        <span class="brand-mark" style="height:28px;width:28px;font-size:14px">C</span>
+        <b>CLEARLOOP PITCH DECK</b>
+        <small>L'ORÉAL SUSTAINABILITY CHALLENGE 2026</small>
+      </div>
+      <div class="pitch-nav-controls">
+        <span class="eyebrow" id="slideCounter" style="margin:0;color:#c9a96e">SLIDE 1 OF 8</span>
+        <button class="icon-button" onclick="prevSlide()">‹</button>
+        <button class="icon-button" onclick="nextSlide()">›</button>
+        <button class="icon-button" onclick="closePitchDeck()">×</button>
+      </div>
+    </div>
+    
+    <div class="pitch-slide-viewport" id="pitchSlideViewport">
+      <!-- Slides injected dynamically -->
+    </div>
+
+    <div class="pitch-bottom-bar">
+      <div class="pitch-dots" id="pitchDots"></div>
+      <div class="button-row">
+        <button class="button ghost" onclick="prevSlide()">‹ Previous Slide</button>
+        <button class="button primary" onclick="nextSlide()">Next Slide ›</button>
+        <button class="button gold" id="slideActionBtn" onclick="jumpToCurrentSlideView()">▶ Live Product Moment</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status"></div>
+<script src="/frontend/app.js"></script>
+</body>
+</html>
