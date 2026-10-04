@@ -5964,4 +5964,1434 @@ dialog::backdrop {
   }
 }
 
+/* ==========================================================================
+   WATER CASCADE & INTELLIGENT ROUTING ENGINE (PROTOCOL 4.2)
+   Master Layout matching media_1791128827332.png
+   ========================================================================== */
+
+/* Topbar simulation pill & button updates */
+.simulation-mode-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  background: #fff3e6;
+  color: #b45309;
+  border: 1px solid #fed7aa;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.4px;
+}
+
+.present-clearloop-btn {
+  background: #ffffff;
+  color: #b45309;
+  border: 1px solid #fcd34d;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.15);
+}
+
+.present-clearloop-btn:hover {
+  background: #fffbeb;
+  border-color: #f59e0b;
+  transform: translateY(-1px);
+}
+
+.nav-badge.active-loop {
+  background: #047857;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* 1. CASCADE HERO HEADER & TELEMETRY */
+.cascade-top-header {
+  margin-bottom: 16px;
+}
+
+.cascade-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.casc-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.casc-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.casc-accent-bar {
+  display: inline-block;
+  width: 6px;
+  height: 20px;
+  background: #059669;
+  border-radius: 2px;
+}
+
+.cascade-main-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 0.5px;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.protocol-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.casc-sub-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.iso-non-add-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+
+.ledger-hash {
+  font-size: 9px;
+  color: #64748b;
+}
+
+.manifold-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: #334155;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+
+.spectro-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  color: #047857;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 2px 7px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.casc-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-jury-casc {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  font-weight: 800;
+  font-size: 10.5px;
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+}
+
+.btn-jury-casc:hover {
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
+
+.btn-simulate-flow {
+  background: #047857;
+  color: #ffffff;
+  border: none;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 7px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(4, 120, 87, 0.25);
+}
+
+.btn-simulate-flow:hover:not(:disabled) {
+  background: #065f46;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(4, 120, 87, 0.35);
+}
+
+.btn-simulate-flow.is-simulating {
+  background: #065f46;
+  cursor: wait;
+}
+
+.play-icon {
+  font-size: 11px;
+}
+
+.btn-dossier-casc {
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-dossier-casc:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+/* 2. FOUR HERO KPI CARDS */
+.cascade-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.casc-kpi-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  min-height: 140px;
+}
+
+.ck-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.ck-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.5px;
+}
+
+.ck-icon {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.ck-icon.green {
+  color: #059669;
+}
+
+.ck-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+
+.ck-value .u {
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  margin-left: 2px;
+}
+
+.ck-value.green {
+  color: #059669;
+}
+
+.ck-breakdown-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.ck-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.ck-tag.clean {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.ck-tag.caustic {
+  background: #fff1f2;
+  color: #e11d48;
+  border: 1px solid #fecdd3;
+}
+
+.ck-tag.yield {
+  background: #f0fdf4;
+  color: #059669;
+  border: 1px solid #bbf7d0;
+}
+
+.ck-tag.reject {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.ck-footer-note {
+  font-family: 'DM Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #475569;
+  line-height: 1.3;
+}
+
+.ck-footer-note.green {
+  color: #047857;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 2px 6px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.ck-footer-note.red {
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 2px 6px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+/* Dark Card (Card 4: Eco-Value & Net-Zero) */
+.casc-kpi-card.dark-card {
+  background: #032117;
+  border: 1px solid #064e3b;
+  color: #ffffff;
+}
+
+.dark-card .green-txt {
+  color: #34d399;
+}
+
+.dark-card-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 6px 0 8px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(52, 211, 153, 0.15);
+}
+
+.dc-metric small {
+  display: block;
+  font-family: 'DM Mono', monospace;
+  font-size: 7.5px;
+  color: #9bb7ad;
+  margin-bottom: 2px;
+}
+
+.dc-metric b {
+  font-family: 'DM Mono', monospace;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.dark-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  color: #34d399;
+  border-top: 1px solid rgba(52, 211, 153, 0.2);
+  padding-top: 6px;
+}
+
+/* 3. AUTOMATED HYDRAULIC CASCADE SCADA */
+.cascade-scada-panel {
+  background: #ffffff;
+  border: 1px solid #d1fae5;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.casc-scada-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.csh-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.scada-diagram-icon {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+}
+
+.csh-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.csh-sub {
+  font-size: 10px;
+  color: #64748b;
+  margin: 2px 0 0;
+}
+
+.csh-rate-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  background: #e6f9f0;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+/* Upper Telemetry Strip across 3 sections */
+.scada-telemetry-strip {
+  background: #f4fbf7;
+  border: 1px solid #c7eed8;
+  border-radius: 8px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 240px 90px 1.2fr 1.3fr;
+  gap: 10px;
+  align-items: stretch;
+  margin-bottom: 16px;
+}
+
+.scada-sec-box {
+  background: #ffffff;
+  border: 1px solid #d1fae5;
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sec-box-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.black-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.discharging-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  color: #059669;
+}
+
+.source-tank-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 4px 0 6px;
+}
+
+.st-name {
+  font-size: 12px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.st-vol {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.source-tank-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: #475569;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 6px;
+}
+
+/* Transit Arrow */
+.scada-transit-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.transit-txt {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  color: #059669;
+  background: #d1fae5;
+  padding: 2px 5px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.transit-anim-arrows {
+  font-size: 14px;
+  color: #059669;
+  letter-spacing: 2px;
+  font-weight: 800;
+  animation: pulseArrows 1.5s infinite;
+}
+
+.scada-transit-arrow.active-transit .transit-anim-arrows {
+  color: #047857;
+  animation: pulseArrowsFast 0.5s infinite;
+}
+
+@keyframes pulseArrows {
+  0%, 100% { opacity: 0.4; transform: translateX(-2px); }
+  50% { opacity: 1; transform: translateX(2px); }
+}
+
+@keyframes pulseArrowsFast {
+  0%, 100% { opacity: 0.5; transform: translateX(-4px); }
+  50% { opacity: 1; transform: translateX(4px); }
+}
+
+/* Probe Node SPEC-004 */
+.probe-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.pass-latency {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  color: #059669;
+  font-weight: 700;
+}
+
+.probe-readouts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  margin: 6px 0;
+}
+
+.probe-readout-cell {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 4px;
+  padding: 5px;
+  text-align: center;
+}
+
+.probe-readout-cell small {
+  display: block;
+  font-family: 'DM Mono', monospace;
+  font-size: 7px;
+  color: #065f46;
+  margin-bottom: 2px;
+  font-weight: 700;
+}
+
+.probe-readout-cell b {
+  font-size: 11px;
+  color: #047857;
+  font-weight: 800;
+}
+
+.probe-readout-cell .u {
+  font-size: 8px;
+  font-weight: 600;
+}
+
+.probe-sub-chem {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  color: #475569;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 5px;
+}
+
+/* Stream Inspector */
+.scada-sec-box.stream-inspector {
+  background: #064e3b;
+  border: 1px solid #047857;
+  color: #ffffff;
+}
+
+.inspector-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #a7f3d0;
+}
+
+.circular-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  background: #047857;
+  color: #34d399;
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid #059669;
+}
+
+.inspector-checks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.ins-check {
+  display: flex;
+  justify-content: space-between;
+  font-size: 8.5px;
+  color: #d1fae5;
+  font-family: 'DM Mono', monospace;
+  line-height: 1.3;
+}
+
+.ins-check b {
+  color: #ffffff;
+}
+
+/* ACTIVE DIVERTER MANIFOLD MATRIX */
+.manifold-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 14px 0 8px;
+}
+
+.m-sec-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.3px;
+}
+
+.m-sec-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  color: #059669;
+  font-weight: 700;
+}
+
+.manifold-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.manifold-stream-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 11px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.manifold-stream-card:hover,
+.manifold-stream-card.active {
+  border-color: #059669;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.15);
+  transform: translateY(-1px);
+}
+
+.msc-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 3px;
+}
+
+.msc-vol {
+  font-size: 12px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.msc-vol.red {
+  color: #b91c1c;
+}
+
+.msc-pct {
+  font-family: 'DM Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #059669;
+}
+
+.msc-pct.red {
+  color: #dc2626;
+}
+
+.msc-desc {
+  font-size: 9px;
+  color: #64748b;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.destination-callout {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 7px 9px;
+  margin-top: auto;
+}
+
+.dest-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  color: #059669;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.dest-badge.red {
+  color: #dc2626;
+}
+
+.dest-title {
+  font-size: 10px;
+  font-weight: 800;
+  color: #0f172a;
+  display: block;
+  line-height: 1.25;
+  margin-bottom: 2px;
+}
+
+.dest-circuit {
+  font-size: 8px;
+  color: #64748b;
+  font-family: 'DM Mono', monospace;
+}
+
+.dest-circuit.red {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+/* Manifold Safety Proof Card */
+.manifold-safety-proof-card {
+  background: #041c14;
+  border: 1px solid #064e3b;
+  border-radius: 8px;
+  padding: 11px 12px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.msp-head {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #34d399;
+  margin-bottom: 6px;
+}
+
+.msp-icon {
+  font-size: 12px;
+}
+
+.msp-text {
+  font-size: 8.5px;
+  color: #cbd5e1;
+  line-height: 1.35;
+  margin: 0 0 8px;
+}
+
+.msp-footer {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  color: #94a3b8;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 5px;
+}
+
+.msp-footer .green-txt {
+  color: #34d399;
+  font-weight: 700;
+}
+
+/* Bottom Reclaim Strip */
+.thermal-reclaim-strip {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trs-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.phe-icon {
+  font-size: 13px;
+  color: #059669;
+}
+
+.trs-info small {
+  display: block;
+  font-family: 'DM Mono', monospace;
+  font-size: 7.5px;
+  color: #065f46;
+  font-weight: 700;
+}
+
+.trs-info b {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #064e3b;
+}
+
+.trs-saving-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  background: #ffffff;
+  border: 1px solid #a7f3d0;
+  color: #047857;
+  padding: 3px 7px;
+  border-radius: 4px;
+}
+
+/* 4. L'ORÉAL CLEAN WATER CHARTER MATRIX */
+.charter-matrix-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+.cmp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.cmp-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.cmp-sub {
+  font-size: 9.5px;
+  color: #64748b;
+  margin: 2px 0 0;
+}
+
+.cmp-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.charter-rules-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.charter-rule-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 11px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.charter-rule-card:hover,
+.charter-rule-card.active {
+  background: #ffffff;
+  border-color: #059669;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.12);
+  transform: translateY(-1px);
+}
+
+.cr-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.cr-code {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.cr-status {
+  font-family: 'DM Mono', monospace;
+  font-size: 7.5px;
+  font-weight: 700;
+}
+
+.cr-status.green {
+  color: #059669;
+}
+
+.cr-status.red {
+  color: #dc2626;
+}
+
+.cr-name {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 3px;
+  display: block;
+}
+
+.cr-spec {
+  font-size: 8.5px;
+  color: #64748b;
+  line-height: 1.35;
+  margin: 0 0 8px;
+}
+
+.cr-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: 'DM Mono', monospace;
+  font-size: 7.5px;
+  border-top: 1px dashed #cbd5e1;
+  padding-top: 5px;
+}
+
+.qual-pass {
+  color: #059669;
+  font-weight: 700;
+}
+
+.qual-reject {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.qual-active {
+  color: #047857;
+  font-weight: 700;
+}
+
+/* Fail-Safe Redundant Pneumatic Interlock Banner */
+.fail-safe-banner {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+  padding: 9px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.fsb-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fsb-shield {
+  font-size: 16px;
+  color: #059669;
+}
+
+.fsb-left b {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #064e3b;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.fsb-text {
+  font-size: 9px;
+  color: #065f46;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.fsb-verified-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  background: #ffffff;
+  color: #059669;
+  border: 1px solid #6ee7b7;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* 5. TWO REAL-WORLD ASSET IMAGE CARDS */
+.asset-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.asset-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+.asset-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.asset-id-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.asset-status-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.asset-status-pill.green {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.asset-status-pill.blue {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.asset-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 8px;
+}
+
+.asset-image-container {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  border: 1px solid #cbd5e1;
+  background: #0f172a;
+}
+
+.asset-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.asset-card:hover .asset-img {
+  transform: scale(1.02);
+}
+
+.asset-img-overlay {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  background: rgba(15, 23, 42, 0.85);
+  color: #ffffff;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 3px;
+  letter-spacing: 0.4px;
+  backdrop-filter: blur(2px);
+}
+
+.asset-desc {
+  font-size: 9px;
+  color: #475569;
+  line-height: 1.4;
+  margin: 0 0 10px;
+}
+
+.asset-specs-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 7px 9px;
+}
+
+.spec-col small {
+  display: block;
+  font-family: 'DM Mono', monospace;
+  font-size: 7px;
+  color: #64748b;
+  margin-bottom: 2px;
+  font-weight: 700;
+}
+
+.spec-col b {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+/* 6. HUMAN-IN-THE-LOOP CASCADE AUTHORIZATION */
+.cascade-auth-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.auth-panel-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-icon-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #059669;
+  flex-shrink: 0;
+}
+
+.auth-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.auth-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.auth-ready-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.auth-ready-pill.ready {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.auth-ready-pill.committed {
+  background: #047857;
+  color: #ffffff;
+}
+
+.auth-sub {
+  font-size: 9.5px;
+  color: #64748b;
+  margin: 0 0 5px;
+}
+
+.auth-meta-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 9px;
+  color: #475569;
+}
+
+.auth-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-override-wwtp {
+  background: #ffffff;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 9px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-override-wwtp:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
+}
+
+.btn-override-wwtp.active {
+  background: #fee2e2;
+  border-color: #dc2626;
+  color: #991b1b;
+}
+
+.btn-authorize-cascade {
+  background: #032117;
+  color: #34d399;
+  border: 1px solid #064e3b;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 9px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(3, 33, 23, 0.25);
+  white-space: nowrap;
+}
+
+.btn-authorize-cascade:hover {
+  background: #064e3b;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btn-authorize-cascade.authorized {
+  background: #047857;
+  color: #ffffff;
+  border-color: #059669;
+}
+
+.chk-icon {
+  background: rgba(52, 211, 153, 0.2);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+/* RESPONSIVE BREAKPOINTS */
+@media (max-width: 1200px) {
+  .cascade-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .scada-telemetry-strip {
+    grid-template-columns: 1fr 1fr;
+  }
+  .manifold-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .charter-rules-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .cascade-title-row {
+    flex-direction: column;
+  }
+  .casc-hero-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .cascade-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  .scada-telemetry-strip {
+    grid-template-columns: 1fr;
+  }
+  .manifold-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .charter-rules-grid {
+    grid-template-columns: 1fr;
+  }
+  .asset-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .cascade-auth-panel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .auth-panel-actions {
+    flex-direction: column;
+  }
+  .btn-authorize-cascade,
+  .btn-override-wwtp {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+
 

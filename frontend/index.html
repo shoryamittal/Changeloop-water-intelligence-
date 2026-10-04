@@ -236,9 +236,9 @@
       </div>
 
       <div class="site-badge-group">
-        <span class="site-label">PLANT</span>
+        <span class="site-label">FACILITY</span>
         <select class="topbar-select" id="plantSelector" onchange="changePlant(this.value)">
-          <option value="aulnay">Aulnay-sous-Bois</option>
+          <option value="aulnay">Aulnay-sous-Bois Formulation</option>
           <option value="burgos">Burgos (Waterloop)</option>
           <option value="settimo">Settimo Torinese</option>
           <option value="vorselaar">Vorselaar Surfactants</option>
@@ -254,14 +254,13 @@
         </select>
       </div>
 
-      <span class="sensors-sync-pill"><span class="sync-live-dot"></span> 100 HZ SPECTROPHOTOMETRIC SYNC</span>
-      <span class="topbar-clock" id="topbarClock">2026-03-29 14:42:18 CET</span>
-      <span class="demo-armed-pill">DEMO ARMED</span>
+      <span class="simulation-mode-pill">SIMULATION MODE</span>
+      <span class="sensors-sync-pill"><span class="sync-live-dot"></span> 100 HZ ACTIVE</span>
+      <span class="topbar-clock" id="topbarClock">2026-03-29 16:42:18 CET</span>
     </div>
 
     <div class="topbar-actions">
-      <button class="button gold judge-demo-btn" onclick="openPitchDeck()">★ 60S JURY DEMO</button>
-      <button class="button ghost dossier-btn" onclick="showView('dossier')">🗎 DOSSIER</button>
+      <button class="button gold present-clearloop-btn" onclick="openPitchDeck()">✨ PRESENT CLEARLOOP</button>
       <div class="topbar-profile" onclick="returnToGateway()" title="Lock Session / Return to Operator Gateway">
         <div class="avatar" id="topbarAvatar">CL</div>
         <div class="profile-info">
@@ -286,11 +285,11 @@
         <button data-view="optimizer" onclick="showView('optimizer')">
           <i>⚡</i><span>Changeover Optimizer</span><span class="nav-badge green">-38%</span>
         </button>
-        <button data-view="cleaning" class="active" onclick="showView('cleaning')">
-          <i>🔬</i><span>Adaptive Cleaning</span><span class="nav-badge active-100hz">100Hz</span>
+        <button data-view="cleaning" onclick="showView('cleaning')">
+          <i>🔬</i><span>Adaptive Cleaning</span><span class="nav-badge">CIP</span>
         </button>
-        <button data-view="cascade" onclick="showView('cascade')">
-          <i>🔄</i><span>Water Cascade</span><span class="nav-badge">Loop</span>
+        <button data-view="cascade" class="active" onclick="showView('cascade')">
+          <i>🔄</i><span>Water Cascade</span><span class="nav-badge active-loop">Loop</span>
         </button>
         <button data-view="analytics" onclick="showView('analytics')">
           <i>📜</i><span>Impact</span><span class="nav-badge">ESG</span>
@@ -314,7 +313,7 @@
             <b>INTEGRITY GUARD</b>
             <span class="pulsing-green-dot"></span>
           </div>
-          <div class="integrity-desc">ISO 22716 &amp; Cosmetic GMP strict lock-step active. Zero safety overrides.</div>
+          <div class="integrity-desc">Formulation safety parameters lock-step activated.</div>
         </div>
       </div>
     </aside>

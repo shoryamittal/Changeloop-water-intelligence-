@@ -8,7 +8,7 @@ const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
 
 const state = {
-  view: 'cleaning',
+  view: 'cascade',
   seed: 2030,
   weight: 1,
   deadlineWeight: 1,
@@ -44,7 +44,12 @@ const state = {
   cleaningScenario: 'normal',
   cleaningAuthorized: false,
   cleaningOverridden: false,
-  selectedSpectroWave: '650'
+  selectedSpectroWave: '650',
+  cascadeSimulationRunning: false,
+  cascadeAuthorized: false,
+  cascadeOverridden: false,
+  selectedCascadeStream: 'A',
+  selectedCascadeRule: 'RULE-CL-01'
 };
 
 const views = {
@@ -52,7 +57,7 @@ const views = {
   planning: ['PLANNING & BATCHES', 'Cosmetic Queue & Formulation Physics'],
   optimizer: ['PREVENT ENGINE', '2-Opt Changeover Tour Optimizer'],
   cleaning: ['ADAPT ENGINE', '4-Phase Dynamic CIP Telemetry & Skid'],
-  cascade: ['CIRCULAR WATERLOOP', 'Segregated Stream Screening'],
+  cascade: ['WATER CASCADE', 'Intelligent Routing Engine & Segregation'],
   analytics: ['ESG IMPACT LEDGER', 'Water, Thermal MWh & Carbon Mass Balance'],
   scenarios: ['WHAT-IF LAB', 'Campaign Simulator'],
   business: ['BUSINESS CASE & ROI', 'Facility Economics & Scaling'],
@@ -2838,104 +2843,514 @@ function cleaning() {
   `;
 }
 
-/* 5. CIRCULAR WATERLOOP & CASCADE VIEW */
+/* 5. WATER CASCADE & INTELLIGENT ROUTING ENGINE (MATCHES MASTER MOCKUP media_1791128827332.png) */
+
+function simulateEffluentFlow() {
+  state.cascadeSimulationRunning = true;
+  playChime('cutoff');
+  toast('► Simulating In-Flight Hydraulic Effluent Flow (100 Hz Refresh)...');
+  render();
+
+  setTimeout(() => {
+    state.cascadeSimulationRunning = false;
+    playChime('success');
+    toast('✓ Hydraulic Divergence Complete: 110 L (Stream A) + 35 L (Stream B) + 65 L (WWTP Reject)');
+    render();
+  }, 900);
+}
+
+function authorizeCascadeCommittal() {
+  state.cascadeAuthorized = true;
+  state.cascadeOverridden = false;
+  playChime('success');
+
+  const newLog = {
+    timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19) + ' CET',
+    action: 'CASCADE_COMMITTAL_AUTHORIZED',
+    detail: 'Lead Engineer Dr. Camille Laurent authorized 145 L non-contact cascade committal. SHA-256: 7c44d1869eaf35bc',
+    standard: 'ISO 14046 / ISO 22716 GMP'
+  };
+  state.audit = [newLog, ...(state.audit || [])];
+
+  toast('✓ Cascade Committal Authorized: 145 L Reused in Indirect Utility Circuits (100% Health)');
+  render();
+}
+
+function overrideCascadeWWTP() {
+  state.cascadeOverridden = true;
+  state.cascadeAuthorized = false;
+  playChime('cutoff');
+
+  const newLog = {
+    timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19) + ' CET',
+    action: 'CASCADE_OVERRIDE_ROUTE_TO_WWTP',
+    detail: 'Manual operator override: All 210 L effluent diverted directly to WWTP bio-treatment plant.',
+    standard: 'ISO 14046 Non-Additive'
+  };
+  state.audit = [newLog, ...(state.audit || [])];
+
+  toast('Manual Override: All 210 L Routed Directly to Industrial WWTP');
+  render();
+}
+
+function selectCascadeStream(strId) {
+  state.selectedCascadeStream = strId;
+  playChime('cutoff');
+  render();
+  toast(`Inspecting Manifold Destination: Stream ${strId}`);
+}
+
+function selectCascadeRule(ruleId) {
+  state.selectedCascadeRule = ruleId;
+  playChime('cutoff');
+  render();
+  toast(`Inspecting Clean Water Charter Rule: ${ruleId}`);
+}
+
 function cascade() {
-  const w = state.water || {};
-  const streams = w.streams || [];
+  const isAuth = state.cascadeAuthorized;
+  const isOver = state.cascadeOverridden;
+  const isSim = state.cascadeSimulationRunning;
+  const activeStream = state.selectedCascadeStream || 'A';
+  const activeRule = state.selectedCascadeRule || 'RULE-CL-01';
 
-  return header(
-    'Circular Waterloop & Cascade Segregation',
-    'Modeled on L\'Oréal Waterloop factory architecture (e.g. Burgos plant). Segregate and screen, never auto-approve.',
-    `<button class="button primary" onclick="runWater()">Screen Permeate Stream</button>`
-  ) + `
-  <div class="cascade-grid">
-    <section class="cascade-node">
-      <h3>RECOVERED FINAL RINSE</h3>
-      <div class="cascade-number">${num(w.available_volume_l)} L</div>
-      <p class="eyebrow">Demineralized Rinse Permeate</p>
-    </section>
+  return `
+  <!-- TOP SUB-BANNER TELEMETRY & HERO HEADER -->
+  <div class="cascade-top-header">
+    <div class="cascade-title-row">
+      <div class="casc-title-group">
+        <div class="casc-title-wrap">
+          <span class="casc-accent-bar"></span>
+          <h1 class="cascade-main-title">WATER CASCADE &amp; INTELLIGENT ROUTING ENGINE</h1>
+          <span class="protocol-pill">PROTOCOL 4.2</span>
+        </div>
+        
+        <div class="casc-sub-meta-row">
+          <span class="iso-non-add-badge">ISO 14046 NON-ADDITIVE CERTIFIED</span>
+          <span class="ledger-hash font-mono">LEDGER: SHA-256: 9eaf9e4f:7b11:e402:35bc</span>
+          <span class="manifold-tag">SUB-SYSTEM MANIFOLD: Skid R-02 Optical Diverter</span>
+          <span class="spectro-tag"><span class="pulsing-green-dot"></span> 100 HZ SPECTROMETRY Dual-Path UV-Vis Active</span>
+        </div>
+      </div>
 
-    <section class="cascade-node">
-      <h3>STREAM QUALITY METRICS</h3>
-      <div class="cascade-row">
-        <span>Chemical Oxygen Demand (COD)</span>
-        <b>28 mg/L (Limit &lt;50)</b>
+      <div class="casc-hero-actions">
+        <button class="button gold btn-jury-casc" onclick="openPitchDeck()">★ 60S JURY DEMO</button>
+        <button class="btn-simulate-flow ${isSim ? 'is-simulating' : ''}" onclick="simulateEffluentFlow()" ${isSim ? 'disabled' : ''}>
+          <span class="play-icon">${isSim ? '⏳' : '►'}</span>
+          <span>${isSim ? 'TRANSMITTING FLOW...' : 'SIMULATE EFFLUENT FLOW'}</span>
+        </button>
+        <button class="button ghost btn-dossier-casc" onclick="showView('dossier')">🗎 DOSSIER EXPORT</button>
       </div>
-      <div class="cascade-row">
-        <span>Total Dissolved Solids (TDS)</span>
-        <b>160 ppm (Limit &lt;200)</b>
-      </div>
-      <div class="cascade-row">
-        <span>pH Stability</span>
-        <b>7.1 (Neutral range)</b>
-      </div>
-      <div class="cascade-row">
-        <span>Microbiological Barrier</span>
-        <b>Validation Required</b>
-      </div>
-    </section>
-
-    <section class="cascade-node">
-      <h3>SCREENING DISPOSITION</h3>
-      ${badge(w.screening || 'POTENTIALLY REUSABLE', w.screening?.startsWith('POTENTIALLY') ? 'good' : 'warn')}
-      <p style="font-size:12px;line-height:1.6;margin-top:10px">
-        ${escape(w.recommended_destination || 'Screened for non-contact utility makeup (cooling towers, scrubbers).')}
-      </p>
-      <small style="color:var(--muted);display:block">Zero cosmetic product contact.</small>
-    </section>
+    </div>
   </div>
 
-  <section class="panel" style="margin-top:18px">
-    <div class="panel-title">
-      <div>
-        <h2>3-Stream Manifold Segregation (Burgos Plant Architecture)</h2>
-        <p>Segregating effluent streams prevents high-load sludge from fouling on-site recycling membranes.</p>
+  <!-- 4 HERO KPI CARDS -->
+  <div class="cascade-kpi-grid">
+    <!-- Card 1: EFFLUENT VOLUME HARVESTED -->
+    <div class="casc-kpi-card">
+      <div class="ck-header">
+        <span class="ck-label">EFFLUENT VOLUME HARVESTED</span>
+        <span class="ck-icon">☰</span>
       </div>
-      ${source('L\'ORÉAL WATERLOOP ARCHITECTURE')}
+      <div class="ck-value font-mono">210 <span class="u">L</span></div>
+      <div class="ck-breakdown-row">
+        <span class="ck-tag clean">CLEAN RINSE (69%)</span>
+        <span class="ck-tag caustic">CAUSTIC PURGE (31%)</span>
+      </div>
+      <div class="ck-footer-note">V-04 Rouge Velvet 100% YSL Loveshine ACCOUNTED</div>
     </div>
-    <div style="overflow-x:auto">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Stream Designation</th>
-            <th>Volume</th>
-            <th>Contamination Profile</th>
-            <th>Target Routing Destination</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${streams.map(s => `
-            <tr>
-              <td><b>${escape(s.stream_name)}</b></td>
-              <td>${num(s.volume_l)} L</td>
-              <td>${s.cod_mg_l ? `COD: ${num(s.cod_mg_l)} mg/L` : 'Filtered Alkaline Wash'}</td>
-              <td>${escape(s.disposition)}</td>
-              <td>${source(s.status)}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
-  </section>
 
-  <section class="panel">
-    <div class="panel-title">
-      <div>
-        <h2>Mandatory Site Validation Gates Before Reuse</h2>
-        <p>Recovered does NOT equal Reusable. Plant authorization checklist.</p>
+    <!-- Card 2: SECONDARY RINSE QUALIFIED -->
+    <div class="casc-kpi-card">
+      <div class="ck-header">
+        <span class="ck-label">SECONDARY RINSE QUALIFIED</span>
+        <span class="ck-icon green">🔄</span>
       </div>
-      ${badge('QUALITY AUTHORIZATION REQUIRED', 'warn')}
+      <div class="ck-value green font-mono">145 <span class="u">L</span></div>
+      <div class="ck-breakdown-row">
+        <span class="ck-tag yield">CASCADE YIELD: 69.0% OF BATCH DISCHARGE</span>
+      </div>
+      <div class="ck-footer-note green">☑ GMP NON-CONTACT QUALIFIED [GRADE A+R]</div>
     </div>
-    <div class="button-row">
-      ${(w.required_checks || [
-        'Site water-quality criteria (COD < 50 mg/L, TDS < 200 ppm)',
-        'Regulatory review & ATEX compliance',
-        'Microbiological barrier & cross-contamination review',
-        'Human approval & quality release authorization'
-      ]).map(x => `<span class="source-badge assumption">✓ ${escape(x)}</span>`).join('')}
+
+    <!-- Card 3: HEAVY SLUDGE DIVERTED -->
+    <div class="casc-kpi-card">
+      <div class="ck-header">
+        <span class="ck-label">HEAVY SLUDGE DIVERTED</span>
+        <span class="ck-icon">⏚</span>
+      </div>
+      <div class="ck-value font-mono">65 <span class="u">L</span></div>
+      <div class="ck-breakdown-row">
+        <span class="ck-tag reject">ROUTED TO WWTP: 31.0% BIOLOGICAL REJECT</span>
+      </div>
+      <div class="ck-footer-note red">🔒 ZERO CROSS-CONTAMINATION HARD LOCK</div>
     </div>
-  </section>
+
+    <!-- Card 4: ECO-VALUE & NET-ZERO (DARK FOREST GREEN CARD) -->
+    <div class="casc-kpi-card dark-card">
+      <div class="ck-header">
+        <span class="ck-label green-txt">ECO-VALUE &amp; NET-ZERO</span>
+        <span class="ck-icon green-txt">🛡</span>
+      </div>
+      <div class="ck-value green-txt font-mono">145 L <span class="u">Spared / cycle</span></div>
+      <div class="dark-card-metrics-grid">
+        <div class="dc-metric">
+          <small>ANNUAL REC. RATE</small>
+          <b>48,200 L/yr</b>
+        </div>
+        <div class="dc-metric">
+          <small>ENERGY &amp; WATER VALUE</small>
+          <b>€18,400</b>
+        </div>
+      </div>
+      <div class="dark-card-footer">
+        <span>Scope 3: -3.42 kg CO2e</span>
+        <span>ISO 14046 SEALED</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTOMATED HYDRAULIC CASCADE SCADA (MIDDLE MAIN HUD) -->
+  <div class="cascade-scada-panel">
+    <div class="casc-scada-header">
+      <div class="csh-title-group">
+        <span class="scada-diagram-icon">☊</span>
+        <div>
+          <h3 class="csh-title">Automated Hydraulic Cascade SCADA</h3>
+          <p class="csh-sub">Real-time in-line UV-Vis spectrometry &amp; high-frequency pneumatic divergence matrix</p>
+        </div>
+      </div>
+      <span class="csh-rate-pill">FLOW SENSOR REFRESH: 100 HZ ACTIVE</span>
+    </div>
+
+    <!-- UPPER TELEMETRY ROW ACROSS 3 SECTIONS -->
+    <div class="scada-telemetry-strip">
+      <!-- Section 1: Source Vessel -->
+      <div class="scada-sec-box source-vessel">
+        <div class="sec-box-title">
+          <span class="black-pill">SOURCE VESSEL V-04</span>
+          <span class="discharging-tag">DISCHARGING</span>
+        </div>
+        <div class="source-tank-info">
+          <b class="st-name">Rouge Velvet Tank</b>
+          <span class="st-vol font-mono">218 L</span>
+        </div>
+        <div class="source-tank-meta">
+          <span>TEMP EFFLUENT: <b class="font-mono">38.2 °C</b></span>
+          <span>FLOW RATE: <b class="font-mono">42.5 L/min</b></span>
+        </div>
+      </div>
+
+      <!-- Arrow In-Flight Transit -->
+      <div class="scada-transit-arrow ${isSim ? 'active-transit' : ''}">
+        <span class="transit-txt">${isSim ? '100 Hz IN-FLIGHT' : '0.4s ON-FLIGHT'}</span>
+        <span class="transit-anim-arrows">➔➔➔</span>
+      </div>
+
+      <!-- Section 2: Probe Node SPEC-004 -->
+      <div class="scada-sec-box probe-node">
+        <div class="sec-box-title">
+          <span class="probe-tag">PROBE NODE SPEC-004</span>
+          <span class="pass-latency">PASS LATENCY: 0.4s</span>
+        </div>
+        <div class="probe-readouts-grid">
+          <div class="probe-readout-cell">
+            <small>TURBIDITY</small>
+            <b class="green font-mono">0.9 <span class="u">NTU</span></b>
+          </div>
+          <div class="probe-readout-cell">
+            <small>CONDUCT.</small>
+            <b class="green font-mono">6.4 <span class="u">µS/cm</span></b>
+          </div>
+          <div class="probe-readout-cell">
+            <small>pH LEVEL</small>
+            <b class="green font-mono">7.2 <span class="u">pH</span></b>
+          </div>
+        </div>
+        <div class="probe-sub-chem">
+          <span>TOC: &lt; 5 ppm</span>
+          <span>HYDROCARBONS: 0.001 g/L</span>
+        </div>
+      </div>
+
+      <!-- Section 3: Stream Inspector -->
+      <div class="scada-sec-box stream-inspector">
+        <div class="sec-box-title">
+          <span class="inspector-tag">STREAM INSPECTOR: STREAM A</span>
+          <span class="circular-pill">CIRCULAR A+</span>
+        </div>
+        <div class="inspector-checks-list">
+          <div class="ins-check"><span>Turbidity Threshold:</span> <b class="font-mono">0.9 / &lt; 2.0 NTU ✓</b></div>
+          <div class="ins-check"><span>Ionic Conductivity:</span> <b class="font-mono">6.4 / &lt; 15 µS/cm ✓</b></div>
+          <div class="ins-check"><span>Surfactant / Active Lipids:</span> <b>0.02% UNDETECTED ✓</b></div>
+          <div class="ins-check"><span>Thermal Harvest Temp:</span> <b class="font-mono">37.8 °C (+14.2 °C)</b></div>
+          <div class="ins-check"><span>Pneumatic Actuator:</span> <b class="font-mono">120 ms Cutoff</b></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVE DIVERTER MANIFOLD MATRIX (PNEUMATIC 3-WAY) -->
+    <div class="manifold-section-header">
+      <span class="m-sec-title">ACTIVE DIVERTER MANIFOLD MATRIX (PNEUMATIC 3-WAY)</span>
+      <span class="m-sec-sub">AUTOMATED ROUTING ACTION</span>
+    </div>
+
+    <div class="manifold-cards-grid">
+      <!-- Destination Stream A -->
+      <div class="manifold-stream-card stream-a ${activeStream === 'A' ? 'active' : ''}" onclick="selectCascadeStream('A')">
+        <div class="msc-top-bar">
+          <b class="msc-vol font-mono">110 L (Stream A)</b>
+          <span class="msc-pct">52.4%</span>
+        </div>
+        <div class="msc-desc">Final High-Purity Demin Rinse</div>
+        <div class="destination-callout dest-1">
+          <div class="dest-badge">Destination 01</div>
+          <b class="dest-title">Secondary Evaporative Cooling Condenser Makeup</b>
+          <div class="dest-circuit">Zero-Contact Indirect Circuit</div>
+        </div>
+      </div>
+
+      <!-- Destination Stream B -->
+      <div class="manifold-stream-card stream-b ${activeStream === 'B' ? 'active' : ''}" onclick="selectCascadeStream('B')">
+        <div class="msc-top-bar">
+          <b class="msc-vol font-mono">35 L (Stream B)</b>
+          <span class="msc-pct">16.7%</span>
+        </div>
+        <div class="msc-desc">Intermediate Pre-Rinse Wash</div>
+        <div class="destination-callout dest-2">
+          <div class="dest-badge">Destination 02</div>
+          <b class="dest-title">Crate &amp; Carrier Exterior Cleaning Bay</b>
+          <div class="dest-circuit">Buffer Tank A5 Dispatched</div>
+        </div>
+      </div>
+
+      <!-- Destination Stream C -->
+      <div class="manifold-stream-card stream-c ${activeStream === 'C' ? 'active' : ''}" onclick="selectCascadeStream('C')">
+        <div class="msc-top-bar">
+          <b class="msc-vol font-mono red">65 L (Stream C)</b>
+          <span class="msc-pct red">31.0%</span>
+        </div>
+        <div class="msc-desc">Concentrated Caustic Wash Sludge</div>
+        <div class="destination-callout dest-3">
+          <div class="dest-badge red">Drain Diversion</div>
+          <b class="dest-title">Industrial WWTP Bio-Treatment Plant</b>
+          <div class="dest-circuit red">Strict Contamination Lockout</div>
+        </div>
+      </div>
+
+      <!-- Safety Proof Card (Dark Emerald #041c14) -->
+      <div class="manifold-safety-proof-card">
+        <div class="msp-head">
+          <span class="msp-icon">🛡</span>
+          <b>Non-Product Contact Safety Proof</b>
+        </div>
+        <p class="msp-text">
+          Water stream routed through Destination 01 &amp; 02 never contact cosmetic formulation ingredients. Complies with EU Cosmetics Regulation (EC) No 1223/2009 &amp; ISO 22716 Good Manufacturing Practices.
+        </p>
+        <div class="msp-footer">
+          <span>CASCADE INTEGRITY STATUS:</span>
+          <b class="green-txt">100% HEALTH</b>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thermal Energy Reclaim Strip -->
+    <div class="thermal-reclaim-strip">
+      <div class="trs-left">
+        <span class="phe-icon">🍃</span>
+        <div class="trs-info">
+          <small>INTEGRATED PLATE HEAT EXCHANGER PHE-01</small>
+          <b>Thermal Energy Reclaim: +14.2 °C Enthalpy Captured</b>
+        </div>
+      </div>
+      <div class="trs-badge">SAVES 1.84 kWh STEAM EQ.</div>
+    </div>
+  </div>
+
+  <!-- L'ORÉAL CLEAN WATER CHARTER — AUTOMATED QUALIFICATION MATRIX -->
+  <div class="charter-matrix-panel">
+    <div class="cmp-header">
+      <div>
+        <h3 class="cmp-title">L'Oréal Clean Water Charter — Automated Qualification Matrix</h3>
+        <p class="cmp-sub">Deterministic plant logic gates guaranteeing total absence of cross-contamination</p>
+      </div>
+      <span class="cmp-sealed-pill">4 OF 4 LOGIC RULES SEALED</span>
+    </div>
+
+    <div class="charter-rules-grid">
+      <!-- Rule 1 -->
+      <div class="charter-rule-card ${activeRule === 'RULE-CL-01' ? 'active' : ''}" onclick="selectCascadeRule('RULE-CL-01')">
+        <div class="cr-top">
+          <span class="cr-code">RULE-CL-01</span>
+          <span class="cr-status green">● ENGAGED</span>
+        </div>
+        <b class="cr-name">Evaporative Cooling Loop</b>
+        <p class="cr-spec">Turbidity &lt; 2.0 NTU and Conductivity &lt; 15 µS/cm with 0% cosmetics solids.</p>
+        <div class="cr-meta">
+          <span>ALLOCATION: Max 5,000 L / day</span>
+          <b class="qual-pass">QUALIFICATION: PASSED • GRADE A</b>
+        </div>
+      </div>
+
+      <!-- Rule 2 -->
+      <div class="charter-rule-card ${activeRule === 'RULE-CL-02' ? 'active' : ''}" onclick="selectCascadeRule('RULE-CL-02')">
+        <div class="cr-top">
+          <span class="cr-code">RULE-CL-02</span>
+          <span class="cr-status green">● ENGAGED</span>
+        </div>
+        <b class="cr-name">Utility &amp; Crate Wash Bay</b>
+        <p class="cr-spec">Turbidity 2.0 - 25 NTU with neutral pH (6.5 - 8.2) routed to buffer vessel.</p>
+        <div class="cr-meta">
+          <span>BUFFER VESSEL: Tank 1,200 L Cap</span>
+          <b class="qual-pass">QUALIFICATION: PASSED • GRADE B</b>
+        </div>
+      </div>
+
+      <!-- Rule 3 -->
+      <div class="charter-rule-card ${activeRule === 'RULE-CL-03' ? 'active' : ''}" onclick="selectCascadeRule('RULE-CL-03')">
+        <div class="cr-top">
+          <span class="cr-code">RULE-CL-03</span>
+          <span class="cr-status red">● INTERLOCKED</span>
+        </div>
+        <b class="cr-name">Biological WWTP Reject</b>
+        <p class="cr-spec">Concentrated surfactant &gt; 0.01% or viscous sludge instantly routed to wastewater.</p>
+        <div class="cr-meta">
+          <span>SAFETY INTERLOCK: CIRCULAR REJECT</span>
+          <b class="qual-reject red">QUALIFICATION: GRADE C • FLUSHED</b>
+        </div>
+      </div>
+
+      <!-- Rule 4 -->
+      <div class="charter-rule-card ${activeRule === 'RULE-CL-04' ? 'active' : ''}" onclick="selectCascadeRule('RULE-CL-04')">
+        <div class="cr-top">
+          <span class="cr-code">RULE-CL-04</span>
+          <span class="cr-status green">● OPTIMIZING</span>
+        </div>
+        <b class="cr-name">Thermal Energy Exchanger</b>
+        <p class="cr-spec">Effluent temp &gt; 35°C triggers PHE heat exchanger to pre-heat boiler feedwater.</p>
+        <div class="cr-meta">
+          <span>HEAT RECOVERY: 1.84 kWh eq</span>
+          <b class="qual-active">QUALIFICATION: ACTIVE 38.2 °C</b>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fail-Safe Redundant Pneumatic Interlock Banner -->
+    <div class="fail-safe-banner">
+      <div class="fsb-left">
+        <span class="fsb-shield">🛡</span>
+        <div>
+          <b>Fail-Safe Redundant Pneumatic Interlock</b>
+          <p class="fsb-text">
+            If in-line optical spectroscopy detects unexpected organic particulates (&gt; 2.0 NTU variance), pneumatically actuated diverter closes to the primary WWTP treatment drain within <b>120 milliseconds</b>, guaranteeing zero batch cross-contamination.
+          </p>
+        </div>
+      </div>
+      <span class="fsb-verified-badge">✓ HARDWARE INTERLOCK VERIFIED</span>
+    </div>
+  </div>
+
+  <!-- 2 REAL-WORLD ASSET IMAGE CARDS (SIDE-BY-SIDE) -->
+  <div class="asset-cards-grid">
+    <!-- Card 1: Ultra-Turbidity UV-Vis Flow Gate -->
+    <div class="asset-card">
+      <div class="asset-card-top">
+        <span class="asset-id-tag">SKID R-02</span>
+        <span class="asset-status-pill green">ONLINE [100 Hz]</span>
+      </div>
+      <h3 class="asset-title">Ultra-Turbidity UV-Vis Flow Gate</h3>
+      
+      <div class="asset-image-container">
+        <img src="/frontend/cip_fluidics.jpg" alt="Ultra-Turbidity UV-Vis Flow Gate" class="asset-img">
+        <div class="asset-img-overlay">DUAL-PATH 650nm NIR IN-LINE OPTICS</div>
+      </div>
+
+      <p class="asset-desc">
+        Continuously measures absorption spectra and refractive index at high velocity. Sealed in 316L pharmaceutical stainless steel housing with automated CIP sterilization cycle.
+      </p>
+
+      <div class="asset-specs-row">
+        <div class="spec-col">
+          <small>SAMPLING</small>
+          <b class="font-mono">100 Hz</b>
+        </div>
+        <div class="spec-col">
+          <small>CALIBRATION</small>
+          <b class="font-mono">ISO 17025</b>
+        </div>
+        <div class="spec-col">
+          <small>PRESSURE DROP</small>
+          <b class="font-mono">&lt; 0.35 bar</b>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Secondary Buffer & Thermal PHE -->
+    <div class="asset-card">
+      <div class="asset-card-top">
+        <span class="asset-id-tag">ASSET PHE-01</span>
+        <span class="asset-status-pill blue">DUAL-RETURN</span>
+      </div>
+      <h3 class="asset-title">Secondary Buffer &amp; Thermal PHE</h3>
+      
+      <div class="asset-image-container">
+        <img src="/frontend/thermal_phe.jpg" alt="Secondary Buffer & Thermal PHE" class="asset-img">
+        <div class="asset-img-overlay">PLATE EXCHANGER 14.2 °C DELTA T</div>
+      </div>
+
+      <p class="asset-desc">
+        High-efficiency brazed plate counter-flow heat exchanger channeling kinetic thermal energy directly into plant utility makeup tanks, dramatically trimming boiler steam generation load.
+      </p>
+
+      <div class="asset-specs-row">
+        <div class="spec-col">
+          <small>BUFFER CAP</small>
+          <b class="font-mono">1,200 L</b>
+        </div>
+        <div class="spec-col">
+          <small>RECOVERY RATE</small>
+          <b class="font-mono">92.4%</b>
+        </div>
+        <div class="spec-col">
+          <small>BOILER LOAD</small>
+          <b class="font-mono">-3.86 kWh</b>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HUMAN-IN-THE-LOOP CASCADE AUTHORIZATION BAR -->
+  <div class="cascade-auth-panel">
+    <div class="auth-panel-left">
+      <div class="auth-icon-circle">
+        <span class="icon">🛡</span>
+      </div>
+      <div>
+        <div class="auth-title-row">
+          <h3 class="auth-title">Human-in-the-Loop Cascade Authorization</h3>
+          <span class="auth-ready-pill ${isAuth ? 'committed' : 'ready'}">
+            ${isAuth ? 'COMMITTAL COMPLETED' : 'READY FOR COMMITTAL'}
+          </span>
+        </div>
+        <p class="auth-sub">Step-Gate Sign-Off: AI Classifies + Safety Matrix Constraints Enforced + Lead Engineer Authorizes</p>
+        <div class="auth-meta-strip">
+          <span>OPERATOR: <b>Dr. Camille Laurent</b></span>
+          <span>QUALIFIED VOLUME: <b class="font-mono">145 Liters</b></span>
+          <span>AUDIT STAMP: <b class="font-mono">SHA-256: 7c44d186</b></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-panel-actions">
+      <button class="btn-override-wwtp ${isOver ? 'active' : ''}" onclick="overrideCascadeWWTP()">
+        OVERRIDE: ROUTE ALL TO WWTP
+      </button>
+      <button class="btn-authorize-cascade ${isAuth ? 'authorized' : ''}" onclick="authorizeCascadeCommittal()">
+        <span class="chk-icon">✓</span>
+        <span>${isAuth ? 'CASCADE COMMITTED (145 L REUSED)' : 'AUTHORIZE CASCADE COMMITTAL (145 L REUSED)'}</span>
+      </button>
+    </div>
+  </div>
   `;
 }
 
