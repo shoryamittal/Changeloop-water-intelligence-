@@ -9507,3 +9507,358 @@ dialog::backdrop {
 .queue-card-bridge .bridge-arr {
   font-size: 10px;
 }
+.queue-card-bridge .bridge-swap-btn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 8.5px;
+  font-family: 'DM Mono', monospace;
+  font-weight: 700;
+  color: #334155;
+  padding: 1px 5px;
+  margin-top: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1.2;
+}
+.queue-card-bridge .bridge-swap-btn:hover {
+  background: #059669;
+  color: #ffffff;
+  border-color: #047857;
+  transform: scale(1.06);
+}
+
+/* 9. Universal 4-Pillar Operations Pipeline Strip (Prevent -> Adapt -> Cascade -> Measure) */
+.four-pillar-pipeline-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+@media (max-width: 900px) {
+  .four-pillar-pipeline-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 540px) {
+  .four-pillar-pipeline-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pillar-step-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+}
+.pillar-step-card:hover {
+  transform: translateY(-2px);
+  border-color: #10b981;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.09);
+}
+.pillar-step-card.active-pillar {
+  background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+  border-color: #10b981;
+  box-shadow: 0 0 0 1.5px #10b981, 0 4px 14px rgba(16, 185, 129, 0.08);
+}
+
+.pillar-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 800;
+  color: #059669;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+.pillar-step-card.active-pillar .pillar-num {
+  color: #047857;
+}
+.pillar-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+.pillar-stat {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.pillar-desc {
+  font-size: 9.5px;
+  color: #64748b;
+  line-height: 1.4;
+  margin: 0;
+  flex-grow: 1;
+}
+.pillar-flow-arrow {
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: #059669;
+  z-index: 2;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+@media (max-width: 900px) {
+  .pillar-flow-arrow { display: none; }
+}
+
+/* 10. Card Micro Step Buttons */
+.bcard-nav-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.bcard-step-btn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
+  font-weight: bold;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+.bcard-step-btn:hover {
+  background: #059669;
+  color: #ffffff;
+  border-color: #047857;
+}
+.bcard-step-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* 11. Live Sequence Friction Delta HUD */
+.live-friction-hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1px solid #a7f3d0;
+  border-left: 4px solid #10b981;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-top: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  animation: fadeInDown 0.25s ease;
+}
+.live-friction-hud.friction-high {
+  border-color: #fca5a5;
+  border-left-color: #ef4444;
+  background: #fff8f8;
+}
+.friction-hud-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.friction-hud-icon {
+  font-size: 18px;
+}
+.friction-hud-title {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #0f172a;
+}
+.friction-hud-desc {
+  font-size: 9.5px;
+  color: #475569;
+  margin: 1px 0 0;
+}
+.friction-hud-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.friction-stat-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #ecfdf5;
+  color: #047857;
+}
+.friction-stat-pill.alert {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* 12. GMP Cleanroom Release Interlock & Dual-Authorization Veto */
+.gmp-interlock-panel {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-top: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+}
+.gmp-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 10px;
+}
+.gmp-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gmp-shield-icon {
+  font-size: 16px;
+}
+.gmp-panel-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.gmp-panel-sub {
+  font-size: 9px;
+  color: #64748b;
+  margin-top: 1px;
+}
+.gmp-criteria-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.gmp-criterion-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.gmp-criterion-card.pass {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+.gmp-criterion-card.fail {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+.gc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.gc-name {
+  font-size: 10px;
+  font-weight: 700;
+  color: #0f172a;
+}
+.gc-status-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  font-weight: 800;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: #dcfce7;
+  color: #15803d;
+}
+.gc-status-pill.fail {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.gc-metric {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 800;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+.gc-threshold {
+  font-size: 8.5px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.gmp-operator-veto-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 10px 14px;
+}
+.gov-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.gov-operator-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  background: #e2e8f0;
+  color: #334155;
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+.gov-text {
+  font-size: 9.5px;
+  color: #475569;
+}
+.btn-operator-veto {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  letter-spacing: 0.02em;
+}
+.btn-operator-veto:hover {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #b91c1c;
+}
+.btn-operator-veto.active-veto {
+  background: #dc2626;
+  border-color: #b91c1c;
+  color: #ffffff;
+}
+
+/* 13. Tabular Numerics & Micro-Typography Precision */
+.kpi-big-num, .val-num, .stat-main, .dkc-val, .dp-impact-num, .m-value, .csp-ind-val {
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.02em;
+}
+

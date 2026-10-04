@@ -450,6 +450,40 @@ function overview() {
     </div>
   </div>
 
+  <!-- 4-Pillar Closed-Loop Operations Architecture (Prevent -> Adapt -> Cascade -> Measure) -->
+  <div class="four-pillar-pipeline-strip">
+    <div class="pillar-step-card" onclick="showView('planning')" title="Click to open Layer 1: Combinatorial Batch Planning & Sequence Optimizer">
+      <div class="pillar-num">01 // PREVENT</div>
+      <div class="pillar-title">MILP Rheology Scheduling</div>
+      <div class="pillar-stat green-txt">-29.4% Base Demand Cut</div>
+      <p class="pillar-desc">Formulations clustered by rheological &amp; pigment compatibility to avoid harsh washouts before tanks flood.</p>
+      <div class="pillar-flow-arrow">➔</div>
+    </div>
+
+    <div class="pillar-step-card" onclick="showView('cleaning')" title="Click to open Layer 2: Adaptive CIP In-Line Spectroscopy">
+      <div class="pillar-num">02 // ADAPT</div>
+      <div class="pillar-title">100 Hz In-Line Spectroscopy</div>
+      <div class="pillar-stat font-mono cyan-txt">-13 min / -130 L Early Cutoff</div>
+      <p class="pillar-desc">Asymptotic turbidity tracking halts rinse sprays at pure clear plateaus instead of blind 42-min timers.</p>
+      <div class="pillar-flow-arrow">➔</div>
+    </div>
+
+    <div class="pillar-step-card" onclick="showView('cascade')" title="Click to open Layer 3: Circular Waterloop Segregated Routing">
+      <div class="pillar-num">03 // CASCADE</div>
+      <div class="pillar-title">Segregated Stream Routing</div>
+      <div class="pillar-stat font-mono teal-txt">69% Reclaim Divert</div>
+      <p class="pillar-desc">Automated diverters route pre-rinse to biogas, caustic to re-dosing, and permeate to utility cooling.</p>
+      <div class="pillar-flow-arrow">➔</div>
+    </div>
+
+    <div class="pillar-step-card" onclick="showView('analytics')" title="Click to open Layer 4: ISO 14046 & CSRD Resource Impact Ledger">
+      <div class="pillar-num">04 // MEASURE</div>
+      <div class="pillar-title">ISO 14046 &amp; ESG Ledger</div>
+      <div class="pillar-stat font-mono gold-txt">Zero Double-Counting</div>
+      <p class="pillar-desc">Cryptographically sealed mass-balance ledger isolates demand avoidance from circular water loops.</p>
+    </div>
+  </div>
+
   <!-- 4 Hero KPI Cards -->
   <div class="cockpit-kpi-grid">
     <!-- Card 1: Water Avoided -->
@@ -1690,6 +1724,9 @@ function planning() {
             <div class="queue-card-bridge ${isBottleneck ? 'bridge-alert' : 'bridge-clean'}" title="Transition: ${batchId} ➔ ${nextId} (${tMeta.val})">
               <span class="bridge-val font-mono">${tMeta.val}</span>
               <span class="bridge-arr">➔</span>
+              <button class="bridge-swap-btn" onclick="moveQueueItem(${idx}, 1)" title="Click to swap batches and simulate transition friction">
+                ⇄ Swap
+              </button>
             </div>
           `;
         }
@@ -1702,7 +1739,11 @@ function planning() {
             
             <div class="bcard-top-row">
               <span class="bcard-id">POS ${idx + 1} • BATCH ${escape(b.id)}</span>
-              <span class="bcard-drag-handle" title="Drag to reorder position">⋮⋮</span>
+              <div class="bcard-nav-row">
+                <button class="bcard-step-btn" onclick="moveQueueItem(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} title="Move earlier in queue">‹</button>
+                <button class="bcard-step-btn" onclick="moveQueueItem(${idx}, 1)" ${idx === arr.length - 1 ? 'disabled' : ''} title="Move later in queue">›</button>
+                <span class="bcard-drag-handle" title="Drag to reorder position">⋮⋮</span>
+              </div>
             </div>
 
             <div class="bcard-hero-row">
@@ -1736,6 +1777,29 @@ function planning() {
           ${bridgeHtml}
         `;
       }).join('')}
+    </div>
+
+    <!-- LIVE SEQUENCE FRICTION & WATER PENALTY MONITOR HUD -->
+    <div class="live-friction-hud ${queueWaterL > 550 ? 'friction-high' : ''}">
+      <div class="friction-hud-left">
+        <span class="friction-hud-icon">${queueWaterL > 550 ? '⚠️' : '⚡'}</span>
+        <div>
+          <div class="friction-hud-title">LIVE SEQUENCE FRICTION &amp; WATER PENALTY MONITOR</div>
+          <p class="friction-hud-desc">
+            ${queueWaterL > 550 
+              ? `High formulation incompatibility detected. Obsidian Black precedes light emulsion, causing severe color bleed and +${queueWaterL - 110} L excess wash penalty.` 
+              : `Active sequence is thermodynamically optimized: compatible waxes and lakes grouped sequentially. Transition drag is minimal.`}
+          </p>
+        </div>
+      </div>
+      <div class="friction-hud-right">
+        <div class="friction-stat-pill ${queueWaterL > 550 ? 'alert' : ''}">
+          Burden: <b>${queueWaterL} L</b> (${queueWaterL > 550 ? '+412 L vs 2-Opt' : 'OPTIMAL'})
+        </div>
+        <button class="button primary" style="padding:4px 10px;font-size:10px" onclick="reSolveSequenceAI()">
+          ${queueWaterL > 550 ? '⚡ RESTORE 2-OPT OPTIMUM' : '✓ RE-EVALUATE 2-OPT'}
+        </button>
+      </div>
     </div>
   </div>
 
@@ -2352,6 +2416,14 @@ async function overrideCleaningBaseline() {
   }
 
   toast('Operator Override: Standard 42-Minute Timer Enforced');
+  render();
+}
+
+function resumeCleaningAdvisory() {
+  state.cleaningOverridden = false;
+  state.cleaningAuthorized = false;
+  playChime('success');
+  toast('✓ AI Advisory Restored: 100 Hz in-line spectroscopic monitoring active');
   render();
 }
 
@@ -2981,30 +3053,44 @@ function cleaning() {
     </div>
 
     <!-- Operator Action Bar -->
-    <div class="operator-action-bar">
-      <div class="op-profile-cluster">
-        <div class="op-avatar-circle">CL</div>
-        <div class="op-meta">
-          <div class="op-name-row">
-            <b>Operator Action: Dr. Camille Laurent</b>
-            <span class="op-interlock-pill ${cur.canAuthorize ? 'green' : 'amber'}">${cur.interlocksCount}</span>
+    ${state.cleaningOverridden ? `
+      <div class="gmp-operator-veto-bar" style="margin-top:14px;border-color:#fca5a5;background:#fff8f8;">
+        <div class="gov-left">
+          <span class="gov-operator-badge" style="background:#fee2e2;color:#dc2626;">OPERATOR VETO ACTIVE</span>
+          <span class="gov-text" style="color:#b91c1c;font-weight:600;">
+            Manual operator veto engaged by Dr. Camille Laurent. Automated early cutoff suspended; CIP Skid running standard 42-minute baseline timer per SOP-CL-04. 21 CFR Part 11 audit logged.
+          </span>
+        </div>
+        <button class="btn-operator-veto active-veto" onclick="resumeCleaningAdvisory()" title="Click to clear operator veto and restore AI advisory">
+          ↺ RESTORE AI ADVISORY
+        </button>
+      </div>
+    ` : `
+      <div class="operator-action-bar">
+        <div class="op-profile-cluster">
+          <div class="op-avatar-circle">CL</div>
+          <div class="op-meta">
+            <div class="op-name-row">
+              <b>Operator Action: Dr. Camille Laurent</b>
+              <span class="op-interlock-pill ${cur.canAuthorize ? 'green' : 'amber'}">${cur.interlocksCount}</span>
+            </div>
+            <div class="op-hash font-mono">Audit Trail Hash: SHA-256: 8f9b...e21a logged to L'Oréal Enterprise Quality Ledger.</div>
           </div>
-          <div class="op-hash font-mono">Audit Trail Hash: SHA-256: 8f9b...e21a logged to L'Oréal Enterprise Quality Ledger.</div>
+        </div>
+
+        <div class="op-buttons-cluster">
+          <button class="btn-override-baseline" onclick="overrideCleaningBaseline()" title="Engage manual operator veto: forces conservative 42-min baseline rinse">
+            🔒 Engage Manual SOP Veto (42-Min Baseline)
+          </button>
+          <button class="btn-authorize-cutoff ${state.cleaningAuthorized ? 'authorized' : ''}" 
+                  onclick="authorizeEarlyRinse()" 
+                  ${!cur.canAuthorize && !state.cleaningAuthorized ? 'disabled' : ''}>
+            <span>✓</span>
+            <span>${state.cleaningAuthorized ? 'EARLY RINSE TERMINATED (130 L & 13 MIN SPARED)' : 'AUTHORIZE EARLY RINSE TERMINATION (SAVES 130 L & 13 MIN)'}</span>
+          </button>
         </div>
       </div>
-
-      <div class="op-buttons-cluster">
-        <button class="btn-override-baseline ${state.cleaningOverridden ? 'active' : ''}" onclick="overrideCleaningBaseline()">
-          Override &amp; Run Standard Baseline (13m left)
-        </button>
-        <button class="btn-authorize-cutoff ${state.cleaningAuthorized ? 'authorized' : ''}" 
-                onclick="authorizeEarlyRinse()" 
-                ${!cur.canAuthorize && !state.cleaningAuthorized ? 'disabled' : ''}>
-          <span>✓</span>
-          <span>${state.cleaningAuthorized ? 'EARLY RINSE TERMINATED (130 L & 13 MIN SPARED)' : 'AUTHORIZE EARLY RINSE TERMINATION (SAVES 130 L & 13 MIN)'}</span>
-        </button>
-      </div>
-    </div>
+    `}
   </div>
 
   <!-- INTERACTIVE RESILIENCE SANDBOX: SAFETY INTERLOCK TESTING -->
