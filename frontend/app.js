@@ -8,7 +8,7 @@ const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
 
 const state = {
-  view: 'planning',
+  view: 'cleaning',
   seed: 2030,
   weight: 1,
   deadlineWeight: 1,
@@ -40,7 +40,11 @@ const state = {
   planningQueue: ['B-217', 'B-218', 'B-219', 'B-220', 'B-221'],
   simCustomViscosity: 14200,
   simCustomPigment: 45,
-  simCustomTemp: 78
+  simCustomTemp: 78,
+  cleaningScenario: 'normal',
+  cleaningAuthorized: false,
+  cleaningOverridden: false,
+  selectedSpectroWave: '650'
 };
 
 const views = {
@@ -2139,91 +2143,698 @@ function signalChart(readings) {
   `;
 }
 
+/* 4. ADAPTIVE CLEANING & DYNAMIC CIP TELEMETRY (MATCHES MASTER MOCKUP media_1791128612861.png) */
+
+function setCleaningScenario(scen) {
+  state.cleaningScenario = scen;
+  state.cleaningAuthorized = false;
+  state.cleaningOverridden = false;
+  playChime(scen === 'normal' ? 'cutoff' : 'alert');
+  render();
+  const titles = {
+    normal: 'Scenario 01: Normal Optimization (29:00 Cutoff Approved)',
+    drift: 'Scenario 02: Sensor Drift (+15% Mismatch Aborts Cutoff)',
+    thermal: 'Scenario 03: Thermal Deficit (48°C Log-Kill Deficit Locks Cutoff)',
+    spike: 'Scenario 04: Turbidity Pocket Spike (Slug Concentration Detected)'
+  };
+  toast(titles[scen] || 'CIP Test Scenario Updated');
+}
+
+function authorizeEarlyRinse() {
+  if (state.cleaningScenario !== 'normal') {
+    playChime('alert');
+    toast('⚠ Authorization Blocked: Deterministic safety interlocks are currently engaged');
+    return;
+  }
+  state.cleaningAuthorized = true;
+  playChime('success');
+
+  const newLog = {
+    timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19) + ' CET',
+    action: 'GMP_EARLY_RINSE_CUTOFF_AUTHORIZED',
+    detail: 'Operator Dr. Camille Laurent approved 29:00 dynamic cutoff. Saved 130 L DIW, avoided 13 min cycle. SHA-256: 8f9b4c2e1a90d7c',
+    standard: 'ISO 22716 / 21 CFR Part 11'
+  };
+  state.audit = [newLog, ...(state.audit || [])];
+
+  toast('✓ Early Rinse Terminated: 130 L DIW Spared • Line 04 Cleanroom Interlocked');
+  render();
+}
+
+function overrideCleaningBaseline() {
+  state.cleaningOverridden = true;
+  state.cleaningAuthorized = false;
+  playChime('cutoff');
+
+  const newLog = {
+    timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19) + ' CET',
+    action: 'OPERATOR_OVERRIDE_STANDARD_BASELINE',
+    detail: 'Operator Dr. Camille Laurent manually enforced 42-minute standard timer protocol. Zero automated savings applied.',
+    standard: 'ISO 22716 / 21 CFR Part 11'
+  };
+  state.audit = [newLog, ...(state.audit || [])];
+
+  toast('Operator Override: Standard 42-Minute Timer Enforced');
+  render();
+}
+
 function cleaning() {
-  const c = state.clean || {};
-  const last = c.readings?.at(-1) || {};
-  const isBad = c.confidence === 'INSUFFICIENT DATA';
-  const gate = c.safety_gate || {};
-  const checks = gate.three_point_clearance || {};
+  const scen = state.cleaningScenario || 'normal';
 
-  return header(
-    'Adaptive CIP Cleaning Telemetry',
-    'Dynamic process-signal simulation with an animated skid schematic and 3-point safety gate.',
-    `<div class="button-row">
-      <button class="button primary" onclick="runCleaning(null)">🟢 Nominal CIP Cycle</button>
-      <button class="button ghost" onclick="runCleaning('missing')">🔴 Inject Sensor Dropout</button>
-      <button class="button ghost" onclick="runCleaning('drift')">🟠 Inject Sensor Drift</button>
-      <button class="button ghost" onclick="runCleaning('thermal')">🔵 Inject Thermal Deficit</button>
-    </div>`
-  ) + `
-  <section class="panel">
-    <div class="panel-title">
-      <div>
-        <h2>${isBad ? 'Safety Gate Activated: Release Blocked' : 'Normal Telemetry: Early Endpoint Achieved'}</h2>
-        <p>${escape(gate.model_message || 'Simulating Clean-In-Place telemetry.')}</p>
-      </div>
-      ${badge(c.confidence || '—', isBad ? 'bad' : 'good')}
+  // Dynamic scenario parameters
+  const scenarioData = {
+    normal: {
+      turbidity: '1.82',
+      absorbance: '0.014',
+      conductivity: '0.34',
+      effluentTemp: '64.8',
+      downtimeSaved: '13:00',
+      waterSaved: '130',
+      thermalKwh: '-28',
+      confidence: '99.4',
+      drainValve: 'ISOLATED',
+      diverterValve: 'CASCADE',
+      flowVelocity: '2.2 m/s',
+      interlocksCount: '4/4 INTERLOCKS CLEAR',
+      interlock1Pass: true,
+      interlock1Val: 'dC/dt < 0.001',
+      interlock1Sub: 'Plateau verified over 180s scan',
+      interlock2Pass: true,
+      interlock2Val: '1.82 NTU',
+      interlock2Sub: 'Clearance Spec: < 2.50 NTU Limit',
+      interlock3Pass: true,
+      interlock3Val: '82 A₀ Units',
+      interlock3Sub: 'Minimum spec > 60 Ao (Absolute kill)',
+      interlock4Pass: true,
+      interlock4Val: 'ZERO CARRYOVER',
+      interlock4Sub: 'Spectrophotometric signature clean',
+      stabilityTitle: 'DETERMINISTIC STABILITY CONFIRMED: Normal Operation',
+      stabilityBadge: 'OPTIMIZATION ACTIVE',
+      stabilityBadgeKind: 'green',
+      stabilityDesc: 'Optical spectroscopy and conductivity verify continuous linear wash-down. Vessel residual load is under 0.002 g/L. Early termination at 29:00 maintains 100% cosmetic formula purity.',
+      canAuthorize: true
+    },
+    drift: {
+      turbidity: '3.14',
+      absorbance: '0.038',
+      conductivity: '0.68',
+      effluentTemp: '63.2',
+      downtimeSaved: '0:00',
+      waterSaved: '0',
+      thermalKwh: '0',
+      confidence: '84.1',
+      drainValve: 'OPEN (PURGE)',
+      diverterValve: 'ISOLATED',
+      flowVelocity: '2.4 m/s',
+      interlocksCount: '2/4 INTERLOCKS CLEAR (DRIFT WARNING)',
+      interlock1Pass: false,
+      interlock1Val: 'dC/dt = 0.008 (DRIFT)',
+      interlock1Sub: 'Secondary probe mismatch +15%',
+      interlock2Pass: false,
+      interlock2Val: '3.14 NTU (EXCEEDED)',
+      interlock2Sub: 'Exceeds 2.50 NTU safety ceiling',
+      interlock3Pass: true,
+      interlock3Val: '78 A₀ Units',
+      interlock3Sub: 'Minimum spec > 60 Ao (Absolute kill)',
+      interlock4Pass: true,
+      interlock4Val: 'ZERO CARRYOVER',
+      interlock4Sub: 'Spectrophotometric signature clean',
+      stabilityTitle: 'DETERMINISTIC FAIL-SAFE ENGAGED: Probe Drift Mismatch (+15%)',
+      stabilityBadge: 'CUTOFF ABORTED',
+      stabilityBadgeKind: 'red',
+      stabilityDesc: 'Dual-probe redundant sensors detect upward drift divergence (> 0.001 mS/cm/s). ClearLoop deterministic rule #1 locks out early rinse cutoff and enforces standard 42m baseline timer to protect L\'Oréal formulation purity.',
+      canAuthorize: false
+    },
+    thermal: {
+      turbidity: '1.95',
+      absorbance: '0.018',
+      conductivity: '0.38',
+      effluentTemp: '48.2',
+      downtimeSaved: '0:00',
+      waterSaved: '0',
+      thermalKwh: '0',
+      confidence: '79.2',
+      drainValve: 'ISOLATED',
+      diverterValve: 'RECIRCULATE',
+      flowVelocity: '2.0 m/s',
+      interlocksCount: '3/4 INTERLOCKS CLEAR (THERMAL DEFICIT)',
+      interlock1Pass: true,
+      interlock1Val: 'dC/dt < 0.001',
+      interlock1Sub: 'Plateau verified over 180s scan',
+      interlock2Pass: true,
+      interlock2Val: '1.95 NTU',
+      interlock2Sub: 'Clearance Spec: < 2.50 NTU Limit',
+      interlock3Pass: false,
+      interlock3Val: '34 A₀ Units (DEFICIT)',
+      interlock3Sub: 'Required minimum > 60 Ao (Deficit at 48°C)',
+      interlock4Pass: true,
+      interlock4Val: 'ZERO CARRYOVER',
+      interlock4Sub: 'Spectrophotometric signature clean',
+      stabilityTitle: 'DETERMINISTIC FAIL-SAFE ENGAGED: Thermal Log-Kill Deficit (48°C)',
+      stabilityBadge: 'RINSE HELD',
+      stabilityBadgeKind: 'amber',
+      stabilityDesc: 'Wash temperature fell below 65°C during alkaline cycle (Ao = 34 < 60). In accordance with L\'Oréal Hygiene Charter Q-882, early cutoff is vetoed until thermal contact time is fully satisfied.',
+      canAuthorize: false
+    },
+    spike: {
+      turbidity: '14.80',
+      absorbance: '0.112',
+      conductivity: '1.24',
+      effluentTemp: '65.0',
+      downtimeSaved: '0:00',
+      waterSaved: '0',
+      thermalKwh: '0',
+      confidence: '68.5',
+      drainValve: 'DRAIN (SLUDGE)',
+      diverterValve: 'ISOLATED',
+      flowVelocity: '2.8 m/s',
+      interlocksCount: '3/4 INTERLOCKS CLEAR (SOIL SPIKE)',
+      interlock1Pass: true,
+      interlock1Val: 'dC/dt < 0.001',
+      interlock1Sub: 'Plateau verified over 180s scan',
+      interlock2Pass: false,
+      interlock2Val: '14.80 NTU (SPIKE)',
+      interlock2Sub: 'Residual pigment slug pocket detected',
+      interlock3Pass: true,
+      interlock3Val: '84 A₀ Units',
+      interlock3Sub: 'Minimum spec > 60 Ao (Absolute kill)',
+      interlock4Pass: false,
+      interlock4Val: 'SLUG POCKET',
+      interlock4Sub: 'Elevated absorption signature at 650nm',
+      stabilityTitle: 'DETERMINISTIC FAIL-SAFE ENGAGED: Residual Soil Slug Detected',
+      stabilityBadge: 'AUTO PULSE ACTIVE',
+      stabilityBadgeKind: 'red',
+      stabilityDesc: 'Localized pigment slug (14.80 NTU) detected across optical flow cell. Automated high-pressure sprayball pulse triggered; rinse cycle extended by 4 minutes to guarantee zero cosmetic carryover.',
+      canAuthorize: false
+    }
+  };
+
+  const cur = scenarioData[scen] || scenarioData.normal;
+
+  return `
+  <!-- TOP SUB-BANNER TELEMETRY STRIP (DARK FOREST GREEN) -->
+  <div class="cleaning-top-banner">
+    <div class="ct-left">
+      <span class="cip-skid-badge">● CIP SKID 02 // VESSEL V-04</span>
+      <span class="ct-banner-title">LINE 04 SPECTROSCOPIC CUTOFF ACTIVE // REAL-TIME EFFLUENT TELEMETRY</span>
+    </div>
+    <div class="ct-right">
+      <span class="auto-lock-pill">🔒 PROTOCOL Q-002 AUTO-LOCK</span>
+      <span class="sha-pill">SHA-256 VALIDATED</span>
+    </div>
+  </div>
+
+  <!-- HERO TITLE & BREADCRUMBS -->
+  <div class="cleaning-hero-block">
+    <div class="crumb-pills-row">
+      <span class="crumb-pill"><span class="pulsing-green-dot"></span> SPECTROPHOTOMETRIC IN-LINE CELL: SPEC-04</span>
+      <span class="crumb-pill-sep">/</span>
+      <span class="crumb-pill">LIPSTICK EMULSION BASE B-302</span>
+      <span class="crumb-pill-sep">/</span>
+      <span class="crumb-pill mint">DYNAMIC CUTOFF TARGET: 29:00</span>
     </div>
 
-    ${cipSkidSchematic(last.minute || 30, state.failureMode)}
-
-    <div class="signal-layout" style="margin-top:20px">
+    <div class="cleaning-title-row">
       <div>
-        ${signalChart(c.readings)}
-        <div class="state-machine">
-          <div class="state ${!last.minute || last.minute < 8 ? 'active' : ''}">STAGE 1: PRE-RINSE (PURGE)</div>
-          <div class="state ${last.minute >= 8 && last.minute < 22 ? 'active' : ''}">STAGE 2: CAUSTIC WASH (72°C)</div>
-          <div class="state ${last.minute >= 22 && last.minute < 29 ? 'active' : ''}">STAGE 3: INTER-RINSE</div>
-          <div class="state ${last.minute >= 29 ? 'active' : ''}">STAGE 4: FINAL POLISH</div>
+        <h1 class="cleaning-main-title">Adaptive Cleaning &amp; Dynamic CIP Telemetry</h1>
+        <p class="cleaning-subtitle">
+          Multi-spectral continuous optical absorbance and electrolytic conductivity replace blind timer-based rinses with quantified kinetic dissolution endpoints — stopping high-purity DIW injection the exact second hygiene compliance is proven.
+        </p>
+      </div>
+      <div class="cleaning-hero-meta-right">
+        <div class="meta-pill-outline"><span class="green-dot">●</span> <b>OPTICAL CELL CALIBRATED:</b> Dual-Path λ=650nm NIR</div>
+        <div class="meta-pill-outline"><b>BATCH IDENTIFICATION:</b> LOT-2026-FR-098</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 HERO KPI TILES (HORIZONTAL ROW) -->
+  <div class="cleaning-kpi-grid">
+    <!-- 1. BASELINE FIXED CIP -->
+    <div class="clean-kpi-card">
+      <div class="kpi-card-header">
+        <span class="kpi-label">BASELINE FIXED CIP</span>
+        <span class="kpi-icon">⏱</span>
+      </div>
+      <div class="kpi-val font-mono">42:00 <span class="u">min</span></div>
+      <div class="kpi-sub">Standard Timer Protocol</div>
+    </div>
+
+    <!-- 2. DYNAMIC ENDPOINT -->
+    <div class="clean-kpi-card">
+      <div class="kpi-card-header">
+        <span class="kpi-label">DYNAMIC ENDPOINT</span>
+        <span class="kpi-icon green">🎯</span>
+      </div>
+      <div class="kpi-val green font-mono">29:00 <span class="u">min</span></div>
+      <div class="kpi-sub green">● Cutoff at &lt; 2.50 NTU</div>
+    </div>
+
+    <!-- 3. TIME COMPRESSED -->
+    <div class="clean-kpi-card">
+      <div class="kpi-card-header">
+        <span class="kpi-label">TIME COMPRESSED</span>
+        <span class="kpi-icon">⏱</span>
+      </div>
+      <div class="kpi-val font-mono">
+        ${cur.downtimeSaved} <span class="u">min</span>
+        <span class="kpi-pill-badge green">-31.0%</span>
+      </div>
+      <div class="kpi-sub">Zero-compromise turnover</div>
+    </div>
+
+    <!-- 4. DIW WATER SPARED -->
+    <div class="clean-kpi-card">
+      <div class="kpi-card-header">
+        <span class="kpi-label">DIW WATER SPARED</span>
+        <span class="kpi-icon">💧</span>
+      </div>
+      <div class="kpi-val green font-mono">
+        ${cur.waterSaved} <span class="u">Liters</span>
+        <span class="kpi-pill-badge green">Stage 3</span>
+      </div>
+      <div class="kpi-sub">High-purity permeate saved</div>
+    </div>
+
+    <!-- 5. THERMAL ENERGY SAVED -->
+    <div class="clean-kpi-card">
+      <div class="kpi-card-header">
+        <span class="kpi-label">THERMAL ENERGY SAVED</span>
+        <span class="kpi-icon gold">🍃</span>
+      </div>
+      <div class="kpi-val font-mono">
+        ${cur.thermalKwh} <span class="u">kWh eq</span>
+        <span class="kpi-pill-badge gold">85°C steam</span>
+      </div>
+      <div class="kpi-sub">Zero caustic over-injection</div>
+    </div>
+
+    <!-- 6. SENSOR CONFIDENCE -->
+    <div class="clean-kpi-card">
+      <div class="kpi-card-header">
+        <span class="kpi-label">SENSOR CONFIDENCE</span>
+        <span class="kpi-icon green">🛡️</span>
+      </div>
+      <div class="kpi-val font-mono">${cur.confidence} <span class="u">%</span></div>
+      <div class="kpi-sub">1,420 Reference Trials</div>
+    </div>
+  </div>
+
+  <!-- MIDDLE 2-COLUMN SECTION: SPECTROSCOPIC DECAY HUD & SCADA P&ID FLUIDICS MIMIC -->
+  <div class="cleaning-middle-grid">
+    
+    <!-- LEFT: Dynamic In-Line Spectroscopic Kinetic Decay HUD -->
+    <div class="clean-panel decay-hud-card">
+      <div class="hud-top-meta">
+        <div>
+          <div class="hud-title-row">
+            <h3 class="hud-title">Dynamic In-Line Spectroscopic Kinetic Decay HUD</h3>
+            <span class="stream-tag">V-04 Effluent Stream</span>
+          </div>
+          <p class="hud-sub">Real-time spectral decay showing asymptotic solute dissolution across wash phases</p>
+        </div>
+        <div class="hud-legend-strip">
+          <span class="legend-dot green">■</span> <span class="legend-txt">Turbidity (NTU)</span>
+          <span class="legend-dot cyan">■</span> <span class="legend-txt">NIR 650nm</span>
+          <span class="legend-dot gold">■</span> <span class="legend-txt">Conductivity</span>
+          <span class="legend-dot purple">■</span> <span class="legend-txt">Temp (65°C)</span>
         </div>
       </div>
 
-      <div>
-        <div class="sensor-grid">
-          <div class="sensor">
-            <small>Conductivity</small>
-            <b>${last.conductivity !== null ? last.conductivity : 'DROPOUT'}</b>
-            <span>mS/cm (Ionic Load)</span>
-          </div>
-          <div class="sensor">
-            <small>Turbidity</small>
-            <b>${last.turbidity !== null ? last.turbidity : 'DROPOUT'}</b>
-            <span>NTU (Particulates)</span>
-          </div>
-          <div class="sensor">
-            <small>Wash Temperature</small>
-            <b>${last.temperature ?? '—'}°C</b>
-            <span>Target: ≥ 65°C</span>
-          </div>
-          <div class="sensor">
-            <small>pH Level</small>
-            <b>${last.ph ?? '7.0'}</b>
-            <span>Neutral: 6.8–7.4</span>
-          </div>
-        </div>
+      <!-- SPECTROSCOPIC CHART SVG -->
+      <div class="spectro-chart-container">
+        <svg viewBox="0 0 620 230" class="spectro-svg-plot">
+          <!-- Background Grid lines -->
+          <line x1="45" y1="25" x2="590" y2="25" stroke="#f1f5f9" stroke-width="1"/>
+          <line x1="45" y1="65" x2="590" y2="65" stroke="#f1f5f9" stroke-width="1"/>
+          <line x1="45" y1="105" x2="590" y2="105" stroke="#f1f5f9" stroke-width="1"/>
+          <line x1="45" y1="145" x2="590" y2="145" stroke="#f1f5f9" stroke-width="1"/>
+          <line x1="45" y1="185" x2="590" y2="185" stroke="#cbd5e1" stroke-width="1.2"/>
 
-        <div class="explanation ${isBad ? 'warn' : ''}">
-          <b>3-Point Safety Clearance Checklist:</b>
-          <div class="cascade-row" style="margin-top:8px">
-            <span>1. Asymptotic Conductivity reached</span>
-            <b>${checks.asymptotic_conductivity ? 'PASS' : badge('FAIL', 'bad')}</b>
-          </div>
-          <div class="cascade-row">
-            <span>2. Turbidity residual cleared (&lt;0.4 NTU)</span>
-            <b>${checks.turbidity_below_threshold ? 'PASS' : badge('FAIL', 'bad')}</b>
-          </div>
-          <div class="cascade-row">
-            <span>3. Sanitization thermal log-kill met (&gt;65°C)</span>
-            <b>${checks.thermal_contact_satisfied ? 'PASS' : badge('DEFICIT', 'bad')}</b>
-          </div>
-          <div class="cascade-row" style="border-top:2px solid var(--line);margin-top:8px;padding-top:8px">
-            <span>Automatic Equipment Release</span>
-            <b>${badge('BLOCKED (HUMAN GATE REQUIRED)', 'warn')}</b>
-          </div>
+          <!-- Y-Axis Labels -->
+          <text x="10" y="29" fill="#94a3b8" font-family="DM Mono" font-size="8.5">100 NTU</text>
+          <text x="14" y="69" fill="#94a3b8" font-family="DM Mono" font-size="8.5">50 NTU</text>
+          <text x="14" y="109" fill="#94a3b8" font-family="DM Mono" font-size="8.5">25 NTU</text>
+          <text x="12" y="149" fill="#94a3b8" font-family="DM Mono" font-size="8.5">7.5 NTU</text>
+          <text x="14" y="188" fill="#94a3b8" font-family="DM Mono" font-size="8.5">0.0 NTU</text>
+
+          <!-- X-Axis Labels -->
+          <text x="45" y="202" fill="#64748b" font-family="DM Mono" font-size="8.5">00:00</text>
+          <text x="125" y="202" fill="#64748b" font-family="DM Mono" font-size="8.5">10:00</text>
+          <text x="215" y="202" fill="#64748b" font-family="DM Mono" font-size="8.5">18:00</text>
+          <text x="305" y="202" fill="#64748b" font-family="DM Mono" font-size="8.5">24:00</text>
+          <text x="390" y="202" fill="#059669" font-family="DM Mono" font-size="9" font-weight="bold">29:00*</text>
+          <text x="480" y="202" fill="#64748b" font-family="DM Mono" font-size="8.5">35:00</text>
+          <text x="560" y="202" fill="#dc2626" font-family="DM Mono" font-size="8.5" font-weight="bold">42:00</text>
+
+          <!-- Phase background shading -->
+          <!-- Avoided Blind Over-Rinse Box (29:00 to 42:00) -->
+          <rect x="402" y="32" width="178" height="153" fill="rgba(254, 226, 226, 0.45)" stroke="#fca5a5" stroke-dasharray="4 3" rx="4"/>
+          <text x="412" y="52" fill="#b91c1c" font-family="DM Mono" font-size="9" font-weight="bold">13:00 MIN: BLIND TIMER</text>
+          <text x="412" y="66" fill="#dc2626" font-family="DM Mono" font-size="8">Blind Over-Rinse: 13 min &amp; 130 L Wasted Pure DIW</text>
+
+          <!-- Cutoff Vertical Dashed Line (29:00) -->
+          <line x1="402" y1="15" x2="402" y2="185" stroke="#059669" stroke-width="1.8" stroke-dasharray="4 3"/>
+
+          <!-- Dynamic Cutoff Callout Pill -->
+          <rect x="360" y="10" width="135" height="18" fill="#064e3b" rx="3"/>
+          <text x="366" y="22" fill="#34d399" font-family="DM Mono" font-size="8" font-weight="bold">t=29:00 P95: SENSOR SCAN</text>
+
+          <rect x="302" y="80" width="145" height="26" fill="#ecfdf5" stroke="#a7f3d0" rx="3"/>
+          <text x="308" y="92" fill="#065f46" font-family="DM Mono" font-size="7.8" font-weight="bold">t=29:00 MIN: DYNAMIC CUTOFF</text>
+          <text x="308" y="102" fill="#047857" font-family="DM Mono" font-size="7">(Spectroscopic Plateau Verified)</text>
+
+          <!-- TURBIDITY CURVE (Emerald) -->
+          ${scen === 'spike' ? `
+            <path d="M 45,30 C 80,45 125,75 190,115 C 260,135 320,158 375,168 L 390,75 L 405,150 L 580,178" fill="none" stroke="#10b981" stroke-width="2.5"/>
+          ` : scen === 'drift' ? `
+            <path d="M 45,30 C 80,45 125,75 190,115 C 260,135 320,158 360,166 C 390,160 440,140 580,125" fill="none" stroke="#10b981" stroke-width="2.5"/>
+          ` : `
+            <path d="M 45,30 C 80,45 125,75 190,115 C 260,135 320,158 375,170 C 402,172 450,174 580,175" fill="none" stroke="#10b981" stroke-width="2.5"/>
+          `}
+
+          <!-- NIR 650nm ABSORBANCE CURVE (Cyan) -->
+          <path d="M 45,45 C 90,65 140,95 210,130 C 270,148 330,165 385,174 C 410,175 460,176 580,176" fill="none" stroke="#06b6d4" stroke-width="1.8" stroke-dasharray="3 2"/>
+
+          <!-- CONDUCTIVITY CURVE (Gold) -->
+          <path d="M 45,60 C 85,75 130,90 190,110 C 250,125 310,150 375,168 C 402,171 450,173 580,174" fill="none" stroke="#f59e0b" stroke-width="2"/>
+
+          <!-- TEMPERATURE CURVE (Purple) -->
+          ${scen === 'thermal' ? `
+            <path d="M 45,160 L 125,145 L 215,145 L 305,155 L 402,170 L 580,175" fill="none" stroke="#8b5cf6" stroke-width="1.8"/>
+          ` : `
+            <path d="M 45,150 L 125,85 L 215,85 L 305,130 L 402,168 L 580,175" fill="none" stroke="#8b5cf6" stroke-width="1.8"/>
+          `}
+
+          <!-- Cutoff circle on turbidity curve -->
+          <circle cx="402" cy="${scen === 'spike' ? 145 : (scen === 'drift' ? 158 : 172)}" r="5" fill="#10b981" stroke="#ffffff" stroke-width="2"/>
+        </svg>
+      </div>
+
+      <!-- Live Measurements Strip below HUD -->
+      <div class="hud-live-metrics-bar">
+        <div class="live-m-item">
+          <span class="m-title">Effluent Turbidity:</span>
+          <b class="m-val ${scen === 'spike' || scen === 'drift' ? 'red' : 'green'}">${cur.turbidity} NTU</b>
+        </div>
+        <div class="live-m-sep">•</div>
+        <div class="live-m-item">
+          <span class="m-title">Absorbance (650nm):</span>
+          <b class="m-val">${cur.absorbance} AU</b>
+        </div>
+        <div class="live-m-sep">•</div>
+        <div class="live-m-item">
+          <span class="m-title">Conductivity:</span>
+          <b class="m-val">${cur.conductivity} mS/cm</b>
+        </div>
+        <div class="live-plateau-badge ${cur.interlock1Pass ? 'green' : 'red'}">
+          ${cur.interlock1Pass ? 'PLATEAU STABLE (dC/dt < 0.001)' : 'DRIFT DETECTED (dC/dt > 0.001)'}
+        </div>
+      </div>
+
+      <!-- 4-Phase CIP Progress Bar -->
+      <div class="cip-phases-strip">
+        <div class="cip-phase-item complete">
+          <div class="ph-top">Phase 1: COMPLETE ✓</div>
+          <div class="ph-name">Pre-Rinse Recover</div>
+          <div class="ph-sub">210 L to Cascade</div>
+        </div>
+        <div class="cip-phase-item complete">
+          <div class="ph-top">Phase 2: COMPLETE ✓</div>
+          <div class="ph-name">Eco-Caustic Wash</div>
+          <div class="ph-sub">${scen === 'thermal' ? '48°C (Deficit)' : '65°C'}</div>
+        </div>
+        <div class="cip-phase-item active">
+          <div class="ph-top">Phase 3: ACTIVE ● t=27:38</div>
+          <div class="ph-name">Final Purified DIW</div>
+          <div class="ph-sub">Rinse</div>
+        </div>
+        <div class="cip-phase-item avoided">
+          <div class="ph-top">Phase 4: AVOIDED 🚫</div>
+          <div class="ph-name">Blind Over-Rinse</div>
+          <div class="ph-sub">130 L &amp; 13m SPARED</div>
         </div>
       </div>
     </div>
-  </section>
+
+    <!-- RIGHT: SCADA P&ID Fluidics Mimic -->
+    <div class="clean-panel scada-mimic-card">
+      <div class="scada-top-meta">
+        <div>
+          <div class="scada-title-row">
+            <h3 class="scada-title">SCADA P&amp;ID Fluidics Mimic</h3>
+            <span class="skid-active-pill">SKID-02 ACTIVE</span>
+            <span class="p-id-icon">🖹</span>
+          </div>
+          <p class="scada-sub">Closed-loop hydraulic routing &amp; spectrophotometer cell</p>
+        </div>
+      </div>
+
+      <!-- DARK CLEANROOM SCADA SCREEN -->
+      <div class="scada-screen-viewport">
+        <svg viewBox="0 0 380 230" class="scada-svg-diagram">
+          <!-- Dark background is handled by CSS -->
+
+          <!-- Piping Lines (Stainless Steel SS316) -->
+          <!-- Main Loop: Tank V-101 to Pump P-004 -->
+          <line x1="60" y1="90" x2="110" y2="90" stroke="#059669" stroke-width="3" stroke-dasharray="6 3"/>
+          <line x1="110" y1="90" x2="110" y2="120" stroke="#059669" stroke-width="3"/>
+          <line x1="110" y1="120" x2="145" y2="120" stroke="#059669" stroke-width="3" stroke-dasharray="6 3"/>
+          
+          <!-- Through Heat Exchanger to Vessel V-04 -->
+          <line x1="175" y1="120" x2="230" y2="120" stroke="#059669" stroke-width="3" stroke-dasharray="6 3"/>
+          <line x1="230" y1="120" x2="230" y2="75" stroke="#059669" stroke-width="3"/>
+          <line x1="230" y1="75" x2="260" y2="75" stroke="#059669" stroke-width="3" stroke-dasharray="6 3"/>
+
+          <!-- Vessel Drain to Spec Cell -->
+          <line x1="300" y1="145" x2="300" y2="185" stroke="#34d399" stroke-width="3"/>
+          <line x1="300" y1="185" x2="215" y2="185" stroke="#34d399" stroke-width="3" stroke-dasharray="6 3"/>
+          <line x1="185" y1="185" x2="90" y2="185" stroke="#34d399" stroke-width="3" stroke-dasharray="6 3"/>
+          <line x1="90" y1="185" x2="90" y2="90" stroke="#34d399" stroke-width="3" stroke-dasharray="6 3"/>
+
+          <!-- TANK V-101 DIW -->
+          <rect x="25" y="45" width="50" height="75" fill="#062e22" stroke="#10b981" stroke-width="1.8" rx="4"/>
+          <text x="32" y="62" fill="#a7f3d0" font-family="DM Mono" font-size="7.5" font-weight="bold">V-101 DIW</text>
+          <text x="32" y="78" fill="#6ee7b7" font-family="DM Mono" font-size="6.5">1,200 L</text>
+          <text x="32" y="90" fill="#34d399" font-family="DM Mono" font-size="6">RO Permeate</text>
+
+          <!-- INLINE PUMP P-004 -->
+          <circle cx="128" cy="120" r="14" fill="#042018" stroke="#10b981" stroke-width="1.8"/>
+          <text x="117" y="123" fill="#ffffff" font-family="DM Mono" font-size="7" font-weight="bold">P-004</text>
+          <polygon points="128,110 134,120 128,123" fill="#34d399"/>
+
+          <!-- HEAT EXCHANGER HE-301 -->
+          <rect x="150" y="105" width="26" height="30" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5" rx="3"/>
+          <text x="153" y="122" fill="#fbbf24" font-family="DM Mono" font-size="6" font-weight="bold">HE-301</text>
+          <text x="153" y="131" fill="#fde68a" font-family="DM Mono" font-size="5.5">85.2°C</text>
+
+          <!-- COMPOUNDING VESSEL V-04 -->
+          <rect x="255" y="35" width="80" height="110" fill="#062e22" stroke="#34d399" stroke-width="2" rx="6"/>
+          <text x="272" y="52" fill="#ffffff" font-family="DM Mono" font-size="8.5" font-weight="bold">VESSEL V-04</text>
+          <!-- Impeller agitator shaft -->
+          <line x1="295" y1="58" x2="295" y2="105" stroke="#a7f3d0" stroke-width="2"/>
+          <line x1="280" y1="105" x2="310" y2="105" stroke="#a7f3d0" stroke-width="2.5"/>
+          <text x="268" y="90" fill="#6ee7b7" font-family="DM Mono" font-size="6.5">BOILER TEMP 1</text>
+          <text x="278" y="100" fill="#a7f3d0" font-family="DM Mono" font-size="7.5" font-weight="bold">${cur.effluentTemp}°C</text>
+
+          <!-- SPECTROPHOTOMETER FLOW CELL (SPEC-04) -->
+          <rect x="190" y="170" width="55" height="28" fill="#042018" stroke="#06b6d4" stroke-width="1.8" rx="3"/>
+          <text x="195" y="181" fill="#67e8f9" font-family="DM Mono" font-size="6.5" font-weight="bold">SPEC CELL</text>
+          <text x="195" y="192" fill="#38bdf8" font-family="DM Mono" font-size="6.5">${cur.turbidity} NTU</text>
+
+          <!-- VALVE XV-504 DIVERTER -->
+          <polygon points="120,180 130,190 120,190" fill="#10b981"/>
+          <polygon points="140,180 130,190 140,190" fill="#10b981"/>
+          <text x="118" y="202" fill="#34d399" font-family="DM Mono" font-size="6">XV-504 CASCADE</text>
+
+          <!-- VALVE XV-502 DRAIN -->
+          <polygon points="70,180 80,190 70,190" fill="${cur.drainValve === 'ISOLATED' ? '#f59e0b' : '#ef4444'}"/>
+          <polygon points="90,180 80,190 90,190" fill="${cur.drainValve === 'ISOLATED' ? '#f59e0b' : '#ef4444'}"/>
+          <text x="68" y="202" fill="${cur.drainValve === 'ISOLATED' ? '#fbbf24' : '#f87171'}" font-family="DM Mono" font-size="6">XV-502 DRAIN</text>
+        </svg>
+      </div>
+
+      <!-- P&ID Telemetry Readout Strip (4 Columns) -->
+      <div class="scada-telemetry-grid">
+        <div class="scada-tile">
+          <div class="sc-label">XV-502 DRAIN VALVE</div>
+          <div class="sc-val ${cur.drainValve === 'ISOLATED' ? 'amber' : 'red'}">${cur.drainValve}</div>
+        </div>
+        <div class="scada-tile">
+          <div class="sc-label">XV-504 DIVERTER</div>
+          <div class="sc-val ${cur.diverterValve === 'CASCADE' ? 'green' : 'amber'}">${cur.diverterValve}</div>
+        </div>
+        <div class="scada-tile">
+          <div class="sc-label">FLOW VELOCITY</div>
+          <div class="sc-val font-mono">${cur.flowVelocity}</div>
+          <div class="sc-sub">Re &gt; 12,000</div>
+        </div>
+        <div class="scada-tile">
+          <div class="sc-label">EFFLUENT TEMP</div>
+          <div class="sc-val font-mono ${cur.effluentTemp < 55 ? 'red' : ''}">${cur.effluentTemp} °C</div>
+          <div class="sc-sub">Heat Exchanger</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- HUMAN-IN-THE-LOOP INTERLOCK & GMP STEP-GATE SIGN-OFF -->
+  <div class="clean-panel hitl-signoff-card">
+    <div class="hitl-header">
+      <div class="hitl-title-cluster">
+        <span class="shield-green-icon">🛡</span>
+        <div>
+          <h3 class="hitl-main-title">Human-in-the-Loop Interlock &amp; GMP Step-Gate Sign-Off</h3>
+          <p class="hitl-main-sub">L'Oréal Cosmetic Hygiene Protocol Q-882 Step-Gate Clearance Verification</p>
+        </div>
+      </div>
+      <span class="gmp-cert-pill">STANDARD: ISO 22716 GMP &amp; COSMETICS EUROPE CERTIFIED</span>
+    </div>
+
+    <!-- Explainable AI Termination Justification -->
+    <div class="ai-justification-box">
+      <div class="ai-just-head">
+        <span class="bulb-icon">💡</span>
+        <b>Explainable AI Termination Justification:</b>
+      </div>
+      <p class="ai-just-text">
+        Optical spectroscopy confirms asymptotic surfactant dissolution. Residual product concentration is quantified at <b>&lt; 0.002 g/L</b> (5x below L'Oréal Q-882 maximum allowable limit of 0.010 g/L). Continued rinsing provides zero cosmetic hygiene or microbiological gain. Early rinse purge fully authorized.
+      </p>
+    </div>
+
+    <!-- 4 Step-Gate Verification Tiles -->
+    <div class="step-gate-tiles-grid">
+      <div class="step-gate-tile ${cur.interlock1Pass ? 'pass' : 'fail'}">
+        <div class="sg-head">
+          <span class="sg-label">SIGNAL VARIANCE (180S)</span>
+          <span class="sg-chk">${cur.interlock1Pass ? '✓' : '⚠'}</span>
+        </div>
+        <div class="sg-val font-mono">${cur.interlock1Val}</div>
+        <div class="sg-sub">${cur.interlock1Sub}</div>
+      </div>
+
+      <div class="step-gate-tile ${cur.interlock2Pass ? 'pass' : 'fail'}">
+        <div class="sg-head">
+          <span class="sg-label">OPTICAL TURBIDITY</span>
+          <span class="sg-chk">${cur.interlock2Pass ? '✓' : '⚠'}</span>
+        </div>
+        <div class="sg-val font-mono">${cur.interlock2Val}</div>
+        <div class="sg-sub">${cur.interlock2Sub}</div>
+      </div>
+
+      <div class="step-gate-tile ${cur.interlock3Pass ? 'pass' : 'fail'}">
+        <div class="sg-head">
+          <span class="sg-label">THERMAL LETHALITY A₀</span>
+          <span class="sg-chk">${cur.interlock3Pass ? '✓' : '⚠'}</span>
+        </div>
+        <div class="sg-val font-mono">${cur.interlock3Val}</div>
+        <div class="sg-sub">${cur.interlock3Sub}</div>
+      </div>
+
+      <div class="step-gate-tile ${cur.interlock4Pass ? 'pass' : 'fail'}">
+        <div class="sg-head">
+          <span class="sg-label">CROSS-CONTAMINATION</span>
+          <span class="sg-chk">${cur.interlock4Pass ? '✓' : '⚠'}</span>
+        </div>
+        <div class="sg-val font-mono">${cur.interlock4Val}</div>
+        <div class="sg-sub">${cur.interlock4Sub}</div>
+      </div>
+    </div>
+
+    <!-- Operator Action Bar -->
+    <div class="operator-action-bar">
+      <div class="op-profile-cluster">
+        <div class="op-avatar-circle">CL</div>
+        <div class="op-meta">
+          <div class="op-name-row">
+            <b>Operator Action: Dr. Camille Laurent</b>
+            <span class="op-interlock-pill ${cur.canAuthorize ? 'green' : 'amber'}">${cur.interlocksCount}</span>
+          </div>
+          <div class="op-hash font-mono">Audit Trail Hash: SHA-256: 8f9b...e21a logged to L'Oréal Enterprise Quality Ledger.</div>
+        </div>
+      </div>
+
+      <div class="op-buttons-cluster">
+        <button class="btn-override-baseline ${state.cleaningOverridden ? 'active' : ''}" onclick="overrideCleaningBaseline()">
+          Override &amp; Run Standard Baseline (13m left)
+        </button>
+        <button class="btn-authorize-cutoff ${state.cleaningAuthorized ? 'authorized' : ''}" 
+                onclick="authorizeEarlyRinse()" 
+                ${!cur.canAuthorize && !state.cleaningAuthorized ? 'disabled' : ''}>
+          <span>✓</span>
+          <span>${state.cleaningAuthorized ? 'EARLY RINSE TERMINATED (130 L & 13 MIN SPARED)' : 'AUTHORIZE EARLY RINSE TERMINATION (SAVES 130 L & 13 MIN)'}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERACTIVE RESILIENCE SANDBOX: SAFETY INTERLOCK TESTING -->
+  <div class="clean-panel sandbox-card">
+    <div class="sandbox-header">
+      <div class="sandbox-title-cluster">
+        <span class="flask-icon">⚗</span>
+        <div>
+          <h3 class="sandbox-main-title">Interactive Resilience Sandbox: Safety Interlock Testing</h3>
+          <p class="sandbox-main-sub">Inject telemetry perturbations to verify ClearLoop's deterministic fail-safe rollbacks.</p>
+        </div>
+      </div>
+      <span class="bench-pill">COMPETITION TEST BENCH</span>
+    </div>
+
+    <!-- 4 Scenario Cards -->
+    <div class="sandbox-scenarios-grid">
+      <div class="scen-card ${scen === 'normal' ? 'active' : ''}" onclick="setCleaningScenario('normal')">
+        <div class="scen-top">
+          <span class="scen-code">SCENARIO 01</span>
+          <span class="scen-dot green">●</span>
+        </div>
+        <b class="scen-name">Normal Optimization</b>
+        <p class="scen-desc">Optimal clean profile; early termination approved at 29:00.</p>
+      </div>
+
+      <div class="scen-card ${scen === 'drift' ? 'active' : ''}" onclick="setCleaningScenario('drift')">
+        <div class="scen-top">
+          <span class="scen-code">SCENARIO 02</span>
+          <span class="scen-dot amber">●</span>
+        </div>
+        <b class="scen-name">Sensor Drift (+15%)</b>
+        <p class="scen-desc">Redundant dual-probe mismatch immediately aborts cutoff.</p>
+      </div>
+
+      <div class="scen-card ${scen === 'thermal' ? 'active' : ''}" onclick="setCleaningScenario('thermal')">
+        <div class="scen-top">
+          <span class="scen-code">SCENARIO 03</span>
+          <span class="scen-dot amber">●</span>
+        </div>
+        <b class="scen-name">Thermal Deficit (48°C)</b>
+        <p class="scen-desc">Ao kill-step deficit locks early rinse until thermal compliance.</p>
+      </div>
+
+      <div class="scen-card ${scen === 'spike' ? 'active' : ''}" onclick="setCleaningScenario('spike')">
+        <div class="scen-top">
+          <span class="scen-code">SCENARIO 04</span>
+          <span class="scen-dot red">●</span>
+        </div>
+        <b class="scen-name">Turbidity Pocket Spike</b>
+        <p class="scen-desc">Slug detection instantly triggers automated high-pressure pulse.</p>
+      </div>
+    </div>
+
+    <!-- Deterministic Stability Feedback Box -->
+    <div class="stability-feedback-box">
+      <div class="stab-head">
+        <span class="gear-icon">⚙</span>
+        <b class="stab-title">${cur.stabilityTitle}</b>
+        <span class="stab-badge ${cur.stabilityBadgeKind}">${cur.stabilityBadge}</span>
+      </div>
+      <p class="stab-desc">${cur.stabilityDesc}</p>
+      <div class="stab-lock-footer">
+        <span class="lock-icon">🔒</span>
+        <span>Deterministic fail-safe lock: ClearLoop NEVER cuts off rinse early unless both optical and conductivity sensors corroborate asymptotic baseline.</span>
+      </div>
+    </div>
+  </div>
   `;
 }
 
