@@ -680,6 +680,11 @@ class App(SimpleHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "Content-Type, X-Request-ID")
         self.end_headers()
         
+    def do_HEAD(self):
+        route = urlparse(self.path).path
+        self.path = "/frontend/index.html" if route == "/" else route
+        return super().do_HEAD()
+
     def do_GET(self):
         route = urlparse(self.path).path
         if route == "/api/batches":
