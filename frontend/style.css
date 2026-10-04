@@ -9862,3 +9862,94 @@ dialog::backdrop {
   letter-spacing: -0.02em;
 }
 
+/* 14. Universal Canonical Demo Control Dock (Phase 5) */
+.demo-dock-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1px solid #c2eed5;
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.05);
+}
+.demo-dock-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.demo-badge-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 800;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  letter-spacing: 0.03em;
+}
+.demo-step-track {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.demo-step-chip {
+  font-family: 'DM Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1.2;
+}
+.demo-step-chip:hover {
+  border-color: #10b981;
+  color: #047857;
+}
+.demo-step-chip.active {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #059669;
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.25);
+}
+.demo-step-chip.completed {
+  background: #dcfce7;
+  color: #15803d;
+  border-color: #86efac;
+}
+.demo-dock-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-demo-action {
+  font-family: 'DM Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-demo-action.primary {
+  background: #059669;
+  color: #ffffff;
+  border-color: #047857;
+}
+.btn-demo-action:hover {
+  transform: translateY(-1px);
+}
+
+

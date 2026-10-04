@@ -25,6 +25,7 @@ from core import (
     init_db,
     record_audit_event as record,
     get_audit_events as audit_events,
+    get_demo_session,
     RULES
 )
 
@@ -134,7 +135,15 @@ class App(SimpleHTTPRequestHandler):
             return self.send_json(transition_matrix())
 
         if route == "/api/planning/data":
-            return self.send_json(get_planning_data())
+            pdata = get_planning_data()
+            pdata["session"] = get_demo_session().to_dict()
+            return self.send_json(pdata)
+
+        if route == "/api/demo/session":
+            return self.send_json(get_demo_session().to_dict())
+
+        if route == "/api/demo/export":
+            return self.send_json(get_demo_session().export_summary())
 
         if route == "/api/impact/timespan":
             range_key = query.get("range", ["24h"])[0]
@@ -172,18 +181,65 @@ class App(SimpleHTTPRequestHandler):
 
         route = urlparse(self.path).path
 
+        if route == "/api/demo/step":
+            action = body.get("action") or body.get("step_id") or body.get("step") or "get"
+            session = get_demo_session()
+            if action in ("reset", "RESET"):
+                return self.send_json(session.reset_session())
+            if action in ("set_step", "01_PLAN"):
+                return self.send_json(session.set_step(body.get("step", "01_PLAN")))
+            if action in ("optimize", "02_OPTIMIZE"):
+                session.run_optimization()
+                return self.send_json(session.to_dict())
+            if action in ("accept", "03_RECOMMEND"):
+                if body.get("decision") in ("REJECT", "retain_baseline"):
+                    session.retain_baseline()
+                else:
+                    session.accept_recommendation()
+                return self.send_json(session.to_dict())
+            if action in ("retain", "RETAIN"):
+                session.retain_baseline()
+                return self.send_json(session.to_dict())
+            if action in ("start_cleaning", "03_CLEAN", "04_CLEANING_SIM", "05_TELEMETRY_SIGNALS"):
+                failure = body.get("failure") or (body.get("payload", {}).get("failure") if isinstance(body.get("payload"), dict) else None)
+                session.start_cleaning(failure)
+                return self.send_json(session.to_dict())
+            if action in ("authorize_cutoff", "04_VALIDATE", "06_SAFETY_DECISION"):
+                session.authorize_early_cutoff()
+                return self.send_json(session.to_dict())
+            if action in ("override_veto", "OVERRIDE"):
+                session.override_to_baseline_timer()
+                return self.send_json(session.to_dict())
+            if action in ("cascade_screen", "05_RECOVER", "07_RECOVERY"):
+                vol = body.get("volume_l") or (body.get("payload", {}).get("volume_l") if isinstance(body.get("payload"), dict) else None)
+                session.execute_cascade_screening(vol)
+                return self.send_json(session.to_dict())
+            if action in ("cascade_commit", "06_CASCADE", "08_CASCADE"):
+                session.authorize_cascade_committal()
+                return self.send_json(session.to_dict())
+            if action in ("07_IMPACT", "09_IMPACT", "10_AUDIT"):
+                session._recompute_impact()
+                return self.send_json(session.to_dict())
+            return self.send_json(session.to_dict())
+
+        if route == "/api/demo/reset":
+            return self.send_json(get_demo_session().reset_session())
+
         if route == "/api/optimize":
             record("OPTIMIZE_RUN", f"Executed schedule optimization (seed={body.get('seed', 2030)})")
+            get_demo_session().run_optimization()
             return self.send_json(sequence_payload(body))
 
         if route == "/api/cleaning/start":
             failure = body.get("failure")
             seed = body.get("seed", 2026)
             record("CLEANING_SIMULATION", f"Started physical CIP simulation (failure={failure or 'none'})")
+            get_demo_session().start_cleaning(failure)
             return self.send_json(cleaning(seed=seed, failure=failure))
 
         if route == "/api/water/analyze":
             record("WATER_SCREEN", f"Effluent segregation screen for volume={body.get('volume_l', 120)} L")
+            get_demo_session().execute_cascade_screening(body.get("volume_l"))
             return self.send_json(cascade(body))
 
         if route == "/api/water/authorize":
@@ -194,11 +250,13 @@ class App(SimpleHTTPRequestHandler):
                     "error": "Water quality criteria not met. Authorization blocked.",
                     "status": "BLOCKED"
                 }, 400)
+            get_demo_session().authorize_cascade_committal()
             event = record("CASCADE_COMMITTAL_AUTHORIZED", f"Authorized {volume_l} L non-contact cascade committal")
             return self.send_json({
                 "status": "AUTHORIZED",
                 "volume_l": volume_l,
-                "event": event
+                "event": event,
+                "session": get_demo_session().to_dict()
             })
 
         if route == "/api/cleaning/authorize":
@@ -209,11 +267,13 @@ class App(SimpleHTTPRequestHandler):
                     "status": "BLOCKED"
                 }, 400)
             saved_l = float(body.get("water_saved_l", 130))
+            get_demo_session().authorize_early_cutoff()
             event = record("GMP_EARLY_RINSE_CUTOFF_AUTHORIZED", f"Operator approved early rinse cutoff ({saved_l} L DIW avoided)")
             return self.send_json({
                 "status": "AUTHORIZED",
                 "water_saved_l": saved_l,
-                "event": event
+                "event": event,
+                "session": get_demo_session().to_dict()
             })
 
         if route == "/api/audit/record":
@@ -243,11 +303,16 @@ class App(SimpleHTTPRequestHandler):
             decision = body.get("decision") if isinstance(body, dict) else None
             if decision not in {"accept_recommendation", "retain_baseline"}:
                 return self.send_json({"error": "Decision must be accept_recommendation or retain_baseline."}, 400)
+            if decision == "accept_recommendation":
+                get_demo_session().accept_recommendation()
+            else:
+                get_demo_session().retain_baseline()
             event = record("PLANNER_DECISION", f"{decision} for synthetic optimization {body.get('optimization_id', 'unknown')}")
             return self.send_json({
                 "classification": "SIMULATED",
                 "notice": "Planner decision recorded in local session audit trail; no plant schedule was changed.",
-                "event": event
+                "event": event,
+                "session": get_demo_session().to_dict()
             })
 
         return self.send_json({"error": "Unknown route"}, 404)

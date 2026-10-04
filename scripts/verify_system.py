@@ -94,6 +94,7 @@ def main():
         ("Frontend TypeScript Declarations Check", verify_ts_types),
         ("Core Domain Unit Tests (test_core.py)", lambda: run_unittest_file("tests/test_core.py")),
         ("Domain Invariants Tests (test_domain_invariants.py)", lambda: run_unittest_file("tests/test_domain_invariants.py")),
+        ("Canonical Demo Session Tests (test_demo_session.py)", lambda: run_unittest_file("tests/test_demo_session.py")),
         ("API Integration Tests (test_api_integration.py)", lambda: run_unittest_file("tests/test_api_integration.py")),
         ("Industrial Stress Tests (test_stress_1000.py)", lambda: run_unittest_file("tests/test_stress_1000.py")),
     ]

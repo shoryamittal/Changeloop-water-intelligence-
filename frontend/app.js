@@ -49,7 +49,8 @@ const state = {
   cascadeAuthorized: false,
   cascadeOverridden: false,
   selectedCascadeStream: 'A',
-  selectedCascadeRule: 'RULE-CL-01'
+  selectedCascadeRule: 'RULE-CL-01',
+  demoSession: null
 };
 
 const views = {
@@ -123,63 +124,87 @@ function toggleAudio() {
   toast(state.audioEnabled ? 'Audio feedback enabled' : 'Audio feedback muted');
 }
 
-/* 8-STEP 3-MINUTE JUDGE DEMO TOUR STEPS */
+/* 8-STEP 3-MINUTE JUDGE DEMO TOUR STEPS (Synchronized with Canonical Demo Engine) */
 const judgeSteps = [
   {
     view: 'overview',
     title: '1. Strategic Thesis & L\'Oréal 2030 Alignment',
     text: 'L\'Oréal\'s landmark Waterloop Factory initiative targets 100% industrial water circularity by 2030 (achieved 56% in 2025). Most projects only treat water downstream after it is polluted. ClearLoop operates UPSTREAM: reducing modeled changeover water demand before it enters the loop, eliminating thermal energy and chemical stress on recycling membranes.',
-    actionName: 'Inspect Overview',
-    action: () => showView('overview')
+    actionName: 'Initialize Production Plan',
+    action: async () => {
+      showView('overview');
+      await executeDemoStep('01_PLAN');
+    }
   },
   {
     view: 'planning',
     title: '2. Cosmetic Formulation Physics & Batch Attributes',
     text: 'Changeovers in cosmetic plants depend on formulation chemistry: moving from dark pigments to light emulsions or from heavy microcrystalline wax to low-viscosity fluids requires deep, intensive washouts. ClearLoop models these causal physics transparently rather than relying on black-box opacity.',
-    actionName: 'Load Color Makeup Campaign',
-    action: () => loadPreset('colour')
+    actionName: 'Inspect Batch Queue & Bottlenecks',
+    action: async () => {
+      showView('planning');
+      await executeDemoStep('01_PLAN');
+    }
   },
   {
     view: 'optimizer',
     title: '3. Prevent: 2-Opt Tour Optimization & Decision Trace',
     text: 'Inspect the mathematical tour optimizer. Unlike a naive greedy nearest-neighbor that gets trapped in local minima, ClearLoop applies 2-Opt local search edge reversals. Notice the baseline retention safeguard: if an optimization cannot improve the objective, the baseline is preserved.',
-    actionName: 'Run 2-Opt Optimization',
-    action: () => runOptimization()
+    actionName: 'Run 2-Opt Sequence Optimization',
+    action: async () => {
+      showView('optimizer');
+      await executeDemoStep('02_OPTIMIZE');
+    }
   },
   {
     view: 'cleaning',
     title: '4. Adapt: 4-Phase Dynamic CIP Skid & Asymptote Cutoff',
     text: 'Examine the animated CIP Skid Manifold and multi-sensor telemetry (Conductivity, Turbidity, Temp, Flow, pH). Standard lines blindly run fixed 42-minute timers. ClearLoop monitors asymptotic wash plateau stability, safely identifying endpoint at minute 29 and saving 13 minutes and 130 Litres of fresh rinse water.',
-    actionName: 'Run Nominal CIP Cycle',
-    action: () => runCleaning(null)
+    actionName: 'Run Nominal CIP Telemetry',
+    action: async () => {
+      showView('cleaning');
+      await executeDemoStep('04_CLEANING_SIM', { failure: null });
+    }
   },
   {
     view: 'cleaning',
     title: '5. Fail-Safe Safety Gate: Fault Injection',
     text: 'Critical Plant Safety: Automated models must NEVER risk microbiological release or cross-contamination. Watch what happens when a sensor drops or drifts: the Safety Gate instantly blocks early release, raises an alarm, and defaults to the existing validated procedural SOP timer.',
     actionName: 'Inject Sensor Dropout Fault',
-    action: () => runCleaning('missing')
+    action: async () => {
+      showView('cleaning');
+      await executeDemoStep('04_CLEANING_SIM', { failure: 'missing' });
+    }
   },
   {
     view: 'cascade',
     title: '6. Circular Waterloop: Segregated Stream Screening',
     text: 'Direct alignment with L\'Oréal Waterloop factories (Burgos benchmark): ClearLoop segregates CIP effluent into 3 streams: Pre-rinse first-flush to biogas, caustic wash to re-dosing tanks, and final rinse permeate screened for non-contact cooling tower utility. It never auto-approves reuse.',
-    actionName: 'Screen Segregated Stream',
-    action: () => runWater()
+    actionName: 'Screen & Segregate Effluent',
+    action: async () => {
+      showView('cascade');
+      await executeDemoStep('08_CASCADE');
+    }
   },
   {
     view: 'analytics',
     title: '7. Multi-Dimensional ESG Ledger & Anti-Double-Counting',
     text: 'Water Demand Avoided = Baseline − Prevent − Adapt. Cascade is strictly segregated as potential reuse, preventing double-counting. Furthermore, because CIP uses 72°C hot water, avoiding water directly eliminates thermal gas boiler MWh and Scope 1 CO₂e emissions!',
-    actionName: 'Inspect ESG Ledger',
-    action: () => showView('analytics')
+    actionName: 'Calculate Mass-Balance Impact',
+    action: async () => {
+      showView('analytics');
+      await executeDemoStep('09_IMPACT');
+    }
   },
   {
     view: 'defense',
     title: '8. Hostile Judge Defense & Pilot Architecture',
     text: 'Review rigorous defenses for all 5 judge personas: Plant Director (uptime & CIP skids), Sustainability Lead (boundaries & standards), AI Expert (drift & ground truth), CFO (payback & CAPEX), and Competition Jury Chair. Ready for a controlled 6-week single-line pilot!',
-    actionName: 'Open Judge Defenses',
-    action: () => showView('defense')
+    actionName: 'Seal Audit Trail & Defense',
+    action: async () => {
+      await executeDemoStep('10_AUDIT');
+      showView('defense');
+    }
   }
 ];
 
@@ -2358,6 +2383,10 @@ async function setCleaningScenario(scen) {
     const failureArg = scen === 'normal' ? null : scen;
     const simRes = await api('/api/cleaning/start', { seed: 2026, failure: failureArg });
     if (simRes) state.clean = simRes;
+    const demoRes = await api('/api/demo/session').catch(() => null);
+    if (demoRes) {
+      applyDemoSessionUpdate(demoRes);
+    }
   } catch (e) {
     console.warn('Offline simulation fallback', e);
   }
@@ -2389,6 +2418,10 @@ async function authorizeEarlyRinse() {
     const res = await api('/api/cleaning/authorize', { scenario: state.cleaningScenario, water_saved_l: savedL });
     if (res?.event) {
       state.audit = [res.event, ...(state.audit || [])];
+    }
+    const demoRes = await api('/api/demo/session').catch(() => null);
+    if (demoRes) {
+      applyDemoSessionUpdate(demoRes);
     }
   } catch (e) {
     console.warn('Offline authorize fallback', e);
@@ -3199,6 +3232,12 @@ async function authorizeCascadeCommittal() {
     const res = await api('/api/water/authorize', { volume_reused_l: reusedL, destination: 'Secondary Non-Contact Utility' });
     if (res?.event) {
       state.audit = [res.event, ...(state.audit || [])];
+    }
+    if (res?.session) {
+      applyDemoSessionUpdate(res.session);
+    } else {
+      const demoRes = await api('/api/demo/session').catch(() => null);
+      if (demoRes) applyDemoSessionUpdate(demoRes);
     }
   } catch (e) {
     console.warn('Offline cascade authorize fallback', e);
@@ -5059,6 +5098,167 @@ function trust() {
   `;
 }
 
+/* =========================================================================
+   CANONICAL END-TO-END DEMO CONTROLLER & STATE ENGINE
+   Enforces ONE SHARED PRODUCT STATE across all views:
+   01_PLAN -> 02_OPTIMIZE -> 03_RECOMMEND -> 04_CLEANING_SIM ->
+   05_TELEMETRY_SIGNALS -> 06_SAFETY_DECISION -> 07_RECOVERY ->
+   08_CASCADE -> 09_IMPACT -> 10_AUDIT
+   ========================================================================= */
+
+const CANONICAL_DEMO_STEPS = [
+  { id: '01_PLAN', num: '1', name: 'Plan', view: 'planning', desc: 'Initialize cosmetic batch queue & FIFO baseline' },
+  { id: '02_OPTIMIZE', num: '2', name: 'Prevent', view: 'optimizer', desc: 'Execute 2-Opt changeover tour optimization' },
+  { id: '03_RECOMMEND', num: '3', name: 'Advise', view: 'optimizer', desc: 'Evaluate rule constraints & operator advisory' },
+  { id: '04_CLEANING_SIM', num: '4', name: 'Adapt CIP', view: 'cleaning', desc: 'Simulate 4-phase dynamic CIP telemetry' },
+  { id: '05_TELEMETRY_SIGNALS', num: '5', name: 'Signals', view: 'cleaning', desc: 'Detect asymptotic cleanliness endpoint' },
+  { id: '06_SAFETY_DECISION', num: '6', name: 'Safety Gate', view: 'cleaning', desc: 'Verify 3-point clearance & operator sign-off' },
+  { id: '07_RECOVERY', num: '7', name: 'Recovery', view: 'cascade', desc: 'Measure effluent permeate & quality' },
+  { id: '08_CASCADE', num: '8', name: 'Cascade', view: 'cascade', desc: 'Route 3-stream segregated circular cascade' },
+  { id: '09_IMPACT', num: '9', name: 'Impact', view: 'analytics', desc: 'Calculate ISO 14046 mass-balance ledger' },
+  { id: '10_AUDIT', num: '10', name: 'Audit', view: 'alerts', desc: 'Seal durable 21 CFR Part 11 audit trail' }
+];
+
+function applyDemoSessionUpdate(session) {
+  if (!session) return;
+  state.demoSession = session;
+  if (session.batches) {
+    if (Array.isArray(session.batches)) {
+      state.batches = session.batches;
+    } else if (typeof session.batches === 'object') {
+      state.batches = Object.values(session.batches);
+    }
+  }
+  if (session.optimization_result) {
+    state.opt = session.optimization_result;
+  }
+  if (session.cleaning_simulation || session.cleaning_result) {
+    state.clean = session.cleaning_simulation || session.cleaning_result;
+  }
+  if (session.recovery_result || session.cascade_result || session.cascade_distribution) {
+    state.water = {
+      ...(state.water || {}),
+      ...(session.recovery_result || {}),
+      ...(session.cascade_result || session.cascade_distribution || {})
+    };
+  }
+  if (session.impact_record || session.impact_ledger) {
+    state.impact = session.impact_record || session.impact_ledger;
+  }
+  if (session.audit_events) {
+    state.audit = session.audit_events;
+  }
+  renderDemoDock();
+}
+
+function renderDemoDock() {
+  const dock = $('#demoDock');
+  if (!dock) return;
+
+  const session = state.demoSession || {};
+  const currentStep = session.demo_step || session.current_step || '01_PLAN';
+  const plantId = session.plant || session.plant_id || 'FR-AULNAY-04';
+  const lineId = session.line || session.line_id || 'Line 04';
+
+  const curIdx = CANONICAL_DEMO_STEPS.findIndex(s => s.id === currentStep);
+  const stepNumber = curIdx >= 0 ? curIdx + 1 : 1;
+
+  dock.innerHTML = `
+    <div class="demo-dock-left">
+      <div class="demo-badge-pill">
+        <span class="pulsing-green-dot"></span>
+        <span>${escape(plantId)} // ${escape(lineId)} • DEMO STAGE [${stepNumber}/10]</span>
+      </div>
+      <div class="demo-step-track">
+        ${CANONICAL_DEMO_STEPS.map((step, idx) => {
+          const isActive = step.id === currentStep;
+          const isDone = idx < curIdx;
+          const cls = isActive ? 'active' : (isDone ? 'completed' : '');
+          return `<button class="demo-step-chip ${cls}" onclick="jumpToDemoStep('${step.id}')" title="${escape(step.desc)}">
+            <span>${step.num}. ${escape(step.name)}</span>
+          </button>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="demo-dock-actions">
+      <button class="btn-demo-action" onclick="resetDemoSession()" title="Reset session back to unoptimized initial state">↺ Reset</button>
+      <button class="btn-demo-action primary" onclick="nextDemoStep()" title="Advance to next step in the decision chain">Next Step ›</button>
+      <button class="btn-demo-action" onclick="exportDemoLedger()" title="Download verifiable JSON mass-balance ledger with SHA-256 seal">📥 Export Ledger</button>
+    </div>
+  `;
+}
+
+async function executeDemoStep(stepId, payload = {}) {
+  try {
+    const res = await api('/api/demo/step', { step_id: stepId, payload });
+    if (res) {
+      applyDemoSessionUpdate(res);
+    }
+    const stepDef = CANONICAL_DEMO_STEPS.find(s => s.id === stepId);
+    if (stepDef && stepDef.view) {
+      state.view = stepDef.view;
+    }
+    playChime('cutoff');
+    toast(`Stage Activated: ${stepDef ? stepDef.name : stepId}`);
+    render();
+  } catch (err) {
+    console.error('Demo step failed:', err);
+    toast('Demo step execution failed');
+  }
+}
+
+async function nextDemoStep() {
+  const currentId = state.demoSession?.demo_step || state.demoSession?.current_step || '01_PLAN';
+  const curIdx = CANONICAL_DEMO_STEPS.findIndex(s => s.id === currentId);
+  const nextIdx = (curIdx >= 0 && curIdx < CANONICAL_DEMO_STEPS.length - 1) ? curIdx + 1 : 0;
+  const nextStep = CANONICAL_DEMO_STEPS[nextIdx];
+  await executeDemoStep(nextStep.id);
+}
+
+async function jumpToDemoStep(stepId) {
+  const stepDef = CANONICAL_DEMO_STEPS.find(s => s.id === stepId);
+  if (!stepDef) return;
+  await executeDemoStep(stepId);
+}
+
+async function resetDemoSession() {
+  try {
+    const res = await api('/api/demo/reset', {
+      plant_id: 'FR-AULNAY-04',
+      line_id: 'Line 04 (Lipstick & Emulsions)',
+      seed: 2026
+    });
+    if (res) {
+      applyDemoSessionUpdate(res);
+    }
+    state.view = 'planning';
+    playChime('cutoff');
+    toast('Demo Session Reset: Clean cosmetic queue loaded');
+    render();
+  } catch (err) {
+    console.error('Reset failed:', err);
+    toast('Reset failed');
+  }
+}
+
+async function exportDemoLedger() {
+  try {
+    const data = await api('/api/demo/export');
+    const jsonStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+    const dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute("href", jsonStr);
+    dlAnchor.setAttribute("download", `clearloop_demo_ledger_${data.session_id || 'session'}.json`);
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    document.body.removeChild(dlAnchor);
+    playChime('success');
+    toast('✓ Demo Ledger exported with cryptographic SHA-256 seal');
+  } catch (err) {
+    console.error('Export failed:', err);
+    toast('Export failed');
+  }
+}
+
 /* RENDER & EVENT HANDLERS */
 function render() {
   const renderers = {
@@ -5076,6 +5276,8 @@ function render() {
 
   const page = $('#page');
   if (page) page.innerHTML = (renderers[state.view] || overview)();
+
+  renderDemoDock();
 }
 
 function showView(view) {
@@ -5465,19 +5667,21 @@ function closePipelineInspector() {
   $$('.pipeline-stage-card').forEach(card => card.classList.remove('selected'));
 }
 
-function validateSequenceDCS() {
+async function validateSequenceDCS() {
   playChime('success');
-  toast('✓ DCS Interlock Confirmed: Batch B-218 committed to DCS sequence ahead of B-220 (+214 L Saved)');
+  toast('✓ DCS Interlock Confirmed: Batch B-218 committed to DCS sequence ahead of B-220 (+284 L Saved)');
   const btn = $('.validate-dcs-btn');
   if (btn) {
     btn.innerHTML = '<span>✓ SEQUENCE ACTIVE ON LINE 04 DCS</span>';
     btn.style.background = '#059669';
   }
+  await recordDecision('accept_recommendation');
 }
 
-function keepBaselinePlan() {
+async function keepBaselinePlan() {
   playChime('cutoff');
   toast('Baseline schedule preserved: Legacy sequence retained without DCS modification');
+  await recordDecision('retain_baseline');
 }
 
 function simulateShiftData() {
@@ -5543,13 +5747,17 @@ async function loadPreset(preset) {
 }
 
 async function recordDecision(decision) {
+  const normDecision = (decision === 'accept_recommendation' || decision === 'ACCEPT') ? 'accept_recommendation' : 'retain_baseline';
   const res = await api('/api/optimization/decision', {
     optimization_id: state.opt?.optimization_id,
-    decision
+    decision: normDecision
   });
   playChime('success');
-  toast(res.notice);
+  toast(res.notice || 'Decision recorded');
   state.audit = (await api('/api/audit-log')).items || [];
+  if (res && res.session) {
+    applyDemoSessionUpdate(res.session);
+  }
   render();
 }
 
@@ -5559,6 +5767,10 @@ async function runCleaning(failure) {
     seed: state.seed,
     failure: failure
   });
+  const demoRes = await api('/api/demo/session').catch(() => null);
+  if (demoRes) {
+    applyDemoSessionUpdate(demoRes);
+  }
   if (failure) {
     playChime('alert');
     toast(`Safety Gate Triggered: ${failure.toUpperCase()}`);
@@ -5571,6 +5783,10 @@ async function runCleaning(failure) {
 
 async function runWater() {
   state.water = await api('/api/water/analyze', { volume_l: 42, quality: 'screened' });
+  const demoRes = await api('/api/demo/session').catch(() => null);
+  if (demoRes) {
+    applyDemoSessionUpdate(demoRes);
+  }
   playChime('success');
   toast('Permeate stream screened for utility use');
   render();
@@ -6206,7 +6422,7 @@ window.addEventListener('keydown', e => {
 /* INITIAL APPLICATION BOOTSTRAP */
 async function load() {
   try {
-    const [batchesRes, optRes, cleanRes, waterRes, impactRes, pilotRes, auditRes, healthRes, stressRes, matrixRes, _] = await Promise.all([
+    const [batchesRes, optRes, cleanRes, waterRes, impactRes, pilotRes, auditRes, healthRes, stressRes, matrixRes, demoRes, _] = await Promise.all([
       api('/api/batches?seed=2030').catch(() => ({ items: [] })),
       api('/api/optimize', { seed: 2030, water_weight: 1, algorithm: 'two_opt' }).catch(() => null),
       api('/api/cleaning/start', { seed: 2030 }).catch(() => null),
@@ -6217,6 +6433,7 @@ async function load() {
       api('/api/health').catch(() => ({ status: 'ok' })),
       api('/api/stress-test').catch(() => null),
       api('/api/matrix').catch(() => null),
+      api('/api/demo/session').catch(() => null),
       loadImpactRangeData('24h').catch(() => null)
     ]);
 
@@ -6230,6 +6447,9 @@ async function load() {
     state.health = healthRes || {};
     state.stressTest = stressRes;
     if (matrixRes && matrixRes.matrix) state.matrix = matrixRes.matrix;
+    if (demoRes) {
+      applyDemoSessionUpdate(demoRes);
+    }
 
     state.business = await api('/api/business-case', {
       changeovers_per_year: 2800,

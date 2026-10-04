@@ -20,6 +20,7 @@ from .cascade import analyze_cascade
 from .impact import calculate_impact, calculate_impact_timespan_ledger
 from .economics import calculate_business_case
 from .audit import init_db, record_audit_event, get_audit_events
+from .demo import DemoSession, get_demo_session, DEMO_STEPS
 
 __all__ = [
     "Batch", "TransitionBurden", "ScheduleEvaluation", "OptimizationResult",
@@ -32,5 +33,6 @@ __all__ = [
     "SafetyStateMachine", "simulate_cleaning_cycle", "analyze_cascade",
     "calculate_impact", "calculate_impact_timespan_ledger",
     "calculate_business_case",
-    "init_db", "record_audit_event", "get_audit_events"
+    "init_db", "record_audit_event", "get_audit_events",
+    "DemoSession", "get_demo_session", "DEMO_STEPS"
 ]
