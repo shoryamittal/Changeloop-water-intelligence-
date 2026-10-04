@@ -7,7 +7,203 @@
   <link rel="stylesheet" href="/frontend/style.css">
 </head>
 <body>
-<div class="app-shell">
+<!-- Operator Authentication & Gatekeeper Launchpad (Matches Specification) -->
+<div id="loginScreen" class="gateway-screen">
+  <!-- Top bar -->
+  <header class="gateway-topbar">
+    <div class="mesh-node">
+      <span class="pulsing-green-dot"></span>
+      <span id="gwMeshNodeTitle">GLOBAL INDUSTRIAL MESH • NODE L'ORÉAL-FR-AULNAY-04</span>
+    </div>
+    <div class="mesh-security">
+      <span>🛡️ TLS 1.3 HARDWARE BOUND</span>
+      <span id="gatewayClock">🕒 2026-10-04 12:50:09 CET</span>
+    </div>
+  </header>
+
+  <!-- Main 2-column card container -->
+  <div class="gateway-container">
+    <div class="gateway-card">
+      
+      <!-- LEFT COLUMN -->
+      <div class="gateway-left">
+        <div class="gateway-brand-row">
+          <div class="gateway-brand">
+            <div class="gateway-logo-mark">
+              <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="14" stroke="#103628" stroke-width="2.5"/>
+                <circle cx="16" cy="16" r="9" stroke="#059669" stroke-width="2.5" stroke-dasharray="28 14"/>
+                <circle cx="16" cy="16" r="4" fill="#10b981"/>
+              </svg>
+            </div>
+            <div>
+              <div class="gateway-brand-title">ClearLoop™</div>
+              <div class="gateway-brand-sub">L'ORÉAL INDUSTRIAL OPERATIONS • BEAUTY TECH 2026</div>
+            </div>
+          </div>
+          <div class="gateway-engine-pill">
+            <span class="dot"></span> ZERO-WASTE CHANGEOVER ENGINE
+          </div>
+        </div>
+
+        <h1 class="gateway-headline">
+          Autonomous Water Stewardship for High-Precision Formulations.
+        </h1>
+        <p class="gateway-subheadline">
+          Circular clean-in-place telemetry and valve sequencing calibrated for luxury emulsions.
+        </p>
+
+        <!-- Fluidics Visual Card -->
+        <div class="fluidics-card">
+          <img src="/frontend/cip_fluidics.jpg" alt="Circular Hydraulic Fluidics" class="fluidics-img">
+          <div class="fluidics-scanline"></div>
+          <div class="fluidics-overlay-top">
+            🔬 CIRCULAR HYDRAULIC FLUIDICS // IN-LINE REALTIME SPECTROSCOPY
+          </div>
+          <div class="fluidics-overlay-bottom">
+            <div class="scan-tag">✓ 100 Hz OPTICAL SCAN</div>
+            <div class="thesis-text">
+              <b>Causal Circular Thesis:</b> Prevent rinse cycles at molecular detection thresholds before water is expended.
+            </div>
+          </div>
+        </div>
+
+        <!-- Skid Telemetry Box -->
+        <div class="skid-telemetry-box">
+          <div class="skid-telemetry-header">
+            <div class="skid-title-group">
+              <div class="skid-icon">🔬</div>
+              <div>
+                <b id="skidPlantName">Plant Aulnay-sous-Bois • Skid 04</b>
+                <small id="skidBatchName">Active Batch: Lancôme L'Absolu Rouge Flush</small>
+              </div>
+            </div>
+            <span class="sync-pill"><span class="sync-live-dot"></span> 100 Hz SYNC</span>
+          </div>
+
+          <div class="skid-metrics-grid">
+            <div class="skid-metric-cell">
+              <div class="skid-metric-label">WATER SAVED (SHIFT)</div>
+              <div class="skid-metric-value green" id="skidWaterSaved">1,284 <span class="unit">L</span></div>
+            </div>
+            <div class="skid-metric-cell">
+              <div class="skid-metric-label">TURBIDITY INDEX</div>
+              <div class="skid-metric-value" id="skidTurbidity">0.02 <span class="unit">NTU</span></div>
+            </div>
+            <div class="skid-metric-cell">
+              <div class="skid-metric-label">SEQUENCE DEV.</div>
+              <div class="skid-metric-value" id="skidSeqDev">0.00 <span class="unit">ppm</span></div>
+            </div>
+            <div class="skid-metric-cell">
+              <div class="skid-metric-label">SAFETY INTERLOCK</div>
+              <div class="skid-metric-value interlock" id="skidInterlock">ENGAGED</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Operator Profile Footer -->
+        <div class="gateway-operator-bar">
+          <div class="operator-avatar" id="gwOperatorAvatar">CL</div>
+          <div class="operator-meta">
+            <b id="gwOperatorName">Dr. Camille Laurent</b>
+            <small id="gwOperatorTitle">Head of Sustainable Changeovers • Operations Paris</small>
+          </div>
+          <div class="iso-seal">
+            🛡️ ISO 14046 • SHA-256 SEALED
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="gateway-right">
+        <div class="terminal-header">
+          <span class="terminal-tag">TERMINAL ACCESS GATEWAY</span>
+          <div class="terminal-title-row">
+            <h2>Operator Authentication</h2>
+            <span class="gmp-badge">🛡️ GMP LEVEL 3</span>
+          </div>
+        </div>
+
+        <!-- Auth Tabs -->
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab active" id="tabSso" onclick="switchAuthTab('sso')">L'Oréal SSO</button>
+          <button type="button" class="auth-tab" id="tabBadge" onclick="switchAuthTab('badge')">SmartBadge</button>
+          <button type="button" class="auth-tab" id="tabFido2" onclick="switchAuthTab('fido2')">YubiKey FIDO2</button>
+        </div>
+
+        <!-- Form -->
+        <form class="gateway-form" onsubmit="handleAuthenticate(event)">
+          <div class="field-group">
+            <label id="authIdLabel">OPERATOR CORPORATE ID / EMAIL</label>
+            <div class="input-with-icon">
+              <span class="field-icon" id="authIdIcon">🪪</span>
+              <input type="text" id="authEmail" value="camille.laurent@loreal.com" required>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <div class="label-row">
+              <label>BIOMETRIC TOKEN / PASSKEY</label>
+              <span class="fido-ready">🛡️ FIDO2 READY</span>
+            </div>
+            <div class="input-with-icon">
+              <span class="field-icon">🔑</span>
+              <input type="password" id="authPasskey" value="industrial-zero-waste-2026" required>
+              <button type="button" class="pass-toggle" onclick="togglePassVisibility()" title="Toggle visibility">👁️</button>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label>PLANT & FORMULATION SKID ASSIGNMENT</label>
+            <div class="input-with-icon">
+              <span class="field-icon">🏭</span>
+              <select id="authSkidSelect" onchange="handleSkidChange(this.value)">
+                <option value="aulnay">Aulnay-sous-Bois • Skid 04 (Lipstick & Emulsions)</option>
+                <option value="burgos">Burgos Plant • Line 04 (Skincare Emulsions)</option>
+                <option value="settimo">Settimo Torinese • Line 02 (Color Makeup)</option>
+                <option value="vorselaar">Vorselaar Plant • Line 01 (Surfactants)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Protocol Checkbox -->
+          <label class="protocol-checkbox">
+            <input type="checkbox" id="authProtocolCheck" checked required>
+            <span>
+              <b>Human-in-the-Loop Protocol Enforced.</b> Operator retains manual veto over AI clean-in-place valve sequence swaps.
+            </span>
+          </label>
+
+          <!-- Primary Submit Button -->
+          <button type="submit" class="auth-submit-btn" id="authSubmitBtn">
+            <span>AUTHENTICATE & ENTER COCKPIT</span>
+            <span class="btn-arrow">➔</span>
+          </button>
+
+          <!-- Secondary Direct Presentation Button -->
+          <button type="button" class="auth-demo-btn" onclick="handleDemoPitchAccess()">
+            <span class="demo-play-icon">▶</span>
+            <span>Direct Presentation / Judge Mode Access (60s Pitch)</span>
+          </button>
+        </form>
+
+        <div class="gateway-security-footer">
+          <span>🔒 ISDN RESTRICTED ACCESS • HARDWARE TLS 1.3</span>
+          <span class="version-tag">v4.2.8-STABLE</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <footer class="gateway-bottom-bar">
+    <div>L'Oréal Brandstorm & Sustainability Challenge 2026 • ClearLoop Operations Architecture</div>
+    <div>Certified Zero Liquid Waste Manufacturing Initiative • Circular Beauty 2030</div>
+  </footer>
+</div>
+
+<div class="app-shell" id="appShell" style="display:none">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <span class="brand-mark">C</span>
@@ -46,11 +242,11 @@
           <small id="sidebarPlant">Burgos Plant · Line 04</small>
         </div>
       </button>
-      <button class="profile" onclick="showView('alerts')">
-        <span>SM</span>
+      <button class="profile" onclick="returnToGateway()" title="Switch Operator Session / Return to Gateway">
+        <span>CL</span>
         <div>
-          <b>Operations Lead</b>
-          <small>Advisory Decision Access</small>
+          <b>Dr. Camille Laurent</b>
+          <small>Operations Paris · Skid 04</small>
         </div>
       </button>
     </div>
@@ -68,6 +264,7 @@
           <kbd>P</kbd> Deck · <kbd>T</kbd> Tour · <kbd>1-9</kbd> Views
         </span>
         <select class="selector" id="plantSelector" onchange="changePlant(this.value)">
+          <option value="aulnay">L'Oréal Aulnay-sous-Bois (Skid 04)</option>
           <option value="burgos">L'Oréal Burgos Plant (Spain)</option>
           <option value="settimo">L'Oréal Settimo Torinese (Italy)</option>
           <option value="vorselaar">L'Oréal Vorselaar Plant (Belgium)</option>
@@ -89,7 +286,8 @@
         </button>
         <button class="icon-button" id="soundToggle" onclick="toggleAudio()" title="Toggle Audio Sound Feedback">🔊</button>
         <button class="icon-button" onclick="showView('alerts')" aria-label="Open alerts" title="Audit Trail">◉</button>
-        <div class="avatar" title="Logged in as Advisory Operator">SM</div>
+        <button class="icon-button" onclick="returnToGateway()" title="Lock Session / Return to Operator Gateway">🔒</button>
+        <div class="avatar" title="Dr. Camille Laurent — Click to switch operator session" onclick="returnToGateway()" style="cursor:pointer">CL</div>
       </div>
     </header>
 
