@@ -1,7 +1,47 @@
 {
   "classification": "ENGINEERING_ASSUMPTION",
   "notice": "Prototype rules; not L'Oréal proprietary procedures.",
-  "base_litres_by_residue": {"low": 120, "medium": 180, "high": 260},
-  "transition_multipliers": {"same_family": 1.0, "dark_to_light": 1.55, "viscous_to_low": 1.3, "special_clean": 1.7},
-  "base_minutes_by_residue": {"low": 18, "medium": 27, "high": 40}
+  "base_litres_by_residue": {
+    "low": 120,
+    "medium": 180,
+    "high": 260
+  },
+  "transition_multipliers": {
+    "same_family": 1.0,
+    "dark_to_light": 1.55,
+    "viscous_to_low": 1.3,
+    "special_clean": 1.7
+  },
+  "base_minutes_by_residue": {
+    "low": 18,
+    "medium": 27,
+    "high": 40
+  },
+  "sustainability_conversion_factors": {
+    "thermal_kwh_per_litre_delta60c": 0.0697,
+    "natural_gas_kg_co2e_per_kwh": 0.202,
+    "caustic_naoh_kg_per_litre": 0.015,
+    "reference_water_tariff_eur_per_m3": 3.50,
+    "reference_boiler_gas_eur_per_kwh": 0.08
+  },
+  "cosmetic_formulation_profiles": {
+    "care": {
+      "name": "Skincare & Moisturizers",
+      "typical_matrix": "O/W Emulsion, Hyaluronic Gels",
+      "soil_behavior": "Lipids and emulsifiers, moderate warm rinse requirement",
+      "cleanability": "Moderate"
+    },
+    "colour": {
+      "name": "Color Cosmetics & Makeup",
+      "typical_matrix": "Pigment slurries, iron oxides, silicone resins, wax sticks",
+      "soil_behavior": "High staining propensity, severe dark-to-light wash requirement",
+      "cleanability": "Challenging"
+    },
+    "styling": {
+      "name": "Haircare & Cleansers",
+      "typical_matrix": "Anionic/amphoteric surfactant systems, polymers",
+      "soil_behavior": "Foaming agents, water-soluble, rapid rinse-out profile",
+      "cleanability": "High"
+    }
+  }
 }
