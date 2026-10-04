@@ -8,7 +8,8 @@ from .domain import (
 )
 from .cleanability import (
     RULES, COSMETIC_PRODUCTS, generate_batches, validate_queue,
-    calculate_burden, get_transition_matrix
+    calculate_burden, get_transition_matrix,
+    PLANNING_BATCHES, PLANNING_MATRIX_SPEC, get_planning_data
 )
 from .optimizer import (
     evaluate_order, score_order_greedy, score_order_two_opt, optimize_schedule

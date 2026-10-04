@@ -2149,6 +2149,12 @@ function signalChart(readings) {
     }
   });
 
+  const epMin = state.clean?.predicted_endpoint_minute || 29;
+  const isEndpointValid = (state.cleaningScenario === 'normal') && state.clean?.predicted_endpoint_minute !== null;
+  const epLineX = isEndpointValid ? getX(epMin) : getX(42);
+  const epLabel = isEndpointValid ? `★ EARLY ENDPOINT (MIN ${epMin})` : `⚠ INTERLOCK (BASELINE 42m HELD)`;
+  const epSub = isEndpointValid ? `${42 - epMin} MIN / ${(42 - epMin) * 10} L AVOIDED` : `STANDARD SOP RINSE`;
+
   return `
   <div class="chart-wrap">
     <svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Dynamic CIP Multi-Sensor Curve">
@@ -2169,9 +2175,9 @@ function signalChart(readings) {
       <polyline points="${condPoints}" fill="none" stroke="#2e6d52" stroke-width="3" />
       <polyline points="${turbPoints}" fill="none" stroke="#2c6f8f" stroke-width="2.5" stroke-dasharray="4 2"/>
 
-      <line x1="${getX(29)}" y1="0" x2="${getX(29)}" y2="${h}" stroke="#b87b1e" stroke-width="2" stroke-dasharray="4 4"/>
-      <text x="${getX(29.5)}" y="160" fill="#b87b1e" font-size="10" font-family="'DM Mono'" font-weight="700">★ EARLY ENDPOINT (MIN 29)</text>
-      <text x="${getX(29.5)}" y="174" fill="#69857b" font-size="9.5" font-family="'DM Mono'">13 MIN / 130 L AVOIDED</text>
+      <line x1="${epLineX}" y1="0" x2="${epLineX}" y2="${h}" stroke="${isEndpointValid ? '#b87b1e' : '#b33939'}" stroke-width="2" stroke-dasharray="4 4"/>
+      <text x="${Math.min(w - 180, epLineX + 6)}" y="160" fill="${isEndpointValid ? '#b87b1e' : '#b33939'}" font-size="10" font-family="'DM Mono'" font-weight="700">${epLabel}</text>
+      <text x="${Math.min(w - 180, epLineX + 6)}" y="174" fill="#69857b" font-size="9.5" font-family="'DM Mono'">${epSub}</text>
     </svg>
   </div>
   <div class="chart-legend">
@@ -2206,8 +2212,12 @@ async function setCleaningScenario(scen) {
   toast(titles[scen] || 'CIP Test Scenario Updated');
 }
 
-function authorizeEarlyRinse() {
-  if (state.cleaningScenario !== 'normal') {
+async function authorizeEarlyRinse() {
+  const gate = state.clean?.safety_gate;
+  const clearance = gate?.three_point_clearance;
+  const canRelease = clearance && clearance.asymptotic_conductivity && clearance.turbidity_below_threshold && clearance.thermal_contact_satisfied;
+
+  if (!canRelease && state.cleaningScenario !== 'normal') {
     playChime('alert');
     toast('⚠ Authorization Blocked: Deterministic safety interlocks are currently engaged');
     return;
@@ -2215,30 +2225,36 @@ function authorizeEarlyRinse() {
   state.cleaningAuthorized = true;
   playChime('success');
 
-  const newLog = {
-    timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19) + ' CET',
-    action: 'GMP_EARLY_RINSE_CUTOFF_AUTHORIZED',
-    detail: 'Operator Dr. Camille Laurent approved 29:00 dynamic cutoff. Saved 130 L DIW, avoided 13 min cycle. SHA-256: 8f9b4c2e1a90d7c',
-    standard: 'ISO 22716 / 21 CFR Part 11'
-  };
-  state.audit = [newLog, ...(state.audit || [])];
+  try {
+    const savedL = state.clean?.water_avoided_l || 130;
+    const res = await api('/api/cleaning/authorize', { scenario: state.cleaningScenario, water_saved_l: savedL });
+    if (res?.event) {
+      state.audit = [res.event, ...(state.audit || [])];
+    }
+  } catch (e) {
+    console.warn('Offline authorize fallback', e);
+  }
 
   toast('✓ Early Rinse Terminated: 130 L DIW Spared • Line 04 Cleanroom Interlocked');
   render();
 }
 
-function overrideCleaningBaseline() {
+async function overrideCleaningBaseline() {
   state.cleaningOverridden = true;
   state.cleaningAuthorized = false;
   playChime('cutoff');
 
-  const newLog = {
-    timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19) + ' CET',
-    action: 'OPERATOR_OVERRIDE_STANDARD_BASELINE',
-    detail: 'Operator Dr. Camille Laurent manually enforced 42-minute standard timer protocol. Zero automated savings applied.',
-    standard: 'ISO 22716 / 21 CFR Part 11'
-  };
-  state.audit = [newLog, ...(state.audit || [])];
+  try {
+    const res = await api('/api/audit/record', {
+      action: 'OPERATOR_OVERRIDE_STANDARD_BASELINE',
+      detail: 'Operator Dr. Camille Laurent manually enforced 42-minute standard timer protocol. Zero automated savings applied.'
+    });
+    if (res?.event) {
+      state.audit = [res.event, ...(state.audit || [])];
+    }
+  } catch (e) {
+    console.warn('Offline override fallback', e);
+  }
 
   toast('Operator Override: Standard 42-Minute Timer Enforced');
   render();
@@ -2375,7 +2391,42 @@ function cleaning() {
     }
   };
 
-  const cur = scenarioData[scen] || scenarioData.normal;
+  const cur = Object.assign({}, scenarioData[scen] || scenarioData.normal);
+
+  if (state.clean) {
+    if (state.clean.water_avoided_l !== undefined) {
+      cur.waterSaved = Math.round(state.clean.water_avoided_l).toString();
+    }
+    if (state.clean.minutes_avoided !== undefined) {
+      const minAvoided = Math.round(state.clean.minutes_avoided);
+      cur.downtimeSaved = `${minAvoided}:00`;
+    }
+    if (state.clean.safety_gate) {
+      const gate = state.clean.safety_gate;
+      const cl = gate.three_point_clearance;
+      if (cl) {
+        cur.canAuthorize = !!(cl.asymptotic_conductivity && cl.turbidity_below_threshold && cl.thermal_contact_satisfied);
+        cur.interlock1Pass = !!cl.asymptotic_conductivity;
+        cur.interlock2Pass = !!cl.turbidity_below_threshold;
+        cur.interlock3Pass = !!cl.thermal_contact_satisfied;
+      }
+      if (gate.lockout_reason) {
+        cur.stabilityTitle = `DETERMINISTIC FAIL-SAFE ENGAGED: ${gate.lockout_reason}`;
+        cur.stabilityBadge = 'CUTOFF ABORTED';
+        cur.stabilityBadgeKind = 'red';
+      }
+    }
+    if (state.clean.readings && state.clean.readings.length > 0) {
+      const last = state.clean.readings[state.clean.readings.length - 1];
+      if (last.turbidity_ntu !== undefined && last.turbidity_ntu !== null) cur.turbidity = Number(last.turbidity_ntu).toFixed(2);
+      if (last.conductivity_ms_cm !== undefined && last.conductivity_ms_cm !== null) cur.conductivity = Number(last.conductivity_ms_cm).toFixed(2);
+      if (last.temp_c !== undefined && last.temp_c !== null) cur.effluentTemp = Number(last.temp_c).toFixed(1);
+    }
+  }
+
+  const isCutoffApproved = (state.clean && state.clean.predicted_endpoint_minute !== null && scen === 'normal');
+  const dynamicEpDisplay = isCutoffApproved ? `${state.clean.predicted_endpoint_minute}:00` : '42:00';
+  const dynamicEpSub = isCutoffApproved ? '● Cutoff at &lt; 2.50 NTU' : '⚠ Interlocked to SOP';
 
   return `
   <!-- TOP SUB-BANNER TELEMETRY STRIP (DARK FOREST GREEN) -->
@@ -2397,7 +2448,7 @@ function cleaning() {
       <span class="crumb-pill-sep">/</span>
       <span class="crumb-pill">LIPSTICK EMULSION BASE B-302</span>
       <span class="crumb-pill-sep">/</span>
-      <span class="crumb-pill mint">DYNAMIC CUTOFF TARGET: 29:00</span>
+      <span class="crumb-pill mint">DYNAMIC CUTOFF TARGET: ${dynamicEpDisplay}</span>
     </div>
 
     <div class="cleaning-title-row">
@@ -2432,8 +2483,8 @@ function cleaning() {
         <span class="kpi-label">DYNAMIC ENDPOINT</span>
         <span class="kpi-icon green">🎯</span>
       </div>
-      <div class="kpi-val green font-mono">29:00 <span class="u">min</span></div>
-      <div class="kpi-sub green">● Cutoff at &lt; 2.50 NTU</div>
+      <div class="kpi-val green font-mono">${dynamicEpDisplay} <span class="u">min</span></div>
+      <div class="kpi-sub green">${dynamicEpSub}</div>
     </div>
 
     <!-- 3. TIME COMPRESSED -->
@@ -2909,37 +2960,47 @@ async function simulateEffluentFlow() {
   }, 900);
 }
 
-function authorizeCascadeCommittal() {
+async function authorizeCascadeCommittal() {
   state.cascadeAuthorized = true;
   state.cascadeOverridden = false;
   playChime('success');
 
-  const newLog = {
-    timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19) + ' CET',
-    action: 'CASCADE_COMMITTAL_AUTHORIZED',
-    detail: 'Lead Engineer Dr. Camille Laurent authorized 145 L non-contact cascade committal. SHA-256: 7c44d1869eaf35bc',
-    standard: 'ISO 14046 / ISO 22716 GMP'
-  };
-  state.audit = [newLog, ...(state.audit || [])];
+  const totalEffluent = state.water?.available_volume_l ?? 210;
+  const reusedL = Math.round(totalEffluent * 0.69);
 
-  toast('✓ Cascade Committal Authorized: 145 L Reused in Indirect Utility Circuits (100% Health)');
+  try {
+    const res = await api('/api/water/authorize', { volume_reused_l: reusedL, destination: 'Secondary Non-Contact Utility' });
+    if (res?.event) {
+      state.audit = [res.event, ...(state.audit || [])];
+    }
+  } catch (e) {
+    console.warn('Offline cascade authorize fallback', e);
+  }
+
+  toast(`✓ Cascade Committal Authorized: ${reusedL} L Reused in Indirect Utility Circuits (100% Health)`);
   render();
 }
 
-function overrideCascadeWWTP() {
+async function overrideCascadeWWTP() {
   state.cascadeOverridden = true;
   state.cascadeAuthorized = false;
   playChime('cutoff');
 
-  const newLog = {
-    timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19) + ' CET',
-    action: 'CASCADE_OVERRIDE_ROUTE_TO_WWTP',
-    detail: 'Manual operator override: All 210 L effluent diverted directly to WWTP bio-treatment plant.',
-    standard: 'ISO 14046 Non-Additive'
-  };
-  state.audit = [newLog, ...(state.audit || [])];
+  const totalEffluent = state.water?.available_volume_l ?? 210;
 
-  toast('Manual Override: All 210 L Routed Directly to Industrial WWTP');
+  try {
+    const res = await api('/api/audit/record', {
+      action: 'CASCADE_OVERRIDE_ROUTE_TO_WWTP',
+      detail: `Manual operator override: All ${totalEffluent} L effluent diverted directly to WWTP bio-treatment plant.`
+    });
+    if (res?.event) {
+      state.audit = [res.event, ...(state.audit || [])];
+    }
+  } catch (e) {
+    console.warn('Offline override fallback', e);
+  }
+
+  toast(`Manual Override: All ${totalEffluent} L Routed Directly to Industrial WWTP`);
   render();
 }
 
@@ -2963,6 +3024,15 @@ function cascade() {
   const isSim = state.cascadeSimulationRunning;
   const activeStream = state.selectedCascadeStream || 'A';
   const activeRule = state.selectedCascadeRule || 'RULE-CL-01';
+
+  const totalEffluent = state.water?.available_volume_l ?? 210;
+  const qualifiedL = isOver ? 0 : Math.round(totalEffluent * 0.69);
+  const divertedL = totalEffluent - qualifiedL;
+  const yieldPct = totalEffluent > 0 ? ((qualifiedL / totalEffluent) * 100).toFixed(1) : '0.0';
+  const rejectPct = totalEffluent > 0 ? ((divertedL / totalEffluent) * 100).toFixed(1) : '100.0';
+  const annualL = Math.round(qualifiedL * 332.4);
+  const annualSavingsEuro = Math.round(annualL * 0.382);
+  const scope3Co2 = ((qualifiedL * 0.0236)).toFixed(2);
 
   return `
   <!-- TOP SUB-BANNER TELEMETRY & HERO HEADER -->
@@ -3002,10 +3072,10 @@ function cascade() {
         <span class="ck-label">EFFLUENT VOLUME HARVESTED</span>
         <span class="ck-icon">☰</span>
       </div>
-      <div class="ck-value font-mono">210 <span class="u">L</span></div>
+      <div class="ck-value font-mono">${totalEffluent} <span class="u">L</span></div>
       <div class="ck-breakdown-row">
-        <span class="ck-tag clean">CLEAN RINSE (69%)</span>
-        <span class="ck-tag caustic">CAUSTIC PURGE (31%)</span>
+        <span class="ck-tag clean">CLEAN RINSE (${yieldPct}%)</span>
+        <span class="ck-tag caustic">CAUSTIC PURGE (${rejectPct}%)</span>
       </div>
       <div class="ck-footer-note">V-04 Rouge Velvet 100% YSL Loveshine ACCOUNTED</div>
     </div>
@@ -3016,9 +3086,9 @@ function cascade() {
         <span class="ck-label">SECONDARY RINSE QUALIFIED</span>
         <span class="ck-icon green">🔄</span>
       </div>
-      <div class="ck-value green font-mono">145 <span class="u">L</span></div>
+      <div class="ck-value green font-mono">${qualifiedL} <span class="u">L</span></div>
       <div class="ck-breakdown-row">
-        <span class="ck-tag yield">CASCADE YIELD: 69.0% OF BATCH DISCHARGE</span>
+        <span class="ck-tag yield">CASCADE YIELD: ${yieldPct}% OF BATCH DISCHARGE</span>
       </div>
       <div class="ck-footer-note green">☑ GMP NON-CONTACT QUALIFIED [GRADE A+R]</div>
     </div>
@@ -3029,9 +3099,9 @@ function cascade() {
         <span class="ck-label">HEAVY SLUDGE DIVERTED</span>
         <span class="ck-icon">⏚</span>
       </div>
-      <div class="ck-value font-mono">65 <span class="u">L</span></div>
+      <div class="ck-value font-mono">${divertedL} <span class="u">L</span></div>
       <div class="ck-breakdown-row">
-        <span class="ck-tag reject">ROUTED TO WWTP: 31.0% BIOLOGICAL REJECT</span>
+        <span class="ck-tag reject">ROUTED TO WWTP: ${rejectPct}% BIOLOGICAL REJECT</span>
       </div>
       <div class="ck-footer-note red">🔒 ZERO CROSS-CONTAMINATION HARD LOCK</div>
     </div>
@@ -3042,19 +3112,19 @@ function cascade() {
         <span class="ck-label green-txt">ECO-VALUE &amp; NET-ZERO</span>
         <span class="ck-icon green-txt">🛡</span>
       </div>
-      <div class="ck-value green-txt font-mono">145 L <span class="u">Spared / cycle</span></div>
+      <div class="ck-value green-txt font-mono">${qualifiedL} L <span class="u">Spared / cycle</span></div>
       <div class="dark-card-metrics-grid">
         <div class="dc-metric">
           <small>ANNUAL REC. RATE</small>
-          <b>48,200 L/yr</b>
+          <b>${annualL.toLocaleString()} L/yr</b>
         </div>
         <div class="dc-metric">
           <small>ENERGY &amp; WATER VALUE</small>
-          <b>€18,400</b>
+          <b>€${annualSavingsEuro.toLocaleString()}</b>
         </div>
       </div>
       <div class="dark-card-footer">
-        <span>Scope 3: -3.42 kg CO2e</span>
+        <span>Scope 3: -${scope3Co2} kg CO2e</span>
         <span>ISO 14046 SEALED</span>
       </div>
     </div>
@@ -5131,6 +5201,12 @@ async function runOptimization() {
     algorithm: state.algorithm
   });
   state.impact = await api('/api/impact/calculate', { seed: state.seed });
+  if (state.impactRangeData) {
+    state.impactRangeData = {};
+    if (typeof loadImpactRangeData === 'function') {
+      await loadImpactRangeData(state.selectedImpactRange || '24h');
+    }
+  }
   playChime('success');
   toast(`Optimization executed (${state.opt.algorithm_used})`);
   render();

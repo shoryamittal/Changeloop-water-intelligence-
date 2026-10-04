@@ -174,3 +174,86 @@ def get_transition_matrix(rules: Optional[Dict[str, Any]] = None) -> Dict[str, A
                         "reasons": b["reasons"]
                     })
     return {"classification": "ENGINEERING_ASSUMPTION", "matrix": matrix}
+
+PLANNING_BATCHES: Dict[str, Dict[str, Any]] = {
+    "B-217": {
+        "id": "B-217", "swatch": "#b91c1c", "name": "Lancôme Rouge Velvet", "code": "#PR00124 • 3,200 units",
+        "family": "colour", "shade": "dark", "viscosity": "high", "residue": "high", "special": False, "priority": 1, "deadline_h": 24.0,
+        "label1": "Wax Matrix", "val1": "Candelilla 14%", "label2": "CIP Wash Target", "val2": "Low Shear (Hot)",
+        "label3": "Scheduled Window", "val3": "08:00–10:30 CET", "tag1": "CRITICAL COLOR", "tag1Kind": "red", "tag2": "ALLERGEN SAFE", "tag2Kind": "green"
+    },
+    "B-218": {
+        "id": "B-218", "swatch": "#f59e0b", "name": "YSL Loveshine Nude #02", "code": "#PR00125 • 2,800 units",
+        "family": "colour", "shade": "light", "viscosity": "low", "residue": "low", "special": False, "priority": 2, "deadline_h": 28.0,
+        "label1": "Wax Matrix", "val1": "Ester Polymer 6%", "label2": "CIP Wash Target", "val2": "Rapid Flush",
+        "label3": "Scheduled Window", "val3": "10:45–12:30 CET", "tag1": "SHADE SENSITIVE", "tag1Kind": "gold", "tag2": "RECIRC RINSE", "tag2Kind": "green"
+    },
+    "B-219": {
+        "id": "B-219", "swatch": "#ec4899", "name": "Armani Lip Maestro Satin", "code": "#PR00126 • 1,950 units",
+        "family": "colour", "shade": "medium", "viscosity": "low", "residue": "medium", "special": False, "priority": 2, "deadline_h": 32.0,
+        "label1": "Carrier Matrix", "val1": "Volatile Dimethicone", "label2": "CIP Wash Target", "val2": "Organic Solvent Rinse",
+        "label3": "Scheduled Window", "val3": "13:00–14:45 CET", "tag1": "SILICONE CARRIER", "tag1Kind": "purple", "tag2": "SOLVENT PURGE", "tag2Kind": "blue"
+    },
+    "B-220": {
+        "id": "B-220", "swatch": "#18181b", "name": "Kérastase Chronologiste Black", "code": "#PR00127 • 4,500 units",
+        "family": "styling", "shade": "dark", "viscosity": "high", "residue": "high", "special": True, "priority": 1, "deadline_h": 18.0,
+        "label1": "Pigment System", "val1": "Carbon Black CI 77499", "label2": "CIP Wash Target", "val2": "High Temp Boil-Out",
+        "label3": "Scheduled Window", "val3": "15:00–18:00 CET", "tag1": "HEAVY PIGMENT SLUG", "tag1Kind": "dark", "tag2": "STAINING RISK", "tag2Kind": "amber",
+        "isAlertCard": True
+    },
+    "B-221": {
+        "id": "B-221", "swatch": "#f472b6", "name": "Biotherm Plumping Rose", "code": "994401L • 4,000 units",
+        "family": "care", "shade": "light", "viscosity": "low", "residue": "low", "special": False, "priority": 3, "deadline_h": 36.0,
+        "label1": "Phase Sector", "val1": "Aqua/Oil Veil", "label2": "Clean Window", "val2": "Dry-Down Req",
+        "label3": "Dispatch Target", "val3": "18:30 CET", "tag1": "POST-OP CLEAN", "tag1Kind": "gray", "tag2": "ECO WASH", "tag2Kind": "mint"
+    }
+}
+
+PLANNING_MATRIX_SPEC: Dict[str, Dict[str, Dict[str, Any]]] = {
+    "B-217": {
+        "B-217": {"litres": 0, "minutes": 0, "val": "—", "level": "none"},
+        "B-218": {"litres": 38, "minutes": 10, "val": "38 L", "level": "low"},
+        "B-219": {"litres": 115, "minutes": 22, "val": "115 L", "level": "mod"},
+        "B-220": {"litres": 42, "minutes": 12, "val": "42 L", "level": "low"},
+        "B-221": {"litres": 390, "minutes": 52, "val": "390 L", "level": "severe"}
+    },
+    "B-218": {
+        "B-217": {"litres": 35, "minutes": 10, "val": "35 L", "level": "low"},
+        "B-218": {"litres": 0, "minutes": 0, "val": "—", "level": "none"},
+        "B-219": {"litres": 30, "minutes": 8, "val": "30 L", "level": "low"},
+        "B-220": {"litres": 40, "minutes": 12, "val": "40 L", "level": "low"},
+        "B-221": {"litres": 370, "minutes": 48, "val": "370 L", "level": "severe"}
+    },
+    "B-219": {
+        "B-217": {"litres": 45, "minutes": 12, "val": "45 L", "level": "low"},
+        "B-218": {"litres": 35, "minutes": 10, "val": "35 L", "level": "low"},
+        "B-219": {"litres": 0, "minutes": 0, "val": "—", "level": "none"},
+        "B-220": {"litres": 50, "minutes": 14, "val": "50 L", "level": "low"},
+        "B-221": {"litres": 340, "minutes": 42, "val": "340 L", "level": "mod"}
+    },
+    "B-220": {
+        "B-217": {"litres": 430, "minutes": 62, "val": "430 L", "level": "severe"},
+        "B-218": {"litres": 450, "minutes": 68, "val": "450 L !", "level": "severe", "isBottleneck": True},
+        "B-219": {"litres": 448, "minutes": 65, "val": "448 L", "level": "severe"},
+        "B-220": {"litres": 0, "minutes": 0, "val": "—", "level": "none"},
+        "B-221": {"litres": 460, "minutes": 70, "val": "460 L", "level": "severe"}
+    },
+    "B-221": {
+        "B-217": {"litres": 180, "minutes": 28, "val": "180 L", "level": "mod"},
+        "B-218": {"litres": 175, "minutes": 26, "val": "175 L", "level": "mod"},
+        "B-219": {"litres": 190, "minutes": 30, "val": "190 L", "level": "mod"},
+        "B-220": {"litres": 160, "minutes": 24, "val": "160 L", "level": "mod"},
+        "B-221": {"litres": 0, "minutes": 0, "val": "—", "level": "none"}
+    }
+}
+
+def get_planning_data() -> Dict[str, Any]:
+    """Expose canonical planning batch definitions and pairwise matrix to frontend."""
+    return {
+        "classification": "ENGINEERING_ASSUMPTION",
+        "batches": PLANNING_BATCHES,
+        "matrix": PLANNING_MATRIX_SPEC,
+        "optimal_sequence": ["B-217", "B-218", "B-219", "B-220", "B-221"],
+        "unoptimized_baseline_sequence": ["B-217", "B-220", "B-218", "B-219", "B-221"]
+    }
+

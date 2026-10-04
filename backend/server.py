@@ -21,6 +21,7 @@ from core import (
     calculate_impact_timespan_ledger,
     calculate_business_case as business_case,
     get_transition_matrix as transition_matrix,
+    get_planning_data,
     init_db,
     record_audit_event as record,
     get_audit_events as audit_events,
@@ -132,6 +133,9 @@ class App(SimpleHTTPRequestHandler):
         if route == "/api/matrix":
             return self.send_json(transition_matrix())
 
+        if route == "/api/planning/data":
+            return self.send_json(get_planning_data())
+
         if route == "/api/impact/timespan":
             range_key = query.get("range", ["24h"])[0]
             return self.send_json(calculate_impact_timespan_ledger(range_key))
@@ -150,7 +154,7 @@ class App(SimpleHTTPRequestHandler):
                 "notice": "Enter verified site inputs. This prototype contains no L'Oréal costs or savings assumptions."
             })
 
-        if route == "/api/health":
+        if route in ("/health", "/api/health"):
             return self.send_json({"status": "ok", "classification": "REAL", "storage": "sqlite with in-memory fallback"})
 
         if route.startswith("/api/"):
@@ -181,6 +185,46 @@ class App(SimpleHTTPRequestHandler):
         if route == "/api/water/analyze":
             record("WATER_SCREEN", f"Effluent segregation screen for volume={body.get('volume_l', 120)} L")
             return self.send_json(cascade(body))
+
+        if route == "/api/water/authorize":
+            volume_l = float(body.get("volume_l", 145))
+            quality = body.get("quality", "screened")
+            if quality != "screened":
+                return self.send_json({
+                    "error": "Water quality criteria not met. Authorization blocked.",
+                    "status": "BLOCKED"
+                }, 400)
+            event = record("CASCADE_COMMITTAL_AUTHORIZED", f"Authorized {volume_l} L non-contact cascade committal")
+            return self.send_json({
+                "status": "AUTHORIZED",
+                "volume_l": volume_l,
+                "event": event
+            })
+
+        if route == "/api/cleaning/authorize":
+            scen = body.get("scenario", "normal")
+            if scen != "normal":
+                return self.send_json({
+                    "error": "Safety interlocks active. Early cutoff cannot be authorized under fault condition.",
+                    "status": "BLOCKED"
+                }, 400)
+            saved_l = float(body.get("water_saved_l", 130))
+            event = record("GMP_EARLY_RINSE_CUTOFF_AUTHORIZED", f"Operator approved early rinse cutoff ({saved_l} L DIW avoided)")
+            return self.send_json({
+                "status": "AUTHORIZED",
+                "water_saved_l": saved_l,
+                "event": event
+            })
+
+        if route == "/api/audit/record":
+            action = body.get("action", "USER_ACTION")
+            detail = body.get("detail", "")
+            event = record(action, detail)
+            return self.send_json({
+                "classification": "SIMULATED",
+                "notice": "Audit event recorded durably in local database.",
+                "event": event
+            })
 
         if route == "/api/impact/calculate":
             return self.send_json(impact(body))
