@@ -221,6 +221,26 @@ body {
   gap: 6px;
 }
 .data-pill i { height: 6px; width: 6px; border-radius: 50%; background: #2f9464; display: inline-block; }
+.shortcut-pill {
+  font: 10.5px 'DM Mono', monospace;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  padding: 5px 9px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.shortcut-pill kbd {
+  background: #f0f3f2;
+  border: 1px solid #c7d2cc;
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-weight: 700;
+  color: var(--deep);
+  font-size: 9.5px;
+}
 
 .selector {
   border: 1px solid var(--line);
