@@ -231,42 +231,41 @@
         </div>
         <div>
           <div class="topbar-brand-title">ClearLoop</div>
-          <div class="topbar-brand-sub">L'ORÉAL INDUSTRIAL EFFICIENCY / SAFETY TECH DEMO</div>
+          <div class="topbar-brand-sub">BEAUTY TECH INCUBATOR • L'ORÉAL INDUSTRIAL OPERATIONS • CLOSED-LOOP FORMULATION</div>
         </div>
       </div>
 
       <div class="site-badge-group">
-        <span class="site-label">FACILITY</span>
+        <span class="site-label">PLANT</span>
         <select class="topbar-select" id="plantSelector" onchange="changePlant(this.value)">
-          <option value="aulnay">Plant Aulnay-sous-Bois Formulation</option>
-          <option value="burgos">Plant Burgos Waterloop (Spain)</option>
-          <option value="settimo">Plant Settimo Torinese (Italy)</option>
-          <option value="vorselaar">Plant Vorselaar Surfactants (Belgium)</option>
+          <option value="aulnay">Aulnay-sous-Bois</option>
+          <option value="burgos">Burgos (Waterloop)</option>
+          <option value="settimo">Settimo Torinese</option>
+          <option value="vorselaar">Vorselaar Surfactants</option>
         </select>
       </div>
 
       <div class="site-badge-group">
-        <span class="site-label">ACTIVE CELL</span>
+        <span class="site-label">PROCESS NODE</span>
         <select class="topbar-select" id="lineSelector" onchange="changeLine(this.value)">
-          <option value="line04">Line 04 Lipstick & Emulsions</option>
-          <option value="line02">Line 02 Color Cosmetics</option>
-          <option value="line01">Line 01 Surfactants</option>
+          <option value="line04">Line 04 (Lipstick &amp; Emulsions)</option>
+          <option value="line02">Line 02 (Color Cosmetics)</option>
+          <option value="line01">Line 01 (Surfactants)</option>
         </select>
       </div>
 
-      <span class="pilot-status-pill">PILOT ONLINE (3/10)</span>
       <span class="sensors-sync-pill"><span class="sync-live-dot"></span> 100 Hz SYNC</span>
-      <span class="topbar-clock" id="topbarClock">2026-10-04 14:42:18 CET</span>
+      <span class="topbar-clock" id="topbarClock">2026-03-29 16:42:18 CET</span>
     </div>
 
     <div class="topbar-actions">
-      <button class="button gold judge-demo-btn" onclick="openPitchDeck()">★ 60s JUDGE DEMO</button>
-      <button class="button ghost dossier-btn" onclick="showView('dossier')">🖹 DOSSIER</button>
+      <button class="button gold judge-demo-btn" onclick="openPitchDeck()">★ 60S JURY DEMO</button>
+      <button class="button ghost dossier-btn" onclick="showView('dossier')">🗎 DOSSIER EXPORT</button>
       <div class="topbar-profile" onclick="returnToGateway()" title="Lock Session / Return to Operator Gateway">
         <div class="avatar" id="topbarAvatar">CL</div>
         <div class="profile-info">
           <b id="topbarOpName">Dr. Camille Laurent</b>
-          <small id="topbarOpTitle">Lead Cleanroom Chemist / Automation Architect</small>
+          <small id="topbarOpTitle">HEAD OF SUSTAINABLE CHANGEOVERS</small>
         </div>
         <span class="topbar-lock-icon">🔒</span>
       </div>
@@ -275,16 +274,16 @@
 
   <div class="app-body-layout">
     <aside class="sidebar" id="sidebar">
-      <div class="nav-section-title">CORE ARCHITECTURE</div>
+      <div class="nav-section-title">CORE ARCHITECTURE v1.0</div>
       <nav class="nav" aria-label="Primary navigation">
-        <button data-view="overview" class="active" onclick="showView('overview')">
+        <button data-view="overview" onclick="showView('overview')">
           <i>🧭</i><span>Overview</span><span class="nav-badge live">Live</span>
         </button>
-        <button data-view="planning" onclick="showView('planning')">
-          <i>📊</i><span>Planning</span><span class="nav-badge">14</span>
+        <button data-view="planning" class="active" onclick="showView('planning')">
+          <i>📊</i><span>Planning</span><span class="nav-badge dark-active">Active 14</span>
         </button>
         <button data-view="optimizer" onclick="showView('optimizer')">
-          <i>⚡</i><span>Optimizer Engine</span><span class="nav-badge green">-28.8%</span>
+          <i>⚡</i><span>Optimizer Engine</span><span class="nav-badge green">-42.0%</span>
         </button>
         <button data-view="cleaning" onclick="showView('cleaning')">
           <i>🔬</i><span>Fluidics Skid HUD</span><span class="nav-badge">CIP-04</span>
@@ -293,28 +292,28 @@
           <i>🔄</i><span>Closed Loop Flow</span><span class="nav-badge green">Active</span>
         </button>
         <button data-view="analytics" onclick="showView('analytics')">
-          <i>📜</i><span>ESG & ISO Ledger</span><span class="nav-badge gold">Audited</span>
+          <i>📜</i><span>ESG &amp; ISO Ledger</span><span class="nav-badge gold">14046</span>
         </button>
       </nav>
 
-      <div class="nav-section-title">VERIFICATION & TRIALS</div>
+      <div class="nav-section-title">VERIFICATION &amp; TRIALS</div>
       <nav class="nav secondary-nav" aria-label="Verification navigation">
         <button data-view="scenarios" onclick="showView('scenarios')">
-          <i>🧪</i><span>Scenario Simulator</span>
+          <i>🧪</i><span>Scenario Simulator</span><span class="nav-badge">↗</span>
         </button>
         <button data-view="pilot" onclick="showView('pilot')">
-          <i>🏭</i><span>4-Week Pilot</span><span class="nav-badge gold">Phase 1</span>
+          <i>🚀</i><span>6-Week Pilot</span><span class="nav-badge gold">Phase 2</span>
         </button>
       </nav>
 
       <div class="sidebar-bottom">
-        <div class="sidebar-safety-card">
-          <div class="safety-title">🔒 ZERO-RISK SAFETY LOCK</div>
-          <div class="safety-desc">Cross-contamination boundaries hard-interlocked at PLC layer.</div>
-        </div>
-        <div class="sidebar-safety-card">
-          <div class="safety-title">👤 HUMAN-IN-THE-LOOP ARCHITECTURE</div>
-          <div class="safety-desc">All recommendations require physical chemist sign-off.</div>
+        <div class="sidebar-skid-preview">
+          <div class="skid-thumb-wrap">
+            <img src="/frontend/cip_fluidics.jpg" alt="SKID CIP-04 ONLINE" class="skid-thumb-img">
+            <span class="skid-thumb-tag">SKID CIP-04 ONLINE</span>
+          </div>
+          <div class="skid-hitl-tag">👤 HUMAN-IN-THE-LOOP</div>
+          <div class="skid-hitl-desc">Operator Veto Enabled: Physical lock overrides AI suggestions anytime.</div>
         </div>
       </div>
     </aside>
@@ -325,6 +324,21 @@
       </div>
     </main>
   </div>
+
+  <!-- Bottom Global Audit Seal Bar (Matches Master Specification) -->
+  <footer class="app-bottom-audit-bar">
+    <div class="audit-bar-left">
+      <span class="icon">👤</span>
+      <b>HUMAN-IN-THE-LOOP ARCHITECTURE:</b> AI RECOMMENDS • PLANT RULES CONSTRAIN • OPERATORS VETO ENABLED
+    </div>
+    <div class="audit-bar-center">
+      L'ORÉAL CLEAN WATER CHARTER 2026 • ISO 14046 VERIFIED
+    </div>
+    <div class="audit-bar-right">
+      <span class="pulsing-green-dot"></span>
+      <b>AUDIT TRAIL SEALED</b>
+    </div>
+  </footer>
 </div>
 
 <!-- Interactive Guided Judge Tour Modal -->
