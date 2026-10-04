@@ -1824,6 +1824,50 @@ function startGatewayTelemetry() {
   }, 2400);
 }
 
+function inspectSpectroscopy() {
+  const modal = $('#spectroscopyDialog');
+  if (!modal) return;
+  
+  const plantMap = {
+    aulnay: { skid: "Plant Aulnay-sous-Bois • Skid 04", batch: "Lancôme L'Absolu Rouge 132 Flush", abs: "0.012", turb: "0.02" },
+    burgos: { skid: "Plant Burgos • Skid 04 (Waterloop)", batch: "Revitalift Laser X3 Emulsion", abs: "0.009", turb: "0.01" },
+    settimo: { skid: "Plant Settimo Torinese • Skid 02", batch: "Color Riche Red Passion #340", abs: "0.014", turb: "0.03" },
+    vorselaar: { skid: "Plant Vorselaar • Skid 01", batch: "Elvive Hyaluronic Plump Rinse", abs: "0.006", turb: "0.01" }
+  };
+  const cur = plantMap[state.plant] || plantMap.aulnay;
+  
+  const sP = $('#specPlantSkid');
+  const sB = $('#specBatch');
+  const sA = $('#specCurrAbs');
+  const sT = $('#specCurrTurb');
+  if (sP) sP.textContent = cur.skid;
+  if (sB) sB.textContent = cur.batch;
+  if (sA) sA.innerHTML = `${cur.abs} <span class="unit">AU</span>`;
+  if (sT) sT.innerHTML = `${cur.turb} <span class="unit">NTU</span>`;
+
+  modal.showModal();
+  playChime('cutoff');
+  toast('Spectroscopy Telemetry: In-Line 100 Hz Absorption Analysis Active');
+}
+
+function closeSpectroscopy() {
+  const modal = $('#spectroscopyDialog');
+  if (modal) modal.close();
+}
+
+const SITE_PERSONAS = ['aulnay', 'burgos', 'settimo', 'vorselaar'];
+
+function cyclePersona() {
+  const curIdx = SITE_PERSONAS.indexOf(state.plant);
+  const nextIdx = (curIdx + 1) % SITE_PERSONAS.length;
+  const nextPlant = SITE_PERSONAS[nextIdx];
+  const skidSel = $('#authSkidSelect');
+  if (skidSel) skidSel.value = nextPlant;
+  handleSkidChange(nextPlant);
+  const name = $('#gwOperatorName')?.textContent || 'Operator';
+  toast(`Persona Switched: ${name} (${nextPlant.toUpperCase()})`);
+}
+
 function switchAuthTab(tab) {
   $$('.auth-tab').forEach(t => t.classList.remove('active'));
   $(`#tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`)?.classList.add('active');
@@ -1831,10 +1875,15 @@ function switchAuthTab(tab) {
   const emailInput = $('#authEmail');
   const label = $('#authIdLabel');
   const icon = $('#authIdIcon');
+  const badge = $('#authModeBadge');
 
   if (tab === 'sso') {
     if (label) label.textContent = 'OPERATOR CORPORATE ID / EMAIL';
     if (icon) icon.textContent = '🪪';
+    if (badge) {
+      badge.textContent = '● AZURE AD SSO';
+      badge.style.color = '#059669';
+    }
     if (emailInput) {
       const emailMap = {
         aulnay: 'camille.laurent@loreal.com',
@@ -1845,12 +1894,20 @@ function switchAuthTab(tab) {
       emailInput.value = emailMap[state.plant] || 'camille.laurent@loreal.com';
     }
   } else if (tab === 'badge') {
-    if (label) label.textContent = 'RFID SMARTBADGE IDENTIFIER';
+    if (label) label.textContent = 'RFID SMARTBADGE NFC SCAN';
     if (icon) icon.textContent = '💳';
+    if (badge) {
+      badge.textContent = '● NFC SCAN READY';
+      badge.style.color = '#0284c7';
+    }
     if (emailInput) emailInput.value = `LOREAL-SMARTBADGE-${state.plant.toUpperCase()}-#8842-SEC`;
   } else if (tab === 'fido2') {
-    if (label) label.textContent = 'HARDWARE FIDO2 KEY ID';
+    if (label) label.textContent = 'HARDWARE FIDO2 SECURITY TOKEN';
     if (icon) icon.textContent = '🔑';
+    if (badge) {
+      badge.textContent = '● WEBAUTHN FIDO2';
+      badge.style.color = '#b45309';
+    }
     if (emailInput) emailInput.value = `YUBIKEY-5C-NFC-LOREAL-${state.plant.toUpperCase()}-#0091`;
   }
   playChime('cutoff');
@@ -1872,6 +1929,7 @@ function handleSkidChange(val) {
       saved: 1284,
       turbidity: 0.02,
       seqDev: "0.00 ppm",
+      trendSaved: "▲ +14.2% vs Std SOP",
       avatar: "CL",
       name: "Dr. Camille Laurent",
       title: "Head of Sustainable Changeovers • Operations Paris",
@@ -1884,6 +1942,7 @@ function handleSkidChange(val) {
       saved: 2140,
       turbidity: 0.01,
       seqDev: "0.00 ppm",
+      trendSaved: "▲ +24.8% vs Std SOP (Waterloop)",
       avatar: "MD",
       name: "Marc Delacroix",
       title: "Plant Operations Director • Burgos Waterloop Factory",
@@ -1896,6 +1955,7 @@ function handleSkidChange(val) {
       saved: 980,
       turbidity: 0.03,
       seqDev: "0.00 ppm",
+      trendSaved: "▲ +9.6% vs Std SOP",
       avatar: "ER",
       name: "Elena Rossi",
       title: "Lead Formulation Specialist • Color Cosmetics",
@@ -1908,6 +1968,7 @@ function handleSkidChange(val) {
       saved: 3410,
       turbidity: 0.01,
       seqDev: "0.00 ppm",
+      trendSaved: "▲ +28.1% vs Std SOP",
       avatar: "JV",
       name: "Jan Van Eyck",
       title: "Head of Surfactants Manufacturing • Vorselaar",
@@ -1937,6 +1998,9 @@ function handleSkidChange(val) {
   const seqEl = $('#skidSeqDev');
   if (seqEl) seqEl.innerHTML = `${cfg.seqDev.split(' ')[0]} <span class="unit">${cfg.seqDev.split(' ')[1]}</span>`;
 
+  const trendSavedEl = $('#skidSavedTrend');
+  if (trendSavedEl) trendSavedEl.textContent = cfg.trendSaved;
+
   const avatarEl = $('#gwOperatorAvatar');
   if (avatarEl) avatarEl.textContent = cfg.avatar;
 
@@ -1954,28 +2018,31 @@ function handleSkidChange(val) {
   const plantSel = $('#plantSelector');
   if (plantSel) plantSel.value = val;
 
+  const skidSel = $('#authSkidSelect');
+  if (skidSel && skidSel.value !== val) skidSel.value = val;
+
   playChime('cutoff');
 }
 
 function handleAuthenticate(e) {
   if (e) e.preventDefault();
   const btn = $('#authSubmitBtn');
-  if (!btn) return;
+  if (!btn || btn.disabled) return;
   
   btn.disabled = true;
-  btn.style.opacity = '0.9';
-  btn.innerHTML = `<span>🔐 VERIFYING BIOMETRICS & FIDO2 TOKEN...</span>`;
+  btn.style.opacity = '0.92';
+  btn.innerHTML = `<span>🔐 [1/3] VERIFYING FIDO2 HARDWARE ATTESTATION...</span>`;
   playChime('cutoff');
 
   setTimeout(() => {
-    btn.innerHTML = `<span>🏭 HARDWARE SAFETY INTERLOCK VERIFIED...</span>`;
+    btn.innerHTML = `<span>🛡️ [2/3] CONFIRMING GMP LEVEL 3 SKID INTERLOCK...</span>`;
     playChime('cutoff');
-  }, 220);
+  }, 240);
 
   setTimeout(() => {
-    btn.innerHTML = `<span>✓ ACCESS GRANTED • ENTERING COCKPIT...</span>`;
+    btn.innerHTML = `<span>✓ [3/3] ACCESS GRANTED • ENTERING COCKPIT...</span>`;
     playChime('success');
-  }, 440);
+  }, 480);
 
   setTimeout(() => {
     state.authenticated = true;
@@ -1988,8 +2055,8 @@ function handleAuthenticate(e) {
     btn.innerHTML = `<span>AUTHENTICATE & ENTER COCKPIT</span><span class="btn-arrow">➔</span>`;
     render();
     const opName = $('#gwOperatorName')?.textContent || 'Dr. Camille Laurent';
-    toast(`Authenticated: ${opName} • Cockpit Active`);
-  }, 650);
+    toast(`Authenticated: ${opName} • Cockpit Active (${state.plant.toUpperCase()})`);
+  }, 720);
 }
 
 function handleDemoPitchAccess() {
@@ -2001,7 +2068,7 @@ function handleDemoPitchAccess() {
   if (shell) shell.style.display = 'flex';
   render();
   openPitchDeck();
-  toast('Executive Judge Access: 60s Presentation Deck Active');
+  toast('🏆 VIP Judge Access: 60-Second Executive Pitch Deck Active');
 }
 
 function returnToGateway() {
@@ -2303,6 +2370,14 @@ function exportAuditLogCSV() {
 window.addEventListener('keydown', e => {
   const p = $('#pitchDialog');
   const j = $('#judgeDialog');
+  const spec = $('#spectroscopyDialog');
+
+  if (spec && spec.open) {
+    if (e.key === 'Escape') {
+      closeSpectroscopy();
+    }
+    return;
+  }
 
   if (p && p.open) {
     if (e.key === 'ArrowRight' || e.key === 'Space') {
@@ -2330,9 +2405,24 @@ window.addEventListener('keydown', e => {
     return;
   }
 
+  // Session Lock shortcut: Alt + L
+  if (e.altKey && e.key.toLowerCase() === 'l') {
+    e.preventDefault();
+    returnToGateway();
+    return;
+  }
+
   // Ignore single-key shortcuts when operator is typing into an input
   const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
   if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+  if (!state.authenticated) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAuthenticate();
+    }
+    return;
+  }
 
   const k = e.key.toLowerCase();
   if (k === 'p') {
