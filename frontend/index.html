@@ -230,8 +230,8 @@
           </svg>
         </div>
         <div>
-          <div class="topbar-brand-title">ClearLoop</div>
-          <div class="topbar-brand-sub">BEAUTY TECH INCUBATOR • L'ORÉAL INDUSTRIAL OPERATIONS • CLOSED-LOOP FORMULATION</div>
+          <div class="topbar-brand-title">ClearLoop <span class="jury-spec-tag">JURY SPEC V2.6</span></div>
+          <div class="topbar-brand-sub">L'ORÉAL BEAUTY TECH INCUBATOR • OPERATIONS 4.0</div>
         </div>
       </div>
 
@@ -254,18 +254,19 @@
         </select>
       </div>
 
-      <span class="sensors-sync-pill"><span class="sync-live-dot"></span> 100 Hz SYNC</span>
-      <span class="topbar-clock" id="topbarClock">2026-03-29 16:42:18 CET</span>
+      <span class="sensors-sync-pill"><span class="sync-live-dot"></span> 100 HZ SPECTROPHOTOMETRIC SYNC</span>
+      <span class="topbar-clock" id="topbarClock">2026-03-29 14:42:18 CET</span>
+      <span class="demo-armed-pill">DEMO ARMED</span>
     </div>
 
     <div class="topbar-actions">
       <button class="button gold judge-demo-btn" onclick="openPitchDeck()">★ 60S JURY DEMO</button>
-      <button class="button ghost dossier-btn" onclick="showView('dossier')">🗎 DOSSIER EXPORT</button>
+      <button class="button ghost dossier-btn" onclick="showView('dossier')">🗎 DOSSIER</button>
       <div class="topbar-profile" onclick="returnToGateway()" title="Lock Session / Return to Operator Gateway">
         <div class="avatar" id="topbarAvatar">CL</div>
         <div class="profile-info">
           <b id="topbarOpName">Dr. Camille Laurent</b>
-          <small id="topbarOpTitle">HEAD OF SUSTAINABLE CHANGEOVERS</small>
+          <small id="topbarOpTitle">Head of Sustainable Changeovers</small>
         </div>
         <span class="topbar-lock-icon">🔒</span>
       </div>
@@ -274,25 +275,25 @@
 
   <div class="app-body-layout">
     <aside class="sidebar" id="sidebar">
-      <div class="nav-section-title">CORE ARCHITECTURE v1.0</div>
+      <div class="nav-section-title">CORE ARCHITECTURE</div>
       <nav class="nav" aria-label="Primary navigation">
         <button data-view="overview" onclick="showView('overview')">
           <i>🧭</i><span>Overview</span><span class="nav-badge live">Live</span>
         </button>
-        <button data-view="planning" class="active" onclick="showView('planning')">
-          <i>📊</i><span>Planning</span><span class="nav-badge dark-active">Active 14</span>
+        <button data-view="planning" onclick="showView('planning')">
+          <i>📊</i><span>Planning</span><span class="nav-badge">14</span>
         </button>
         <button data-view="optimizer" onclick="showView('optimizer')">
-          <i>⚡</i><span>Optimizer Engine</span><span class="nav-badge green">-42.0%</span>
+          <i>⚡</i><span>Changeover Optimizer</span><span class="nav-badge green">-38%</span>
         </button>
-        <button data-view="cleaning" onclick="showView('cleaning')">
-          <i>🔬</i><span>Fluidics Skid HUD</span><span class="nav-badge">CIP-04</span>
+        <button data-view="cleaning" class="active" onclick="showView('cleaning')">
+          <i>🔬</i><span>Adaptive Cleaning</span><span class="nav-badge active-100hz">100Hz</span>
         </button>
         <button data-view="cascade" onclick="showView('cascade')">
-          <i>🔄</i><span>Closed Loop Flow</span><span class="nav-badge green">Active</span>
+          <i>🔄</i><span>Water Cascade</span><span class="nav-badge">Loop</span>
         </button>
         <button data-view="analytics" onclick="showView('analytics')">
-          <i>📜</i><span>ESG &amp; ISO Ledger</span><span class="nav-badge gold">14046</span>
+          <i>📜</i><span>Impact</span><span class="nav-badge">ESG</span>
         </button>
       </nav>
 
@@ -307,13 +308,13 @@
       </nav>
 
       <div class="sidebar-bottom">
-        <div class="sidebar-skid-preview">
-          <div class="skid-thumb-wrap">
-            <img src="/frontend/cip_fluidics.jpg" alt="SKID CIP-04 ONLINE" class="skid-thumb-img">
-            <span class="skid-thumb-tag">SKID CIP-04 ONLINE</span>
+        <div class="sidebar-integrity-card">
+          <div class="integrity-head">
+            <span class="icon">🛡</span>
+            <b>INTEGRITY GUARD</b>
+            <span class="pulsing-green-dot"></span>
           </div>
-          <div class="skid-hitl-tag">👤 HUMAN-IN-THE-LOOP</div>
-          <div class="skid-hitl-desc">Operator Veto Enabled: Physical lock overrides AI suggestions anytime.</div>
+          <div class="integrity-desc">ISO 22716 &amp; Cosmetic GMP strict lock-step active. Zero safety overrides.</div>
         </div>
       </div>
     </aside>
