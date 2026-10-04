@@ -218,97 +218,113 @@
 </div>
 
 <div class="app-shell" id="appShell" style="display:none">
-  <aside class="sidebar" id="sidebar">
-    <div class="brand">
-      <span class="brand-mark">C</span>
-      <div>
-        <b>CLEARLOOP</b>
-        <small>ZERO-WASTE CHANGEOVER</small>
-      </div>
-      <button class="icon-button collapse" onclick="toggleSidebar()" aria-label="Collapse navigation">‹</button>
-    </div>
-    
-    <div class="loreal-tag">
-      <span>L'ORÉAL CHALLENGE 2026</span>
-      <small>Upstream Demand Reduction</small>
-    </div>
-
-    <nav class="nav" aria-label="Primary navigation">
-      <button data-view="overview" class="active" onclick="showView('overview')"><i>◫</i><span>Overview</span></button>
-      <button data-view="planning" onclick="showView('planning')"><i>▤</i><span>Planning & Batches</span></button>
-      <button data-view="optimizer" onclick="showView('optimizer')"><i>↝</i><span>Changeover Optimizer</span></button>
-      <button data-view="cleaning" onclick="showView('cleaning')"><i>⌁</i><span>Adaptive CIP Cleaning</span></button>
-      <button data-view="cascade" onclick="showView('cascade')"><i>◌</i><span>Circular Waterloop</span></button>
-      <button data-view="analytics" onclick="showView('analytics')"><i>▥</i><span>ESG & Impact Ledger</span></button>
-      <button data-view="scenarios" onclick="showView('scenarios')"><i>◈</i><span>What-If Lab</span></button>
-      <button data-view="business" onclick="showView('business')"><i>◲</i><span>Business Case & ROI</span></button>
-      <button data-view="pilot" onclick="showView('pilot')"><i>◷</i><span>6-Week Pilot Plan</span></button>
-      <button data-view="alerts" onclick="showView('alerts')"><i>◉</i><span>Audit Trail & Logs</span></button>
-      <button data-view="defense" onclick="showView('defense')"><i>⚖</i><span>Judge Q&A Defense</span></button>
-      <button data-view="dossier" onclick="showView('dossier')"><i>🖹</i><span>Executive Dossier</span></button>
-      <button data-view="trust" onclick="showView('trust')"><i>✓</i><span>Data Trust & Scope</span></button>
-    </nav>
-    <div class="sidebar-bottom">
-      <button class="status-panel" onclick="showView('trust')">
-        <span class="status-dot"></span>
-        <div>
-          <b>Advisory Engine Active</b>
-          <small id="sidebarPlant">Burgos Plant · Line 04</small>
+  <!-- Master Cockpit Full-Width Topbar -->
+  <header class="topbar">
+    <div class="topbar-left-cluster">
+      <div class="topbar-brand">
+        <div class="topbar-logo-circle">
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" stroke="#059669" stroke-width="2.5"/>
+            <circle cx="16" cy="16" r="9" stroke="#34d399" stroke-width="2.5" stroke-dasharray="28 14"/>
+            <circle cx="16" cy="16" r="4" fill="#10b981"/>
+          </svg>
         </div>
-      </button>
-      <button class="profile" onclick="returnToGateway()" title="Switch Operator Session / Return to Gateway">
-        <span>CL</span>
         <div>
-          <b>Dr. Camille Laurent</b>
-          <small>Operations Paris · Skid 04</small>
+          <div class="topbar-brand-title">ClearLoop</div>
+          <div class="topbar-brand-sub">L'ORÉAL INDUSTRIAL EFFICIENCY / SAFETY TECH DEMO</div>
         </div>
-      </button>
-    </div>
-  </aside>
-
-  <main class="workspace">
-    <header class="topbar">
-      <div class="crumb">
-        <span id="viewEyebrow">COMMAND CENTER</span>
-        <b id="viewName">Overview</b>
       </div>
-      <div class="topbar-actions">
-        <span class="data-pill"><i></i> SIMULATION MODE</span>
-        <span class="shortcut-pill" title="Shortcuts: [P] Deck · [T] Tour · [D] Dossier · [M] Sound · [1-9] Views">
-          <kbd>P</kbd> Deck · <kbd>T</kbd> Tour · <kbd>1-9</kbd> Views
-        </span>
-        <select class="selector" id="plantSelector" onchange="changePlant(this.value)">
-          <option value="aulnay">L'Oréal Aulnay-sous-Bois (Skid 04)</option>
-          <option value="burgos">L'Oréal Burgos Plant (Spain)</option>
-          <option value="settimo">L'Oréal Settimo Torinese (Italy)</option>
-          <option value="vorselaar">L'Oréal Vorselaar Plant (Belgium)</option>
-          <option value="pilot">Demo Pilot Plant 01</option>
-        </select>
-        <select class="selector" id="lineSelector" onchange="changeLine(this.value)">
-          <option value="line04">Packaging Line 04 (Emulsions)</option>
-          <option value="line02">Packaging Line 02 (Color Makeup)</option>
-          <option value="line01">Packaging Line 01 (Surfactants)</option>
-        </select>
-        <button class="button gold" onclick="openPitchDeck()" style="padding:7px 13px;font-size:11px;" title="Full Screen Presentation Slide Deck">
-          📺 Pitch Deck
-        </button>
-        <button class="button primary" onclick="startJudgeMode()" style="padding:7px 12px;font-size:11px;">
-          ★ 3-Min Tour
-        </button>
-        <button class="button ghost" onclick="showView('dossier')" title="View Executive Technical Brief">
-          🖹 Dossier
-        </button>
-        <button class="icon-button" id="soundToggle" onclick="toggleAudio()" title="Toggle Audio Sound Feedback">🔊</button>
-        <button class="icon-button" onclick="showView('alerts')" aria-label="Open alerts" title="Audit Trail">◉</button>
-        <button class="icon-button" onclick="returnToGateway()" title="Lock Session / Return to Operator Gateway">🔒</button>
-        <div class="avatar" title="Dr. Camille Laurent — Click to switch operator session" onclick="returnToGateway()" style="cursor:pointer">CL</div>
-      </div>
-    </header>
 
-    <div class="page" id="page">
-      <div class="loading"><span></span> Preparing deterministic demonstration…</div>
+      <div class="site-badge-group">
+        <span class="site-label">FACILITY</span>
+        <select class="topbar-select" id="plantSelector" onchange="changePlant(this.value)">
+          <option value="aulnay">Plant Aulnay-sous-Bois Formulation</option>
+          <option value="burgos">Plant Burgos Waterloop (Spain)</option>
+          <option value="settimo">Plant Settimo Torinese (Italy)</option>
+          <option value="vorselaar">Plant Vorselaar Surfactants (Belgium)</option>
+        </select>
+      </div>
+
+      <div class="site-badge-group">
+        <span class="site-label">ACTIVE CELL</span>
+        <select class="topbar-select" id="lineSelector" onchange="changeLine(this.value)">
+          <option value="line04">Line 04 Lipstick & Emulsions</option>
+          <option value="line02">Line 02 Color Cosmetics</option>
+          <option value="line01">Line 01 Surfactants</option>
+        </select>
+      </div>
+
+      <span class="pilot-status-pill">PILOT ONLINE (3/10)</span>
+      <span class="sensors-sync-pill"><span class="sync-live-dot"></span> 100 Hz SYNC</span>
+      <span class="topbar-clock" id="topbarClock">2026-10-04 14:42:18 CET</span>
     </div>
-  </main>
+
+    <div class="topbar-actions">
+      <button class="button gold judge-demo-btn" onclick="openPitchDeck()">★ 60s JUDGE DEMO</button>
+      <button class="button ghost dossier-btn" onclick="showView('dossier')">🖹 DOSSIER</button>
+      <div class="topbar-profile" onclick="returnToGateway()" title="Lock Session / Return to Operator Gateway">
+        <div class="avatar" id="topbarAvatar">CL</div>
+        <div class="profile-info">
+          <b id="topbarOpName">Dr. Camille Laurent</b>
+          <small id="topbarOpTitle">Lead Cleanroom Chemist / Automation Architect</small>
+        </div>
+        <span class="topbar-lock-icon">🔒</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-body-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="nav-section-title">CORE ARCHITECTURE</div>
+      <nav class="nav" aria-label="Primary navigation">
+        <button data-view="overview" class="active" onclick="showView('overview')">
+          <i>🧭</i><span>Overview</span><span class="nav-badge live">Live</span>
+        </button>
+        <button data-view="planning" onclick="showView('planning')">
+          <i>📊</i><span>Planning</span><span class="nav-badge">14</span>
+        </button>
+        <button data-view="optimizer" onclick="showView('optimizer')">
+          <i>⚡</i><span>Optimizer Engine</span><span class="nav-badge green">-28.8%</span>
+        </button>
+        <button data-view="cleaning" onclick="showView('cleaning')">
+          <i>🔬</i><span>Fluidics Skid HUD</span><span class="nav-badge">CIP-04</span>
+        </button>
+        <button data-view="cascade" onclick="showView('cascade')">
+          <i>🔄</i><span>Closed Loop Flow</span><span class="nav-badge green">Active</span>
+        </button>
+        <button data-view="analytics" onclick="showView('analytics')">
+          <i>📜</i><span>ESG & ISO Ledger</span><span class="nav-badge gold">Audited</span>
+        </button>
+      </nav>
+
+      <div class="nav-section-title">VERIFICATION & TRIALS</div>
+      <nav class="nav secondary-nav" aria-label="Verification navigation">
+        <button data-view="scenarios" onclick="showView('scenarios')">
+          <i>🧪</i><span>Scenario Simulator</span>
+        </button>
+        <button data-view="pilot" onclick="showView('pilot')">
+          <i>🏭</i><span>4-Week Pilot</span><span class="nav-badge gold">Phase 1</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="sidebar-safety-card">
+          <div class="safety-title">🔒 ZERO-RISK SAFETY LOCK</div>
+          <div class="safety-desc">Cross-contamination boundaries hard-interlocked at PLC layer.</div>
+        </div>
+        <div class="sidebar-safety-card">
+          <div class="safety-title">👤 HUMAN-IN-THE-LOOP ARCHITECTURE</div>
+          <div class="safety-desc">All recommendations require physical chemist sign-off.</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <div class="page" id="page">
+        <div class="loading"><span></span> Preparing deterministic demonstration…</div>
+      </div>
+    </main>
+  </div>
 </div>
 
 <!-- Interactive Guided Judge Tour Modal -->
