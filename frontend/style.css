@@ -9128,7 +9128,382 @@ dialog::backdrop {
   }
 }
 
+/* ==========================================================================
+   FINAL POLISH DESIGN SYSTEM & INDUSTRIAL UX ENHANCEMENTS
+   ========================================================================== */
 
+/* 1. Universal Data Provenance Badges */
+.prov-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  line-height: 1.3;
+  vertical-align: middle;
+  cursor: help;
+  transition: all 0.15s ease;
+}
+.prov-badge.model {
+  background: rgba(16, 185, 129, 0.1);
+  color: #065f46;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.prov-badge.sim {
+  background: rgba(6, 182, 212, 0.1);
+  color: #0e7490;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+}
+.prov-badge.sop {
+  background: rgba(184, 123, 30, 0.1);
+  color: #92400e;
+  border: 1px solid rgba(184, 123, 30, 0.3);
+}
+.prov-badge.iso {
+  background: rgba(15, 23, 42, 0.08);
+  color: #1e293b;
+  border: 1px solid rgba(15, 23, 42, 0.22);
+}
+.prov-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
 
+/* 2. Deterministic Safety Fault Propagation Flow */
+.safety-propagation-container {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 18px 0;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+.sp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.sp-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sp-title-group h4 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 0.2px;
+}
+.sp-title-group small {
+  color: #64748b;
+  font-size: 11px;
+}
+.sp-flow-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+}
+.sp-step-node {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12px 14px;
+  transition: all 0.2s ease;
+}
+.sp-step-node.state-ok {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+.sp-step-node.state-warn {
+  background: #fffbeb;
+  border-color: #fcd34d;
+}
+.sp-step-node.state-fault {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+.sp-step-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.sp-step-node.state-ok .sp-step-num { color: #059669; }
+.sp-step-node.state-warn .sp-step-num { color: #d97706; }
+.sp-step-node.state-fault .sp-step-num { color: #dc2626; }
 
+.sp-step-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+.sp-step-desc {
+  font-size: 10px;
+  color: #64748b;
+  line-height: 1.4;
+}
+.sp-arrow-connector {
+  font-size: 16px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
+}
+.sp-arrow-connector.active {
+  color: #059669;
+  font-weight: bold;
+}
+.sp-arrow-connector.blocked {
+  color: #dc2626;
+  font-weight: bold;
+}
 
+/* 3. Reusable "Why This Sequence?" Decision Pattern */
+.decision-pattern-box {
+  background: #ffffff;
+  border: 1.5px solid #d1fae5;
+  border-radius: 8px;
+  padding: 18px 22px;
+  margin: 18px 0;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.05);
+  animation: fadeIn 0.25s ease-out;
+}
+.dp-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.dp-banner-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  font-family: 'DM Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+.dp-title {
+  margin: 0 0 10px 0;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #064e3b;
+  letter-spacing: -0.2px;
+}
+.dp-section {
+  margin-bottom: 12px;
+}
+.dp-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  color: #047857;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.dp-text {
+  font-size: 12px;
+  color: #1e293b;
+  line-height: 1.55;
+  margin: 0;
+}
+.dp-impact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  margin: 10px 0 14px 0;
+}
+.dp-impact-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.dp-impact-card.positive {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+.dp-impact-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 15px;
+  font-weight: 800;
+  color: #065f46;
+}
+.dp-impact-sub {
+  font-size: 10px;
+  color: #64748b;
+  margin-top: 2px;
+}
+.dp-constraints-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+}
+.dp-constraint-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  color: #1e293b;
+  background: #f1f5f9;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+.dp-constraint-chip .chk {
+  color: #059669;
+  font-weight: bold;
+}
+.dp-status-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed #cbd5e1;
+}
+
+/* 4. Fluid Motion on SVG Pipelines */
+.fluid-path-active {
+  stroke-dasharray: 6 4;
+  animation: fluidDash 1.2s linear infinite;
+}
+@keyframes fluidDash {
+  from { stroke-dashoffset: 20; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* 5. Interactive Batch Card Shuffling Feedback */
+.batch-card-transitioning {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+.batch-card-transitioning:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+.pulse-cause-effect {
+  animation: causeEffectFlash 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes causeEffectFlash {
+  0% { transform: scale(1); filter: brightness(1); }
+  30% { transform: scale(1.03); filter: brightness(1.2); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* 6. Keyboard Accessibility */
+:focus-visible {
+  outline: 2px solid #059669 !important;
+  outline-offset: 2px !important;
+}
+
+/* 7. Cascade Stream Provenance Inspector */
+.cascade-stream-provenance-box {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 18px 22px;
+  margin-top: 16px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+}
+.csp-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.csp-title-row h4 {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #0f172a;
+}
+.csp-indicators-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.csp-ind-cell {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+.csp-ind-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+}
+.csp-ind-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-top: 2px;
+}
+
+/* 8. Queue Transition Bridges (Cause -> Effect) */
+.queue-card-bridge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  padding: 4px 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-size: 9px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 44px;
+}
+.queue-card-bridge.bridge-clean {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+.queue-card-bridge.bridge-alert {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #dc2626;
+  font-weight: bold;
+}
+.queue-card-bridge .bridge-val {
+  font-weight: 700;
+  font-size: 9.5px;
+  font-family: 'DM Mono', monospace;
+}
+.queue-card-bridge .bridge-arr {
+  font-size: 10px;
+}

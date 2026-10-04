@@ -456,7 +456,7 @@ function overview() {
     <div class="cockpit-kpi-card">
       <div class="kpi-card-header">
         <span class="kpi-tag-label">ABSOLUTE AVOIDANCE</span>
-        <span class="kpi-pill green">SHIFT 1 SCHEDULED</span>
+        <span class="prov-badge model">MODEL OUTPUT</span>
       </div>
       <div class="kpi-title">Water Avoided Today</div>
       <div class="kpi-metric-row">
@@ -494,7 +494,7 @@ function overview() {
     <div class="cockpit-kpi-card">
       <div class="kpi-card-header">
         <span class="kpi-tag-label">THROUGHPUT VELOCITY</span>
-        <span class="kpi-pill cyan">REAL TIME</span>
+        <span class="prov-badge sim">SIMULATION</span>
       </div>
       <div class="kpi-title">CIP Cycle Compression</div>
       <div class="kpi-metric-row">
@@ -531,7 +531,7 @@ function overview() {
     <div class="cockpit-kpi-card">
       <div class="kpi-card-header">
         <span class="kpi-tag-label">PLANT INTAKE REDUCTION</span>
-        <span class="kpi-pill gold">10 SKIDS EQ</span>
+        <span class="prov-badge model">MODEL OUTPUT</span>
       </div>
       <div class="kpi-title">Fresh-Water Intake Cut</div>
       <div class="kpi-metric-row">
@@ -557,7 +557,7 @@ function overview() {
     <div class="cockpit-kpi-card prestige-dark">
       <div class="kpi-card-header">
         <span class="kpi-tag-label gold-tag">ENTERPRISE ESG ROI</span>
-        <span class="kpi-pill green">29 Plants</span>
+        <span class="prov-badge iso">GLOBAL SCALE</span>
       </div>
       <div class="kpi-title gold-title">Global Scale Value</div>
       <div class="kpi-metric-row">
@@ -1160,6 +1160,20 @@ function applyOptimalSwap() {
   render();
 }
 
+function calculatePlanningQueueBurden(queue) {
+  let waterL = 0;
+  for (let i = 0; i < queue.length - 1; i++) {
+    const fId = queue[i];
+    const tId = queue[i+1];
+    const tMeta = PLANNING_MATRIX[fId]?.targets[tId];
+    if (tMeta && tMeta.val) {
+      const mL = tMeta.val.match(/(\d+)\s*L/);
+      if (mL) waterL += parseInt(mL[1], 10);
+    }
+  }
+  return waterL;
+}
+
 async function reSolveSequenceAI() {
   playChime('cutoff');
   const btn = $('#btnResolveAI');
@@ -1178,8 +1192,9 @@ async function reSolveSequenceAI() {
   setTimeout(() => {
     state.planningScheduleCommitted = true;
     state.planningQueue = ['B-217', 'B-218', 'B-219', 'B-220', 'B-221'];
+    state.showOptimizationReasoning = true;
     playChime('success');
-    toast('⚡ MILP Solver Converged (142 ms): Global Optimum Schedule Locked');
+    toast('⚡ MILP Solver Converged (142 ms): Global Optimum Schedule Locked (-320 L / -44 min)');
     render();
   }, 320);
 }
@@ -1220,9 +1235,18 @@ function handleCardDrop(e, targetIdx) {
   const [removed] = queue.splice(sourceIdx, 1);
   queue.splice(targetIdx, 0, removed);
   state.planningQueue = queue;
+  state.planningScheduleCommitted = false;
+
+  const newBurden = calculatePlanningQueueBurden(queue);
+  const baselineBurden = 862;
+  const deltaL = baselineBurden - newBurden;
 
   playChime('cutoff');
-  toast(`Permutation Tested: Moved ${removed} to position ${targetIdx + 1}`);
+  if (newBurden <= 580) {
+    toast(`✓ Optimal Permutation: ${newBurden} L Total Burden (${deltaL > 0 ? '-' + deltaL : '+' + Math.abs(deltaL)} L vs Baseline FIFO)`);
+  } else {
+    toast(`⚠ Sequence Modified: ${newBurden} L Total Burden (+${newBurden - 578} L Penalty vs Optimal)`);
+  }
   render();
 }
 
@@ -1234,7 +1258,18 @@ function moveQueueItem(idx, direction) {
   queue[idx] = queue[newIdx];
   queue[newIdx] = temp;
   state.planningQueue = queue;
+  state.planningScheduleCommitted = false;
+
+  const newBurden = calculatePlanningQueueBurden(queue);
+  const baselineBurden = 862;
+  const deltaL = baselineBurden - newBurden;
+
   playChime('cutoff');
+  if (newBurden <= 580) {
+    toast(`✓ Optimal Permutation: ${newBurden} L Total Burden (${deltaL > 0 ? '-' + deltaL : '+' + Math.abs(deltaL)} L vs Baseline FIFO)`);
+  } else {
+    toast(`⚠ Sequence Modified: ${newBurden} L Total Burden (+${newBurden - 578} L Penalty vs Optimal)`);
+  }
   render();
 }
 
@@ -1583,6 +1618,53 @@ function planning() {
 
   </div>
 
+  <!-- DECISION EXPLAINABILITY PATTERN: WHY THIS SEQUENCE? -->
+  <div class="decision-pattern-box">
+    <div class="dp-header-row">
+      <div class="dp-banner-pill">
+        <span>⚡ 4-D COMBINATORIAL RHEOLOGY OPTIMIZATION RESULT</span>
+      </div>
+      <span class="prov-badge model">MODEL OUTPUT • 2-OPT MILP</span>
+    </div>
+    <h4 class="dp-title">RECOMMENDATION: Move Obsidian Vinyl (B-220) to Position 4 after Armani Balm (B-219)</h4>
+    <div class="dp-section">
+      <div class="dp-label"><span>💡</span> WHY THIS SEQUENCE:</div>
+      <p class="dp-text">
+        Grouping compatible light wax-emulsions first allows continuous warm water flushing (30–38 L). Deferring intense carbon black CI 77499 prevents 2 intermediate alkaline boils and 44 min idle loss.
+      </p>
+    </div>
+    <div class="dp-impact-grid">
+      <div class="dp-impact-card positive">
+        <div class="dp-impact-num font-mono">-${sparedTodayL.toLocaleString()} L (${sparedPercent})</div>
+        <div class="dp-impact-sub">Hot Water Demand Avoided</div>
+      </div>
+      <div class="dp-impact-card positive">
+        <div class="dp-impact-num font-mono">-${idleDowntimeMin} min</div>
+        <div class="dp-impact-sub">Idle Turnaround Downtime</div>
+      </div>
+      <div class="dp-impact-card positive">
+        <div class="dp-impact-num font-mono">${flushesAverted} Cycles</div>
+        <div class="dp-impact-sub">Chemical Flushes Averted</div>
+      </div>
+      <div class="dp-impact-card">
+        <div class="dp-impact-num font-mono">100% On-Time</div>
+        <div class="dp-impact-sub">All Lot Deadlines Preserved</div>
+      </div>
+    </div>
+    <div class="dp-constraints-row">
+      <div class="dp-constraint-chip"><span class="chk">✓</span> Delivery Deadlines Maintained (&le; 18:30 CET)</div>
+      <div class="dp-constraint-chip"><span class="chk">✓</span> Viscosity Shear Envelope (&Delta;&eta; &lt; 4,000 cP)</div>
+      <div class="dp-constraint-chip"><span class="chk">✓</span> GMP Color Migration Shield (&Delta;E &lt; 0.2)</div>
+      <div class="dp-constraint-chip"><span class="chk">✓</span> Clean Water Charter 2026 Invariant Satisfied</div>
+    </div>
+    <div class="dp-status-footer">
+      <span class="font-mono" style="font-size:11px;color:#047857">STATUS: Converged in 142 ms • Operator Review Required</span>
+      <button class="button primary" style="padding:6px 14px;font-size:11px" onclick="lockActiveSchedule()">
+        ${state.activeScheduleLocked ? '✓ SCHEDULE LOCKED TO DCS' : '🔒 COMMIT TO LINE 04 DCS'}
+      </button>
+    </div>
+  </div>
+
   <!-- ACTIVE PRODUCTION WORK QUEUE (5 BATCH CARDS) -->
   <div class="work-queue-section">
     <div class="work-queue-header">
@@ -1597,17 +1679,29 @@ function planning() {
     </div>
 
     <div class="work-queue-cards-row">
-      ${(state.planningQueue || ['B-217', 'B-218', 'B-219', 'B-220', 'B-221']).map((batchId, idx) => {
+      ${(state.planningQueue || ['B-217', 'B-218', 'B-219', 'B-220', 'B-221']).map((batchId, idx, arr) => {
         const b = MASTER_PLANNING_BATCHES[batchId] || MASTER_PLANNING_BATCHES['B-217'];
+        const nextId = arr[idx + 1];
+        let bridgeHtml = '';
+        if (nextId) {
+          const tMeta = PLANNING_MATRIX[batchId]?.targets[nextId] || { val: '—', level: 'none' };
+          const isBottleneck = tMeta.isBottleneck || tMeta.level === 'severe';
+          bridgeHtml = `
+            <div class="queue-card-bridge ${isBottleneck ? 'bridge-alert' : 'bridge-clean'}" title="Transition: ${batchId} ➔ ${nextId} (${tMeta.val})">
+              <span class="bridge-val font-mono">${tMeta.val}</span>
+              <span class="bridge-arr">➔</span>
+            </div>
+          `;
+        }
         return `
-          <div class="batch-work-card ${b.isAlertCard ? 'alert-card' : ''}" 
+          <div class="batch-work-card ${b.isAlertCard ? 'alert-card' : ''} batch-card-transitioning" 
                draggable="true" 
                ondragstart="handleCardDragStart(event, ${idx})" 
                ondragover="handleCardDragOver(event)" 
                ondrop="handleCardDrop(event, ${idx})">
             
             <div class="bcard-top-row">
-              <span class="bcard-id">BATCH ${escape(b.id)}</span>
+              <span class="bcard-id">POS ${idx + 1} • BATCH ${escape(b.id)}</span>
               <span class="bcard-drag-handle" title="Drag to reorder position">⋮⋮</span>
             </div>
 
@@ -1639,6 +1733,7 @@ function planning() {
               <span class="bcard-tag ${b.tag2Kind}">${escape(b.tag2)}</span>
             </div>
           </div>
+          ${bridgeHtml}
         `;
       }).join('')}
     </div>
@@ -2789,6 +2884,52 @@ function cleaning() {
       <span class="gmp-cert-pill">STANDARD: ISO 22716 GMP &amp; COSMETICS EUROPE CERTIFIED</span>
     </div>
 
+    <!-- DETERMINISTIC SAFETY & FAULT PROPAGATION TIMELINE -->
+    <div class="safety-propagation-container">
+      <div class="sp-header">
+        <div class="sp-title-group">
+          <span class="shield-green-icon">🛡</span>
+          <div>
+            <h4>DETERMINISTIC SAFETY &amp; FAULT PROPAGATION CHAIN</h4>
+            <small>Live signal-to-interlock flow: Process Signals ➔ AI Decision ➔ Plant Validation ➔ Operator Action</small>
+          </div>
+        </div>
+        <span class="prov-badge sim">SIMULATION &amp; SENSORS</span>
+      </div>
+      <div class="sp-flow-grid">
+        <!-- Node 1: Process Signals -->
+        <div class="sp-step-node ${scen === 'normal' ? 'state-ok' : (scen === 'drift' ? 'state-fault' : (scen === 'thermal' ? 'state-warn' : 'state-fault'))}">
+          <div class="sp-step-num">01. PROCESS SIGNALS</div>
+          <div class="sp-step-title">${scen === 'normal' ? 'Dual-Probe Synchronized' : (scen === 'drift' ? 'Calibration Divergence' : (scen === 'thermal' ? 'Thermal Deficit (48°C)' : 'Turbidity Slug Spike'))}</div>
+          <div class="sp-step-desc">${scen === 'normal' ? '0.02 NTU • 0.34 mS/cm • 100 Hz' : (scen === 'drift' ? 'Secondary sensor divergence +15%' : (scen === 'thermal' ? 'Wash temperature 48°C < 65°C spec' : 'Optical pulse slug: 14.80 NTU detected'))}</div>
+        </div>
+        <div class="sp-arrow-connector ${scen === 'normal' ? 'active' : 'blocked'}">➔</div>
+
+        <!-- Node 2: AI Decision Support -->
+        <div class="sp-step-node ${scen === 'normal' ? 'state-ok' : 'state-warn'}">
+          <div class="sp-step-num">02. DECISION SUPPORT</div>
+          <div class="sp-step-title">${scen === 'normal' ? 'Asymptotic Endpoint: 29:00' : 'Cutoff Veto Triggered'}</div>
+          <div class="sp-step-desc">${scen === 'normal' ? '130 L DIW avoided (99.4% confidence)' : 'Signal confidence reduced (' + cur.confidence + '%)'}</div>
+        </div>
+        <div class="sp-arrow-connector ${scen === 'normal' ? 'active' : 'blocked'}">➔</div>
+
+        <!-- Node 3: Plant Validation -->
+        <div class="sp-step-node ${scen === 'normal' ? 'state-ok' : 'state-fault'}">
+          <div class="sp-step-num">03. PLANT VALIDATION</div>
+          <div class="sp-step-title">${scen === 'normal' ? '3/3 Interlocks Cleared' : 'Interlock Lockout Engaged'}</div>
+          <div class="sp-step-desc">${scen === 'normal' ? 'L\'Oréal Charter Q-882 Verified' : cur.stabilityTitle.replace('DETERMINISTIC FAIL-SAFE ENGAGED: ', '')}</div>
+        </div>
+        <div class="sp-arrow-connector ${scen === 'normal' ? 'active' : 'blocked'}">➔</div>
+
+        <!-- Node 4: Operator Action -->
+        <div class="sp-step-node ${scen === 'normal' ? 'state-ok' : 'state-warn'}">
+          <div class="sp-step-num">04. OPERATOR ACTION</div>
+          <div class="sp-step-title">${scen === 'normal' ? 'Early Cutoff Authorization' : 'Standard 42m Timer Enforced'}</div>
+          <div class="sp-step-desc">${scen === 'normal' ? 'Human sign-off enables early rinse' : 'Fail-safe fallback: Zero automated savings applied'}</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Explainable AI Termination Justification -->
     <div class="ai-justification-box">
       <div class="ai-just-head">
@@ -3032,7 +3173,54 @@ function cascade() {
   const rejectPct = totalEffluent > 0 ? ((divertedL / totalEffluent) * 100).toFixed(1) : '100.0';
   const annualL = Math.round(qualifiedL * 332.4);
   const annualSavingsEuro = Math.round(annualL * 0.382);
-  const scope3Co2 = ((qualifiedL * 0.0236)).toFixed(2);
+  const streamData = {
+    'A': {
+      tag: 'STREAM A: FINAL WATER POLISH PERMEATE',
+      badge: 'CIRCULAR A+ PERMEATE',
+      badgeClass: 'circular-pill',
+      volumeL: Math.round(totalEffluent * 0.524),
+      turbidity: '0.9 / < 2.0 NTU ✓',
+      conductivity: '6.4 / < 15 µS/cm ✓',
+      lipids: '0.02% UNDETECTED ✓',
+      temp: '37.8 °C (+14.2 °C Captured)',
+      actuator: '120 ms Cutoff (XV-504 CASCADE)',
+      origin: 'Stage 4 DIW Final Rinse Permeate (Vessel V-04)',
+      destination: 'Secondary Evaporative Cooling Condenser Makeup',
+      classification: 'POTENTIALLY REUSABLE SUBJECT TO VALIDATION (Grade A+R)',
+      reason: 'Ultra-low organic carbon (TOC < 5 ppm) qualifies for non-product cooling circuit with zero microbial hazard.'
+    },
+    'B': {
+      tag: 'STREAM B: INTERMEDIATE CAUSTIC RECOVERY',
+      badge: 'INTERNAL CHEMICAL LOOP',
+      badgeClass: 'circular-pill',
+      volumeL: Math.round(totalEffluent * 0.167),
+      turbidity: '2.8 / < 5.0 NTU (Filtered Micro-mesh) ✓',
+      conductivity: '28.4 mS/cm (Alkaline Buffer)',
+      lipids: '0.14% Solubilized in Caustic Matrix',
+      temp: '64.8 °C (Thermal Heat Preserved)',
+      actuator: 'Pneumatic 3-Way Diverter Active',
+      origin: 'Alkaline Caustic Wash Loop (Vessel V-04)',
+      destination: 'CIP Skid Caustic Buffer Tank A5 (Filtered & Re-dosed)',
+      classification: 'INTERNAL CHEMICAL RECIRCULATION LOOP',
+      reason: 'Caustic detergent matrix reclaimed to reduce fresh NaOH chemical consumption by 45%.'
+    },
+    'C': {
+      tag: 'STREAM C: FIRST-FLUSH SLUDGE',
+      badge: 'BIOLOGICAL REJECT / WWTP',
+      badgeClass: 'reject',
+      volumeL: Math.round(totalEffluent * 0.310),
+      turbidity: '14.8 NTU (High Pigment Sludge) ⚠',
+      conductivity: '42.0 mS/cm (Heavy Mineral Residue)',
+      lipids: '4.8% Active Wax/Emulsion Load',
+      temp: '32.1 °C (Discharge Purge)',
+      actuator: 'Drain Valve XV-502 OPEN (Purge)',
+      origin: 'First-Flush Initial Mechanical Rinse (Vessel V-04)',
+      destination: 'Industrial WWTP Bio-Treatment & Anaerobic Digester',
+      classification: 'TREATMENT REQUIRED / ZERO FACTORY REUSE',
+      reason: 'High COD organic load (12,500 mg/L) strictly quarantined to WWTP bio-treatment plant to prevent any cross-contamination.'
+    }
+  };
+  const curStream = streamData[activeStream] || streamData['A'];
 
   return `
   <!-- TOP SUB-BANNER TELEMETRY & HERO HEADER -->
@@ -3070,7 +3258,7 @@ function cascade() {
     <div class="casc-kpi-card">
       <div class="ck-header">
         <span class="ck-label">EFFLUENT VOLUME HARVESTED</span>
-        <span class="ck-icon">☰</span>
+        <span class="prov-badge sim">SIMULATION</span>
       </div>
       <div class="ck-value font-mono">${totalEffluent} <span class="u">L</span></div>
       <div class="ck-breakdown-row">
@@ -3084,7 +3272,7 @@ function cascade() {
     <div class="casc-kpi-card">
       <div class="ck-header">
         <span class="ck-label">SECONDARY RINSE QUALIFIED</span>
-        <span class="ck-icon green">🔄</span>
+        <span class="prov-badge iso">ISO 14046</span>
       </div>
       <div class="ck-value green font-mono">${qualifiedL} <span class="u">L</span></div>
       <div class="ck-breakdown-row">
@@ -3097,7 +3285,7 @@ function cascade() {
     <div class="casc-kpi-card">
       <div class="ck-header">
         <span class="ck-label">HEAVY SLUDGE DIVERTED</span>
-        <span class="ck-icon">⏚</span>
+        <span class="prov-badge sop">ZERO CONTAM</span>
       </div>
       <div class="ck-value font-mono">${divertedL} <span class="u">L</span></div>
       <div class="ck-breakdown-row">
@@ -3110,7 +3298,7 @@ function cascade() {
     <div class="casc-kpi-card dark-card">
       <div class="ck-header">
         <span class="ck-label green-txt">ECO-VALUE &amp; NET-ZERO</span>
-        <span class="ck-icon green-txt">🛡</span>
+        <span class="prov-badge iso">CSRD READY</span>
       </div>
       <div class="ck-value green-txt font-mono">${qualifiedL} L <span class="u">Spared / cycle</span></div>
       <div class="dark-card-metrics-grid">
@@ -3196,15 +3384,15 @@ function cascade() {
       <!-- Section 3: Stream Inspector -->
       <div class="scada-sec-box stream-inspector">
         <div class="sec-box-title">
-          <span class="inspector-tag">STREAM INSPECTOR: STREAM A</span>
-          <span class="circular-pill">CIRCULAR A+</span>
+          <span class="inspector-tag">${curStream.tag}</span>
+          <span class="${curStream.badgeClass}">${curStream.badge}</span>
         </div>
         <div class="inspector-checks-list">
-          <div class="ins-check"><span>Turbidity Threshold:</span> <b class="font-mono">0.9 / &lt; 2.0 NTU ✓</b></div>
-          <div class="ins-check"><span>Ionic Conductivity:</span> <b class="font-mono">6.4 / &lt; 15 µS/cm ✓</b></div>
-          <div class="ins-check"><span>Surfactant / Active Lipids:</span> <b>0.02% UNDETECTED ✓</b></div>
-          <div class="ins-check"><span>Thermal Harvest Temp:</span> <b class="font-mono">37.8 °C (+14.2 °C)</b></div>
-          <div class="ins-check"><span>Pneumatic Actuator:</span> <b class="font-mono">120 ms Cutoff</b></div>
+          <div class="ins-check"><span>Turbidity Threshold:</span> <b class="font-mono">${curStream.turbidity}</b></div>
+          <div class="ins-check"><span>Ionic Conductivity:</span> <b class="font-mono">${curStream.conductivity}</b></div>
+          <div class="ins-check"><span>Surfactant / Active Lipids:</span> <b>${curStream.lipids}</b></div>
+          <div class="ins-check"><span>Thermal Harvest Temp:</span> <b class="font-mono">${curStream.temp}</b></div>
+          <div class="ins-check"><span>Pneumatic Actuator:</span> <b class="font-mono">${curStream.actuator}</b></div>
         </div>
       </div>
     </div>
@@ -3272,6 +3460,39 @@ function cascade() {
           <b class="green-txt">100% HEALTH</b>
         </div>
       </div>
+    </div>
+
+    <!-- STREAM PROVENANCE & VALIDATION INSPECTOR DRAWER -->
+    <div class="cascade-stream-provenance-box">
+      <div class="csp-title-row">
+        <div>
+          <h4>STREAM PROVENANCE &amp; DESTINATION SPECIFICATION: ${curStream.tag}</h4>
+          <small style="color:#64748b">Origin: ${curStream.origin} • Classification: ${curStream.classification}</small>
+        </div>
+        <span class="prov-badge iso">ISO 14046 NON-ADDITIVE</span>
+      </div>
+      <div class="csp-indicators-grid">
+        <div class="csp-ind-cell">
+          <div class="csp-ind-label">STREAM VOLUME</div>
+          <div class="csp-ind-val font-mono">${curStream.volumeL} L</div>
+        </div>
+        <div class="csp-ind-cell">
+          <div class="csp-ind-label">TURBIDITY</div>
+          <div class="csp-ind-val font-mono">${curStream.turbidity}</div>
+        </div>
+        <div class="csp-ind-cell">
+          <div class="csp-ind-label">CONDUCTIVITY</div>
+          <div class="csp-ind-val font-mono">${curStream.conductivity}</div>
+        </div>
+        <div class="csp-ind-cell">
+          <div class="csp-ind-label">TEMPERATURE</div>
+          <div class="csp-ind-val font-mono">${curStream.temp}</div>
+        </div>
+      </div>
+      <p style="font-size:12px;color:#334155;margin:0 0 10px 0;line-height:1.5">
+        <b>Routing Disposition:</b> ${curStream.destination}.<br>
+        <b>Validation Rationale:</b> ${curStream.reason}
+      </p>
     </div>
 
     <!-- Thermal Energy Reclaim Strip -->
@@ -3776,7 +3997,7 @@ function analytics() {
     <div class="impact-kpi-card">
       <div class="ik-header">
         <span class="ik-label">NET FRESH WATER CONSERVED</span>
-        <span class="ik-icon green">💧</span>
+        <span class="prov-badge iso">ISO 14046 AUDIT</span>
       </div>
       <div class="ik-val-block">
         <span class="val-num font-mono">${num(data.savedL)}</span>
@@ -3802,7 +4023,7 @@ function analytics() {
     <div class="impact-kpi-card">
       <div class="ik-header">
         <span class="ik-label">SCOPE 1 &amp; 2 THERMAL</span>
-        <span class="ik-icon teal">♨</span>
+        <span class="prov-badge sim">THERMAL AUDIT</span>
       </div>
       <div class="ik-val-block">
         <span class="val-num font-mono">${num(data.thermalKwh)}</span>
@@ -3824,7 +4045,7 @@ function analytics() {
     <div class="impact-kpi-card">
       <div class="ik-header">
         <span class="ik-label">CHEMICAL &amp; CAUSTIC</span>
-        <span class="ik-icon amber">🧪</span>
+        <span class="prov-badge sop">GMP DOSING</span>
       </div>
       <div class="ik-val-block">
         <span class="val-num font-mono">${num(data.chemKg, 1)}</span>
@@ -3846,7 +4067,7 @@ function analytics() {
     <div class="impact-kpi-card">
       <div class="ik-header">
         <span class="ik-label">LINE OEE YIELD</span>
-        <span class="ik-icon blue">⚡</span>
+        <span class="prov-badge model">OEE TELEMETRY</span>
       </div>
       <div class="ik-val-block">
         <span class="val-num font-mono">+${num(data.lineOeeHrs, 1)}</span>
@@ -3868,7 +4089,7 @@ function analytics() {
     <div class="impact-kpi-card">
       <div class="ik-header">
         <span class="ik-label">UTILITY REALIZATION</span>
-        <span class="ik-icon emerald">💶</span>
+        <span class="prov-badge iso">CSRD / TAXONOMY</span>
       </div>
       <div class="ik-val-block">
         <span class="val-num font-mono">€${num(data.utilityEur)}</span>
@@ -3951,6 +4172,7 @@ function analytics() {
             </div>
           </div>
           <div class="wf-col-label">
+            <span class="prov-badge model" style="margin-bottom:2px; display:inline-block;">1: PREVENT</span>
             <b>UPSTREAM AVOIDANCE</b>
             <small>Color &amp; Viscosity Sort</small>
           </div>
@@ -3967,6 +4189,7 @@ function analytics() {
             </div>
           </div>
           <div class="wf-col-label">
+            <span class="prov-badge sim" style="margin-bottom:2px; display:inline-block;">2: ADAPT</span>
             <b>ADAPTIVE CIP CUTOFF</b>
             <small>Spectroscopy Endpoints</small>
           </div>
@@ -3995,6 +4218,7 @@ function analytics() {
             <div class="wf-bar-float bar-reclaim" style="bottom: ${bReclaim}%; height: ${hReclaim}%;"></div>
           </div>
           <div class="wf-col-label">
+            <span class="prov-badge sop" style="margin-bottom:2px; display:inline-block;">3: CASCADE</span>
             <b>CASCADE RECLAIM</b>
             <small>Utility Loop Divert</small>
           </div>
@@ -4011,6 +4235,7 @@ function analytics() {
             </div>
           </div>
           <div class="wf-col-label">
+            <span class="prov-badge iso" style="margin-bottom:2px; display:inline-block;">4: MEASURE</span>
             <b>NET WATER INTAKE</b>
             <small class="green-txt">-${pctNetTotal}% Net Total</small>
           </div>
