@@ -5232,18 +5232,18 @@ function renderDeckSlideBody(idx) {
     return `
     <div class="deck-insight-slide">
       <div class="deck-slide-meta">
-        <span class="slide-meta-text">SLIDE 02 // PARADIGM SHIFT • STRATEGIC THESIS • CIRCULAR INLINE FLUIDICS ARCHITECTURE</span>
-        <span class="patent-pill">PATENT PENDING: EP-2026-CL89</span>
+        <span class="slide-meta-text font-mono">SLIDE 02 // PARADIGM SHIFT • STRATEGIC THESIS • CIRCULAR INLINE FLUIDICS ARCHITECTURE</span>
+        <span class="patent-pill font-mono">☑ PATENT PENDING: EP-2026-CL89</span>
       </div>
 
-      <div class="deck-core-thesis-label">THE CORE STRATEGIC THESIS</div>
+      <div class="deck-core-thesis-label font-mono">THE CORE STRATEGIC THESIS</div>
       <h1 class="deck-hero-headline">
         DON’T JUST RECYCLE THE WATER.<br>
         PREVENT UNNECESSARY WATER IN THE FIRST PLACE.
       </h1>
 
       <p class="deck-lead-para">
-        Traditional factory sustainability concentrates on downstream wastewater treatment (WWTP) — purifying water after it has already dissolved synthetic polymers, pigments, and waxes. <b>ClearLoop shifts the battle upstream</b>: combining MILP combinatorial rheology with real-time in-line spectrophotometry to stop waste before it contacts the drainage main.
+        Traditional factory sustainability concentrates on downstream wastewater treatment (WWTP) — purifying water after it has already dissolved synthetic polymers, pigments, and waxes. <b>ClearLoop shifts the battle upstream:</b> combining MILP combinatorial rheology with real-time in-line spectrophotometry to stop waste before it contacts the drainage main.
       </p>
 
       <!-- TWO COMPARISON CARDS -->
@@ -5251,41 +5251,41 @@ function renderDeckSlideBody(idx) {
         <!-- Card 1: CONVENTIONAL APPROACH -->
         <div class="deck-comp-card conventional">
           <div class="dcc-top">
-            <span class="dcc-type">CONVENTIONAL APPROACH</span>
-            <span class="dcc-badge red">DOWNSTREAM SYMPTOMS</span>
+            <span class="dcc-type font-mono">CONVENTIONAL APPROACH</span>
+            <span class="dcc-badge red font-mono">DOWNSTREAM SYMPTOMS</span>
           </div>
           <h3 class="dcc-title">End-of-Pipe Biological Reclamation</h3>
           
           <ul class="dcc-list">
             <li>
-              <span class="num-circle">1</span>
+              <span class="num-circle font-mono">1</span>
               <div><b>Static FIFO Scheduling:</b> Formulations batched blind to pigment affinity, forcing severe dark-to-light purge cycles.</div>
             </li>
             <li>
-              <span class="num-circle">2</span>
+              <span class="num-circle font-mono">2</span>
               <div><b>Blind 45-Min Timer Washouts:</b> Constant DIW rinse sprays volume past clean without real-time purity feedback.</div>
             </li>
             <li>
-              <span class="num-circle">3</span>
+              <span class="num-circle font-mono">3</span>
               <div><b>Total Effluent Disposal:</b> 3,300 L / changeover flushed directly into municipal treatment with lost thermal enthalpy.</div>
             </li>
             <li>
-              <span class="num-circle">4</span>
+              <span class="num-circle font-mono">4</span>
               <div><b>Chemical Coagulation:</b> Energy-heavy sludge dewatering and high carbon footprint incineration at centralized WWTP.</div>
             </li>
           </ul>
 
           <div class="dcc-stat-box red-box">
-            <div class="dcc-stat-left">
-              <span class="stat-icon">🗑</span>
-              <div>
+            <div class="dcc-stat-main-row">
+              <div class="stat-left-flex">
+                <span class="stat-icon-square red">🗑</span>
                 <b class="stat-main font-mono">3,300 L / Changeover</b>
-                <small>Zero thermal recovery</small>
               </div>
+              <span class="stat-pill-tag red font-mono">100% INTAKE LOSS</span>
             </div>
-            <div class="dcc-stat-right">
-              <span class="stat-loss font-mono">100% INTAKE LOSS</span>
-              <small>4-Hr lab swab wait</small>
+            <div class="dcc-stat-sub-row font-mono">
+              <span>• Zero thermal recovery</span>
+              <span>• 4-Hr lab swab wait</span>
             </div>
           </div>
         </div>
@@ -5293,41 +5293,41 @@ function renderDeckSlideBody(idx) {
         <!-- Card 2: THE CLEARLOOP PARADIGM -->
         <div class="deck-comp-card clearloop">
           <div class="dcc-top">
-            <span class="dcc-type">THE CLEARLOOP PARADIGM</span>
-            <span class="dcc-badge green">UPSTREAM PREVENTION</span>
+            <span class="dcc-type font-mono">THE CLEARLOOP PARADIGM</span>
+            <span class="dcc-badge green font-mono">UPSTREAM PREVENTION</span>
           </div>
           <h3 class="dcc-title">Autonomous Kinetic Interception &amp; Multi-Tier Cascade</h3>
 
           <ul class="dcc-list">
             <li>
-              <span class="num-circle green">1</span>
+              <span class="num-circle green font-mono">1</span>
               <div><b>MILP Rheology Scheduler:</b> Formulations clustered by surfactant &amp; molecular affinity, eliminating heavy cross-cleaning.</div>
             </li>
             <li>
-              <span class="num-circle green">2</span>
+              <span class="num-circle green font-mono">2</span>
               <div><b>Dual-Path Spectrophotometry:</b> Real-time transmission monitors stop washing at exact asymptotic cleanliness (29 min).</div>
             </li>
             <li>
-              <span class="num-circle green">3</span>
+              <span class="num-circle green font-mono">3</span>
               <div><b>Automated Diverter Valves:</b> 69% of reusable effluent captured in real-time for pre-rinse loops &amp; crate washing bays.</div>
             </li>
             <li>
-              <span class="num-circle green">4</span>
+              <span class="num-circle green font-mono">4</span>
               <div><b>Thermal Enthalpy Loop:</b> Counter-current plate heat exchangers harvest +14.2°C directly back into boiler feed lines.</div>
             </li>
           </ul>
 
           <div class="dcc-stat-box green-box">
-            <div class="dcc-stat-left">
-              <span class="stat-icon green">💧</span>
-              <div>
+            <div class="dcc-stat-main-row">
+              <div class="stat-left-flex">
+                <span class="stat-icon-square green">💧</span>
                 <b class="stat-main font-mono green-txt">-38.8% Intake (-1,284 L)</b>
-                <small>✓ 0 Deviations verified</small>
               </div>
+              <span class="stat-pill-tag green font-mono">INSTANT UPSTREAM SAVING</span>
             </div>
-            <div class="dcc-stat-right">
-              <span class="stat-saving font-mono">INSTANT UPSTREAM SAVING</span>
-              <small>✓ L'Oréal Q-882 Compliant</small>
+            <div class="dcc-stat-sub-row green font-mono">
+              <span>✓ 0 Deviations verified</span>
+              <span>✓ L'Oréal Q-882 Compliant</span>
             </div>
           </div>
         </div>
@@ -5346,74 +5346,124 @@ function renderDeckSlideBody(idx) {
           </div>
         </div>
         <div class="dib-right">
-          <span class="clean-line-tag">● L'ORÉAL CLEAN LINE Q-882</span>
+          <span class="clean-line-tag font-mono">● L'ORÉAL CLEAN LINE Q-882</span>
         </div>
       </div>
+    </div>
 
-      <!-- 4 HERO KPI CARDS -->
-      <div class="deck-kpi-grid">
-        <div class="deck-kpi-card">
-          <div class="dkc-head">
-            <span class="dkc-label">WATER AVOIDED</span>
-            <span class="dkc-icon">💧</span>
-          </div>
-          <div class="dkc-val font-mono green-txt">1,284 L <span class="u">(-38.8%)</span></div>
-          <div class="dkc-sub">Daily fresh water spared / line</div>
+    <!-- 4 HERO KPI CARDS BELOW THE MAIN SLIDE CARD MATCHING MASTER MOCKUP media_1791128861283.png -->
+    <div class="deck-kpi-grid">
+      <div class="deck-kpi-card">
+        <div class="dkc-head">
+          <span class="dkc-label font-mono">WATER AVOIDED</span>
+          <span class="dkc-icon">💧</span>
         </div>
+        <div class="dkc-val font-mono">1,284 L <span class="green-pill font-mono">(-38.8%)</span></div>
+        <div class="dkc-sub">Daily fresh water spared / line</div>
+      </div>
 
-        <div class="deck-kpi-card">
-          <div class="dkc-head">
-            <span class="dkc-label">CAPACITY &amp; OEE</span>
-            <span class="dkc-icon">⏱</span>
-          </div>
-          <div class="dkc-val font-mono green-txt">+74 min <span class="u">/ Shift</span></div>
-          <div class="dkc-sub">Reclaimed production uptime</div>
+      <div class="deck-kpi-card">
+        <div class="dkc-head">
+          <span class="dkc-label font-mono">CAPACITY &amp; OEE</span>
+          <span class="dkc-icon">⏱</span>
         </div>
+        <div class="dkc-val font-mono">+74 min <span class="unit green font-mono">/ Shift</span></div>
+        <div class="dkc-sub">Reclaimed production uptime</div>
+      </div>
 
-        <div class="deck-kpi-card">
-          <div class="dkc-head">
-            <span class="dkc-label">ANNUALIZED OPEX</span>
-            <span class="dkc-icon">💶</span>
-          </div>
-          <div class="dkc-val font-mono">€230,000 <span class="u">/ Line</span></div>
-          <div class="dkc-sub">DIW procurement &amp; thermal return</div>
+      <div class="deck-kpi-card">
+        <div class="dkc-head">
+          <span class="dkc-label font-mono">ANNUALIZED OPEX</span>
+          <span class="dkc-icon">💶</span>
         </div>
+        <div class="dkc-val font-mono">€230,000 <span class="unit green font-mono">/ Line</span></div>
+        <div class="dkc-sub">DIW procurement &amp; thermal return</div>
+      </div>
 
-        <div class="deck-kpi-card">
-          <div class="dkc-head">
-            <span class="dkc-label">GMP COMPLIANCE</span>
-            <span class="dkc-icon">🛡</span>
-          </div>
-          <div class="dkc-val font-mono green-txt">0 Deviations</div>
-          <div class="dkc-sub">0 ppm cross-contamination limit</div>
+      <div class="deck-kpi-card">
+        <div class="dkc-head">
+          <span class="dkc-label font-mono">GMP COMPLIANCE</span>
+          <span class="dkc-icon">🛡</span>
         </div>
+        <div class="dkc-val font-mono green-txt">0 Deviations</div>
+        <div class="dkc-sub">0 ppm cross-contamination limit</div>
       </div>
     </div>
     `;
   }
 
-  // Generic presentation slide renderer
+  // Enhanced presentation slide renderer for all other slides
   const s = pitchSlides[idx] || pitchSlides[0];
   return `
-    <div class="deck-standard-slide">
+    <div class="deck-insight-slide">
       <div class="deck-slide-meta">
-        <span class="slide-meta-text">SLIDE 0${idx + 1} // ${escape(s.tag || '')}</span>
-        <span class="patent-pill">L'ORÉAL 2026</span>
+        <span class="slide-meta-text font-mono">SLIDE 0${idx + 1} // ${escape(s.tag || '')}</span>
+        <span class="patent-pill font-mono">L'ORÉAL BEAUTY TECH 2026</span>
       </div>
-      <h1 class="deck-hero-headline" style="font-size:24px">${escape(s.title || '')}</h1>
-      <h2 style="font-size:13px;color:#047857;margin:4px 0 10px;font-weight:700">${escape(s.subtitle || '')}</h2>
+      <div class="deck-core-thesis-label font-mono">INDUSTRIAL OPERATIONS ARCHITECTURE</div>
+      <h1 class="deck-hero-headline" style="font-size:22px">${escape(s.title || '')}</h1>
+      <h2 style="font-size:12px;color:#047857;margin:0 0 10px;font-weight:700">${escape(s.subtitle || '')}</h2>
       <p class="deck-lead-para">${escape(s.lead || '')}</p>
       
-      <div class="pitch-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px">
+      <div class="pitch-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px">
         ${(s.cards || []).map(c => `
-          <div class="pitch-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:14px">
-            <h3 style="font-size:12px;font-weight:800;color:#0f172a;margin-bottom:6px"><span>${c.icon}</span> ${escape(c.title)}</h3>
-            <p style="font-size:10px;color:#475569;line-height:1.4">${c.text}</p>
+          <div class="pitch-card" style="background:#ffffff;border:1px solid #c2eed5;border-radius:8px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.02)">
+            <h3 style="font-size:12px;font-weight:800;color:#0f172a;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+              <span style="font-size:16px">${c.icon}</span> ${escape(c.title)}
+            </h3>
+            <p style="font-size:9.5px;color:#334155;line-height:1.45;margin:0">${c.text}</p>
           </div>
         `).join('')}
       </div>
     </div>
+
+    <!-- STANDARD 4 KPI SUMMARY STRIP -->
+    <div class="deck-kpi-grid">
+      <div class="deck-kpi-card">
+        <div class="dkc-head">
+          <span class="dkc-label font-mono">TARGET WATER</span>
+          <span class="dkc-icon">💧</span>
+        </div>
+        <div class="dkc-val font-mono">1,494 L <span class="green-pill font-mono">(-39.5%)</span></div>
+        <div class="dkc-sub">Net verified savings / day</div>
+      </div>
+      <div class="deck-kpi-card">
+        <div class="dkc-head">
+          <span class="dkc-label font-mono">THERMAL CO2e</span>
+          <span class="dkc-icon">♨</span>
+        </div>
+        <div class="dkc-val font-mono">412 kWh <span class="unit green font-mono">/ Day</span></div>
+        <div class="dkc-sub">Boiler gas load averted</div>
+      </div>
+      <div class="deck-kpi-card">
+        <div class="dkc-head">
+          <span class="dkc-label font-mono">LINE OEE YIELD</span>
+          <span class="dkc-icon">⚡</span>
+        </div>
+        <div class="dkc-val font-mono">+4.8 Hrs <span class="unit green font-mono">/ Wk</span></div>
+        <div class="dkc-sub">+6.1% Net line availability</div>
+      </div>
+      <div class="deck-kpi-card">
+        <div class="dkc-head">
+          <span class="dkc-label font-mono">CSRD STATUS</span>
+          <span class="dkc-icon">🛡</span>
+        </div>
+        <div class="dkc-val font-mono green-txt">ISO 14046</div>
+        <div class="dkc-sub">Zero double-counting sealed</div>
+      </div>
+    </div>
   `;
+}
+
+function toggleDeckFullscreen() {
+  const d = $('#pitchDialog');
+  if (!d) return;
+  if (!document.fullscreenElement) {
+    if (d.requestFullscreen) d.requestFullscreen();
+    else if (d.webkitRequestFullscreen) d.webkitRequestFullscreen();
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen();
+  }
 }
 
 function renderSlide() {
@@ -5430,23 +5480,32 @@ function renderSlide() {
     <!-- TOP BAR WITH LOGO, STEPPER & ACTIONS -->
     <div class="deck-topbar">
       <div class="deck-brand-group">
-        <span class="deck-infinity-logo">☍</span>
+        <div class="deck-infinity-logo-box">
+          <span class="deck-infinity-logo">∞</span>
+        </div>
         <div>
           <div class="deck-brand-row">
             <b class="deck-brand-name">ClearLoop</b>
-            <span class="deck-stage-pill">STAGE ${stageNum} // ${stageName.toUpperCase()}</span>
+            <div class="deck-stage-pill font-mono">
+              <span>STAGE ${stageNum}</span>
+              <span>// ${stageName.toUpperCase()}</span>
+            </div>
           </div>
-          <small class="deck-sub-tag">L'Oréal Sustainability Challenge 2026 • 60-Second Competition Pitch</small>
+          <div class="deck-sub-tag">
+            <span class="brand-bar">❚</span>
+            <span>L'Oréal Sustainability Challenge 2026 • 60-Second Competition Pitch</span>
+          </div>
         </div>
       </div>
 
       <!-- 8-STEP STEPPER -->
       <div class="deck-stepper">
         ${PITCH_STAGES.map((s, idx) => `
-          <button class="deck-step-btn ${idx === currentSlide ? 'active' : ''}" onclick="goToSlide(${idx})">
-            ${idx === currentSlide ? '<span class="step-dot">●</span>' : ''}
-            <span class="step-code">${s.code}</span>
-            <span class="step-name">${s.name}</span>
+          <button class="deck-step-btn ${idx === currentSlide ? 'active' : ''}" onclick="goToSlide(${idx})" title="Slide ${s.code}: ${s.name}">
+            <div class="step-code font-mono">
+              ${idx === currentSlide ? '<span class="step-dot">●</span> ' : ''}${s.code}
+            </div>
+            <div class="step-name">${s.name}</div>
           </button>
         `).join('')}
       </div>
@@ -5455,6 +5514,9 @@ function renderSlide() {
         <button class="btn-see-live" onclick="jumpToCurrentSlideView()">
           <span>SEE LIVE PLATFORM</span>
           <span class="arrow">↗</span>
+        </button>
+        <button class="btn-fullscreen-toggle" onclick="toggleDeckFullscreen()" title="Toggle Fullscreen">
+          <span class="fs-icon">⛶</span>
         </button>
         <button class="btn-deck-close" onclick="closePitchDeck()" title="Close Presentation">×</button>
       </div>
@@ -5488,7 +5550,7 @@ function renderSlide() {
       </div>
 
       <div class="deck-bottom-right">
-        <span class="jump-label">JUMP:</span>
+        <span class="jump-label font-mono">JUMP:</span>
         <div class="jump-numbers">
           ${PITCH_STAGES.map((s, idx) => `
             <button class="jump-num ${idx === currentSlide ? 'active' : ''}" onclick="goToSlide(${idx})">
@@ -5563,6 +5625,9 @@ window.addEventListener('keydown', e => {
     } else if (e.key === 'ArrowLeft') {
       e.preventDefault();
       prevSlide();
+    } else if (e.key >= '1' && e.key <= '8') {
+      e.preventDefault();
+      goToSlide(parseInt(e.key, 10) - 1);
     } else if (e.key === 'Escape') {
       closePitchDeck();
     }

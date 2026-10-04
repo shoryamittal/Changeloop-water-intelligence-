@@ -8424,23 +8424,23 @@ dialog::backdrop {
    ========================================================================== */
 
 .pitch-modal {
-  max-width: 1080px;
+  max-width: 1040px;
   width: 95vw;
-  height: 92vh;
-  border-radius: 12px;
+  max-height: 94vh;
+  border-radius: 14px;
   padding: 0;
   overflow: hidden;
-  border: 1px solid #d1fae5;
+  border: 1px solid #c2eed5;
   background: #ffffff;
   color: #0f172a;
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 25px 80px rgba(3, 33, 23, 0.25);
 }
 
 .pitch-modal-shell {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  background: #fdfefe;
+  max-height: 94vh;
+  background: #ffffff;
 }
 
 /* DECK TOPBAR */
@@ -8448,7 +8448,7 @@ dialog::backdrop {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 24px;
+  padding: 14px 24px;
   background: #ffffff;
   border-bottom: 1px solid #e2e8f0;
   gap: 16px;
@@ -8460,10 +8460,21 @@ dialog::backdrop {
   gap: 10px;
 }
 
+.deck-infinity-logo-box {
+  width: 28px;
+  height: 28px;
+  background: #032117;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .deck-infinity-logo {
-  font-size: 22px;
-  color: #047857;
+  font-size: 16px;
+  color: #ffffff;
   font-weight: 800;
+  line-height: 1;
 }
 
 .deck-brand-row {
@@ -8473,33 +8484,45 @@ dialog::backdrop {
 }
 
 .deck-brand-name {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 800;
   color: #0f172a;
+  letter-spacing: -0.2px;
 }
 
 .deck-stage-pill {
-  font-family: 'DM Mono', monospace;
-  font-size: 8px;
-  font-weight: 700;
-  background: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
+  background: #6ee7b7;
+  color: #064e3b;
+  font-size: 7.5px;
+  font-weight: 800;
   padding: 2px 6px;
   border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  letter-spacing: 0.2px;
 }
 
 .deck-sub-tag {
   font-size: 9px;
   color: #64748b;
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.deck-sub-tag .brand-bar {
+  color: #059669;
+  font-weight: 800;
+  font-size: 9px;
 }
 
 /* STEPPER */
 .deck-stepper {
   display: flex;
   align-items: center;
-  background: #f1f5f9;
+  background: #e6f7ef;
   padding: 3px;
   border-radius: 8px;
   gap: 2px;
@@ -8507,55 +8530,64 @@ dialog::backdrop {
 
 .deck-step-btn {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 4px;
   border: none;
   background: transparent;
-  padding: 5px 9px;
+  padding: 4px 10px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 10px;
-  color: #64748b;
-  transition: all 0.2s ease;
+  color: #3b6354;
+  transition: all 0.15s ease;
+}
+
+.deck-step-btn .step-code {
+  font-size: 9px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  line-height: 1.1;
+}
+
+.deck-step-btn .step-dot {
+  color: #34d399;
+  font-size: 7px;
+}
+
+.deck-step-btn .step-name {
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1.1;
 }
 
 .deck-step-btn:hover {
-  color: #0f172a;
+  color: #032117;
 }
 
 .deck-step-btn.active {
   background: #032117;
   color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
-.deck-step-btn .step-dot {
-  color: #34d399;
-  font-size: 8px;
-}
-
-.deck-step-btn .step-code {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  font-weight: 700;
-}
-
-.deck-step-btn .step-name {
-  font-weight: 700;
+.deck-step-btn.active .step-name {
+  color: #ffffff;
 }
 
 .deck-top-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .btn-see-live {
   background: #032117;
   color: #ffffff;
   border: none;
-  padding: 6px 12px;
+  padding: 7px 12px;
   border-radius: 6px;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 800;
   cursor: pointer;
   display: flex;
@@ -8567,6 +8599,26 @@ dialog::backdrop {
 
 .btn-see-live:hover {
   background: #064e3b;
+}
+
+.btn-fullscreen-toggle {
+  width: 28px;
+  height: 28px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #475569;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.btn-fullscreen-toggle:hover {
+  background: #e2e8f0;
+  color: #0f172a;
 }
 
 .btn-deck-close {
@@ -8585,18 +8637,17 @@ dialog::backdrop {
 /* DECK SLIDE CONTENT VIEWPORT */
 .deck-slide-content {
   flex: 1;
-  padding: 24px 32px;
+  padding: 20px 28px;
   overflow-y: auto;
-  background: #f8fafc;
+  background: #ffffff;
 }
 
 .deck-insight-slide {
-  background: #f0fdf4;
+  background: #eafaf1;
   border: 1px solid #bbf7d0;
   border-radius: 10px;
-  padding: 24px 28px;
-  max-width: 980px;
-  margin: 0 auto;
+  padding: 22px 26px;
+  margin-bottom: 14px;
 }
 
 .deck-slide-meta {
@@ -8607,93 +8658,98 @@ dialog::backdrop {
 }
 
 .slide-meta-text {
-  font-family: 'DM Mono', monospace;
-  font-size: 8.5px;
+  font-size: 8px;
   font-weight: 700;
   color: #047857;
-  letter-spacing: 0.5px;
+  background: #ffffff;
+  border: 1px solid #86efac;
+  padding: 2px 7px;
+  border-radius: 3px;
+  letter-spacing: 0.4px;
 }
 
 .patent-pill {
-  font-family: 'DM Mono', monospace;
   font-size: 8px;
   font-weight: 700;
   background: #ffffff;
   color: #047857;
-  border: 1px solid #a7f3d0;
+  border: 1px solid #86efac;
   padding: 2px 7px;
   border-radius: 3px;
 }
 
 .deck-core-thesis-label {
-  font-family: 'DM Mono', monospace;
   font-size: 8.5px;
-  font-weight: 700;
+  font-weight: 800;
   color: #059669;
+  letter-spacing: 0.8px;
   margin-bottom: 4px;
-  letter-spacing: 0.5px;
 }
 
 .deck-hero-headline {
   font-size: 24px;
   font-weight: 900;
   color: #064e3b;
-  line-height: 1.25;
+  line-height: 1.15;
   margin: 0 0 10px;
   letter-spacing: -0.3px;
 }
 
 .deck-lead-para {
-  font-size: 11px;
-  color: #334155;
+  font-size: 10.5px;
+  color: #2d4a3e;
   line-height: 1.5;
-  margin: 0 0 18px;
-  max-width: 900px;
+  margin: 0 0 16px;
 }
 
 /* COMPARISON GRID */
 .deck-comparison-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 14px;
+  margin-bottom: 14px;
 }
 
 .deck-comp-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
-  padding: 16px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
 .deck-comp-card.clearloop {
-  border: 1.5px solid #059669;
-  box-shadow: 0 2px 10px rgba(5, 150, 105, 0.08);
+  border: 2px solid #059669;
+  box-shadow: 0 3px 12px rgba(5, 150, 105, 0.08);
 }
 
 .dcc-top {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
+  align-items: flex-start;
+  margin-bottom: 4px;
 }
 
 .dcc-type {
-  font-family: 'DM Mono', monospace;
-  font-size: 8px;
-  font-weight: 700;
+  font-size: 7.5px;
+  font-weight: 800;
   color: #64748b;
+  letter-spacing: 0.3px;
+}
+
+.deck-comp-card.clearloop .dcc-type {
+  color: #047857;
 }
 
 .dcc-badge {
-  font-family: 'DM Mono', monospace;
-  font-size: 7.5px;
-  font-weight: 700;
+  font-size: 7px;
+  font-weight: 800;
   padding: 2px 6px;
   border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
 }
 
 .dcc-badge.red {
@@ -8702,42 +8758,42 @@ dialog::backdrop {
 }
 
 .dcc-badge.green {
-  background: #d1fae5;
-  color: #065f46;
+  background: #6ee7b7;
+  color: #064e3b;
 }
 
 .dcc-title {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
   color: #0f172a;
-  margin: 0 0 12px;
+  margin: 0 0 10px;
 }
 
 .dcc-list {
   list-style: none;
   padding: 0;
-  margin: 0 0 14px;
+  margin: 0 0 12px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .dcc-list li {
   display: flex;
   gap: 8px;
-  font-size: 9.5px;
+  font-size: 9px;
   color: #334155;
   line-height: 1.35;
 }
 
 .num-circle {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
-  background: #f1f5f9;
+  background: #e2e8f0;
   color: #475569;
-  font-size: 9px;
-  font-weight: 700;
+  font-size: 8px;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -8753,8 +8809,8 @@ dialog::backdrop {
   border-radius: 6px;
   padding: 8px 12px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .red-box {
@@ -8767,49 +8823,76 @@ dialog::backdrop {
   border: 1px solid #a7f3d0;
 }
 
-.dcc-stat-left {
+.dcc-stat-main-row {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 8px;
 }
 
-.stat-icon {
-  font-size: 14px;
+.stat-left-flex {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-icon-square {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+
+.stat-icon-square.red {
+  background: #fee2e2;
+}
+
+.stat-icon-square.green {
+  background: #d1fae5;
 }
 
 .stat-main {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 800;
   color: #0f172a;
-  display: block;
 }
 
-.dcc-stat-left small {
-  font-size: 8px;
-  color: #64748b;
-}
-
-.dcc-stat-right {
-  text-align: right;
-}
-
-.stat-loss {
-  font-size: 8px;
-  font-weight: 700;
-  color: #dc2626;
-  display: block;
-}
-
-.stat-saving {
-  font-size: 8px;
-  font-weight: 700;
+.stat-main.green-txt {
   color: #047857;
-  display: block;
+  font-weight: 900;
 }
 
-.dcc-stat-right small {
+.stat-pill-tag {
+  font-size: 7.5px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.stat-pill-tag.red {
+  background: #ffffff;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+.stat-pill-tag.green {
+  background: #ffffff;
+  color: #047857;
+  border: 1px solid #86efac;
+}
+
+.dcc-stat-sub-row {
+  display: flex;
+  justify-content: space-between;
   font-size: 8px;
   color: #64748b;
+}
+
+.dcc-stat-sub-row.green {
+  color: #047857;
+  font-weight: 700;
 }
 
 /* INTERLOCK BANNER */
@@ -8821,7 +8904,6 @@ dialog::backdrop {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
   color: #ffffff;
   gap: 16px;
 }
@@ -8833,9 +8915,9 @@ dialog::backdrop {
 }
 
 .dib-shield-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
   background: rgba(52, 211, 153, 0.15);
   border: 1px solid rgba(52, 211, 153, 0.3);
   display: flex;
@@ -8853,82 +8935,97 @@ dialog::backdrop {
 }
 
 .dib-title {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 800;
   color: #ffffff;
-  display: block;
-  margin: 1px 0;
+  margin: 2px 0;
+  letter-spacing: 0.2px;
 }
 
 .dib-desc {
-  font-size: 9px;
+  font-size: 8.5px;
   color: #cbd5e1;
   margin: 0;
   line-height: 1.35;
 }
 
 .clean-line-tag {
-  font-family: 'DM Mono', monospace;
   font-size: 8px;
-  font-weight: 700;
+  font-weight: 800;
   background: rgba(255, 255, 255, 0.08);
   color: #34d399;
-  border: 1px solid rgba(52, 211, 153, 0.3);
+  border: 1px solid rgba(52, 211, 153, 0.35);
   padding: 4px 8px;
   border-radius: 4px;
   white-space: nowrap;
 }
 
-/* 4 HERO KPI CARDS */
+/* 4 HERO KPI CARDS BELOW THE MAIN SLIDE CARD */
 .deck-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 12px;
+  margin-bottom: 6px;
 }
 
 .deck-kpi-card {
-  background: #ffffff;
+  background: #eafaf1;
   border: 1px solid #bbf7d0;
   border-radius: 8px;
-  padding: 10px 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .dkc-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .dkc-label {
-  font-family: 'DM Mono', monospace;
   font-size: 7.5px;
   font-weight: 700;
-  color: #64748b;
-  letter-spacing: 0.3px;
+  color: #475569;
+  letter-spacing: 0.4px;
 }
 
 .dkc-icon {
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .dkc-val {
-  font-size: 17px;
-  font-weight: 800;
+  font-size: 19px;
+  font-weight: 900;
   color: #0f172a;
-  line-height: 1.2;
+  line-height: 1.1;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
 }
 
-.dkc-val .u {
+.dkc-val .green-pill {
   font-size: 10px;
-  font-weight: 600;
-  color: #64748b;
+  font-weight: 700;
+  color: #047857;
+}
+
+.dkc-val .unit.green {
+  font-size: 11px;
+  font-weight: 700;
+  color: #047857;
+}
+
+.dkc-val.green-txt {
+  color: #047857;
 }
 
 .dkc-sub {
-  font-size: 8px;
+  font-size: 8.5px;
   color: #64748b;
-  margin-top: 2px;
 }
 
 /* DECK BOTTOM BAR */
@@ -8936,7 +9033,7 @@ dialog::backdrop {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 24px;
+  padding: 12px 24px;
   background: #ffffff;
   border-top: 1px solid #e2e8f0;
 }
@@ -8944,7 +9041,7 @@ dialog::backdrop {
 .btn-deck-nav {
   padding: 6px 12px;
   border-radius: 6px;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -8960,12 +9057,16 @@ dialog::backdrop {
   background: #032117;
   color: #ffffff;
   border: none;
+  padding: 7px 14px;
+  font-weight: 800;
 }
 
 .btn-deck-nav.finish {
   background: #047857;
   color: #ffffff;
   border: none;
+  padding: 7px 14px;
+  font-weight: 800;
 }
 
 .btn-deck-nav:hover {
@@ -8979,10 +9080,9 @@ dialog::backdrop {
 }
 
 .jump-label {
-  font-family: 'DM Mono', monospace;
   font-size: 8px;
-  color: #64748b;
   font-weight: 700;
+  color: #64748b;
 }
 
 .jump-numbers {
@@ -8991,12 +9091,11 @@ dialog::backdrop {
 }
 
 .jump-num {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 4px;
   background: #f1f5f9;
   border: none;
-  font-family: 'DM Mono', monospace;
   font-size: 9px;
   font-weight: 700;
   color: #475569;
@@ -9004,11 +9103,17 @@ dialog::backdrop {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.jump-num:hover {
+  background: #e2e8f0;
 }
 
 .jump-num.active {
   background: #032117;
   color: #ffffff;
+  font-weight: 900;
 }
 
 @media (max-width: 900px) {
