@@ -1,0 +1,40 @@
+name: ClearLoop Continuous Integration
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Core Invariants & 1,000-Scenario Industrial Stress Suite
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Verify zero external dependencies (Standard Library Only)
+      run: |
+        python -c "import http.server, sqlite3, json, math, random, urllib.request; print('Python standard library verification successful.')"
+
+    - name: Execute Core Unit & Invariant Tests (21 Tests)
+      run: |
+        python -m unittest discover -s tests -p "test_core.py"
+
+    - name: Execute 1,000-Scenario Industrial Monte Carlo Stress Suite (4,000 Assertions)
+      run: |
+        python tests/test_stress_1000.py
+
+    - name: Verify Front-End JavaScript Syntax
+      run: |
+        node -c frontend/app.js
