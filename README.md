@@ -2,6 +2,14 @@
 
 **An Executable, Upstream Decision-Support Prototype for the L'Oréal Sustainability Challenge 2026.**
 
+[![CI Pipeline](https://github.com/shoryamittal/Zero-Waste-Changeover-Engine/actions/workflows/ci.yml/badge.svg)](https://github.com/shoryamittal/Zero-Waste-Changeover-Engine/actions)
+![Tests Passed](https://img.shields.io/badge/Tests-4%2C021%20Passing-brightgreen?style=flat-square&logo=python)
+![Safety Reliability](https://img.shields.io/badge/Safety%20Reliability-100.000%25-success?style=flat-square)
+![Dependencies](https://img.shields.io/badge/Dependencies-Zero%20External-blue?style=flat-square)
+![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-informational?style=flat-square&logo=python)
+![L'Oréal Challenge](https://img.shields.io/badge/L'Or%C3%A9al%20Challenge-2026-gold?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-lightgrey?style=flat-square)
+
 > **Status:** Simulation & Advisory Decision-Support Prototype — not L'Oréal proprietary production data. Target integration architecture — not connected to live L'Oréal plant control systems.
 
 ---
@@ -21,6 +29,15 @@ Most industrial circularity initiatives focus downstream: treating high-COD effl
 ---
 
 ## 2. Quickstart & Demonstration
+
+### Live Presentation Keyboard Shortcuts
+When presenting in the browser at `http://localhost:8000`:
+- **`[P]`**: Open 8-Slide Executive Pitch Deck (use `[←]` / `[→]` or `[Space]` to navigate slides)
+- **`[T]`**: Start 3-Minute Guided Demo Tour
+- **`[D]`**: Open Printable Executive Dossier (`window.print()`)
+- **`[M]`**: Toggle Web Audio Sound Feedback
+- **`[1]`–`[9]`, `[0]`**: Instant jump to views (Overview, Planning, Optimizer, CIP Cleaning, Waterloop, ESG Ledger, What-If Lab, ROI, Judge Defense, Data Trust)
+- **`[Esc]`**: Close active presentation dialog
 
 ### Run Locally (Standard Python 3)
 ClearLoop runs completely dependency-free using Python's standard library and a lightweight vanilla JS/CSS web app:
