@@ -238,7 +238,7 @@
       <div class="site-badge-group">
         <span class="site-label">FACILITY</span>
         <select class="topbar-select" id="plantSelector" onchange="changePlant(this.value)">
-          <option value="aulnay">Aulnay-sous-Bois Formulation</option>
+          <option value="aulnay">Aulnay-sous-Bois Formulation Skid R-04</option>
           <option value="burgos">Burgos (Waterloop)</option>
           <option value="settimo">Settimo Torinese</option>
           <option value="vorselaar">Vorselaar Surfactants</option>
@@ -260,7 +260,7 @@
     </div>
 
     <div class="topbar-actions">
-      <button class="button gold present-clearloop-btn" onclick="openPitchDeck()">✨ PRESENT CLEARLOOP</button>
+      <button class="button gold present-clearloop-btn" onclick="openPitchDeck()">⏱ PRESENT CLEARLOOP (JURY DEMO)</button>
       <div class="topbar-profile" onclick="returnToGateway()" title="Lock Session / Return to Operator Gateway">
         <div class="avatar" id="topbarAvatar">CL</div>
         <div class="profile-info">
@@ -288,11 +288,11 @@
         <button data-view="cleaning" onclick="showView('cleaning')">
           <i>🔬</i><span>Adaptive Cleaning</span><span class="nav-badge">CIP</span>
         </button>
-        <button data-view="cascade" class="active" onclick="showView('cascade')">
-          <i>🔄</i><span>Water Cascade</span><span class="nav-badge active-loop">Loop</span>
+        <button data-view="cascade" onclick="showView('cascade')">
+          <i>🔄</i><span>Water Cascade</span><span class="nav-badge">Loop</span>
         </button>
-        <button data-view="analytics" onclick="showView('analytics')">
-          <i>📜</i><span>Impact</span><span class="nav-badge">ESG</span>
+        <button data-view="analytics" class="active" onclick="showView('analytics')">
+          <i>📜</i><span>Impact / ESG Verification</span><span class="nav-badge active-esg">ESG</span>
         </button>
       </nav>
 

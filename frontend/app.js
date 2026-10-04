@@ -3357,11 +3357,174 @@ function cascade() {
 /* 6. ESG & IMPACT ANALYTICS VIEW */
 /* 6. RESOURCE IMPACT LEDGER & ESG VERIFICATION (MATCHES MASTER MOCKUP media_1791128843569.png) */
 
+const IMPACT_DATA_BY_RANGE = {
+  '24h': {
+    savedL: 1494,
+    upstreamAvoidedL: 1284,
+    upstreamAvoidedPct: 33.95,
+    reclaimedL: 210,
+    reclaimedPct: 5.55,
+    netIntakeDeltaPct: -39.5,
+    thermalKwh: 412,
+    co2eMitigationKg: 84,
+    chemKg: 18.4,
+    lineOeeHrs: 4.8,
+    utilityEur: 648,
+    runRateEur: 236.5,
+    baselineDemandL: 3850,
+    upstreamDeltaL: -920,
+    adaptiveDeltaL: -364,
+    grossConsumedL: 2566,
+    cascadeReclaimL: -210,
+    netWaterIntakeL: 2356
+  },
+  '7d': {
+    savedL: 10458,
+    upstreamAvoidedL: 8988,
+    upstreamAvoidedPct: 33.95,
+    reclaimedL: 1470,
+    reclaimedPct: 5.55,
+    netIntakeDeltaPct: -39.5,
+    thermalKwh: 2884,
+    co2eMitigationKg: 588,
+    chemKg: 128.8,
+    lineOeeHrs: 33.6,
+    utilityEur: 4536,
+    runRateEur: 236.5,
+    baselineDemandL: 26950,
+    upstreamDeltaL: -6440,
+    adaptiveDeltaL: -2548,
+    grossConsumedL: 17962,
+    cascadeReclaimL: -1470,
+    netWaterIntakeL: 16492
+  },
+  '30d': {
+    savedL: 44820,
+    upstreamAvoidedL: 38520,
+    upstreamAvoidedPct: 33.95,
+    reclaimedL: 6300,
+    reclaimedPct: 5.55,
+    netIntakeDeltaPct: -39.5,
+    thermalKwh: 12360,
+    co2eMitigationKg: 2520,
+    chemKg: 552.0,
+    lineOeeHrs: 144.0,
+    utilityEur: 19440,
+    runRateEur: 236.5,
+    baselineDemandL: 115500,
+    upstreamDeltaL: -27600,
+    adaptiveDeltaL: -10920,
+    grossConsumedL: 76980,
+    cascadeReclaimL: -6300,
+    netWaterIntakeL: 70680
+  },
+  '90d': {
+    savedL: 134460,
+    upstreamAvoidedL: 115560,
+    upstreamAvoidedPct: 33.95,
+    reclaimedL: 18900,
+    reclaimedPct: 5.55,
+    netIntakeDeltaPct: -39.5,
+    thermalKwh: 37080,
+    co2eMitigationKg: 7560,
+    chemKg: 1656.0,
+    lineOeeHrs: 432.0,
+    utilityEur: 58320,
+    runRateEur: 236.5,
+    baselineDemandL: 346500,
+    upstreamDeltaL: -82800,
+    adaptiveDeltaL: -32760,
+    grossConsumedL: 230940,
+    cascadeReclaimL: -18900,
+    netWaterIntakeL: 212040
+  }
+};
+
+const AUDIT_BATCH_ROWS = [
+  {
+    id: 'AULN-2026-9831',
+    vessel: 'Tank 14',
+    transition: 'Rouge Pur #04 → #08',
+    sub: 'Sequenced compatible pigments',
+    shift: 'Morning',
+    preventedL: -360,
+    reclaimedL: 65,
+    netFreshL: 515,
+    energyKwh: -94,
+    hash: '#0x8efb53...f1e'
+  },
+  {
+    id: 'AULN-2026-9824',
+    vessel: 'Tank 09',
+    transition: 'Hydra-Serum → Night Elixir',
+    sub: 'Low-surfactant adaptive rinse',
+    shift: 'Afternoon',
+    preventedL: -290,
+    reclaimedL: 45,
+    netFreshL: 480,
+    energyKwh: -78,
+    hash: '#0x4a99...3c0'
+  },
+  {
+    id: 'AULN-2026-9818',
+    vessel: 'Tank 03',
+    transition: 'Fond de Teint → Matte Glow',
+    sub: 'Optical density dynamic cutoff',
+    shift: 'Morning',
+    preventedL: -390,
+    reclaimedL: 50,
+    netFreshL: 690,
+    energyKwh: -112,
+    hash: '#0x7e15...0d5'
+  },
+  {
+    id: 'AULN-2026-9809',
+    vessel: 'Tank 12',
+    transition: 'UV Defense Prime → Day Veil',
+    sub: 'Viscosity ramp scheduling',
+    shift: 'Night',
+    preventedL: -264,
+    reclaimedL: 50,
+    netFreshL: 671,
+    energyKwh: -68,
+    hash: '#0x2b38...9a1'
+  }
+];
+
 function setImpactRange(range) {
   state.selectedImpactRange = range;
   playChime('cutoff');
   render();
-  toast(`Audited Timespan Filter: ${range}`);
+  toast(`Audited Timespan Filter: ${range.toUpperCase()} Selected`);
+}
+
+function filterAuditVessel() {
+  const vessels = ['all', 'Tank 14', 'Tank 09', 'Tank 03', 'Tank 12'];
+  const curIdx = vessels.indexOf(state.selectedAuditFilterVessel || 'all');
+  const nextVessel = vessels[(curIdx + 1) % vessels.length];
+  state.selectedAuditFilterVessel = nextVessel;
+  playChime('cutoff');
+  render();
+  toast(`Filtering Audit Trail by: ${nextVessel === 'all' ? 'All Vessels' : nextVessel}`);
+}
+
+function filterAuditShift() {
+  const shifts = ['all', 'Morning', 'Afternoon', 'Night'];
+  const curIdx = shifts.indexOf(state.selectedAuditFilterShift || 'all');
+  const nextShift = shifts[(curIdx + 1) % shifts.length];
+  state.selectedAuditFilterShift = nextShift;
+  playChime('cutoff');
+  render();
+  toast(`Filtering Audit Trail by Shift: ${nextShift === 'all' ? 'All Shifts' : nextShift}`);
+}
+
+function exportAuditPackCSV() {
+  playChime('success');
+  const rows = [
+    ['BATCH RUN ID', 'VESSEL', 'COSMETIC SHIFT', 'PREVENTED WATER (L)', 'RECLAIMED (L)', 'NET FRESH (L)', 'ENERGY AVERTED (kWh)', 'CRYPTOGRAPHIC HASH', 'STATUS'],
+    ...AUDIT_BATCH_ROWS.map(r => [r.id, r.vessel, r.transition, r.preventedL, r.reclaimedL, r.netFreshL, r.energyKwh, r.hash, 'VALIDATED'])
+  ];
+  exportCSV('ClearLoop_Audit_Pack_FRAUL04_20260329.csv', rows);
 }
 
 function exportESGReportPDF() {
@@ -3374,7 +3537,16 @@ function exportESGReportPDF() {
 
 function analytics() {
   const range = state.selectedImpactRange || '24h';
-  
+  const data = IMPACT_DATA_BY_RANGE[range] || IMPACT_DATA_BY_RANGE['24h'];
+  const vesselFilter = state.selectedAuditFilterVessel || 'all';
+  const shiftFilter = state.selectedAuditFilterShift || 'all';
+
+  const visibleAuditRows = AUDIT_BATCH_ROWS.filter(r => {
+    if (vesselFilter !== 'all' && r.vessel !== vesselFilter) return false;
+    if (shiftFilter !== 'all' && r.shift !== shiftFilter) return false;
+    return true;
+  });
+
   return `
   <!-- TOP SUB-BANNER TELEMETRY & HERO HEADER -->
   <div class="impact-top-header">
@@ -3407,7 +3579,7 @@ function analytics() {
           <button class="ts-pill ${range === '30d' ? 'active' : ''}" onclick="setImpactRange('30d')">30 DAYS (MONTH)</button>
           <button class="ts-pill ${range === '90d' ? 'active' : ''}" onclick="setImpactRange('90d')">90 DAYS (L'ORÉAL AUDIT)</button>
         </div>
-        <button class="button ghost btn-export-csrd" onclick="exportESGLedgerCSV()">
+        <button class="btn-export-csrd" onclick="exportESGLedgerCSV()">
           🗎 EXPORT ESG &amp; CSRD DOSSIER
         </button>
       </div>
@@ -3422,12 +3594,24 @@ function analytics() {
         <span class="ik-label">NET FRESH WATER CONSERVED</span>
         <span class="ik-icon green">💧</span>
       </div>
-      <div class="ik-value font-mono green">1,494 <span class="u">L / Day</span></div>
-      <div class="ik-breakdown-sub">
-        <div class="ik-sub-line"><span>Upstream Avoidance:</span> <b>1,284 L (-33.95%)</b></div>
-        <div class="ik-sub-line"><span>Cascade Reclaimed:</span> <b>210 L (5.55%)</b></div>
+      <div class="ik-val-block">
+        <span class="val-num font-mono">${num(data.savedL)}</span>
+        <div class="val-unit font-mono">
+          <span>L /</span>
+          <span>Day</span>
+        </div>
       </div>
-      <div class="ik-footer-pill green-pill">Net Intake: -39.5% Net Plant</div>
+      <div class="ik-breakdown-sub">
+        <div class="ik-sub-line">
+          <span>Upstream: <b>${num(data.upstreamAvoidedL)} L</b></span>
+          <span>Avoidance: <b class="green-txt">[-${data.upstreamAvoidedPct}%]</b></span>
+        </div>
+        <div class="ik-sub-line">
+          <span>Cascade: <b>${num(data.reclaimedL)} L</b></span>
+          <span>Reclaimed: <b class="green-txt">(${data.reclaimedPct}%)</b></span>
+        </div>
+      </div>
+      <div class="ik-footer-pill green-pill">Net Intake: ${data.netIntakeDeltaPct}% Net Plant</div>
     </div>
 
     <!-- Card 2: SCOPE 1 & 2 THERMAL -->
@@ -3436,11 +3620,20 @@ function analytics() {
         <span class="ik-label">SCOPE 1 &amp; 2 THERMAL</span>
         <span class="ik-icon teal">♨</span>
       </div>
-      <div class="ik-value font-mono">412 <span class="u">kWh / Day</span></div>
-      <div class="ik-breakdown-sub">
-        <div class="ik-sub-line"><span>-33% Steam Load</span> <span class="badge-mini">at 85°C baseline</span></div>
+      <div class="ik-val-block">
+        <span class="val-num font-mono">${num(data.thermalKwh)}</span>
+        <div class="val-unit font-mono">
+          <span>kWh /</span>
+          <span>Day</span>
+        </div>
       </div>
-      <div class="ik-footer-pill teal-pill">CO2e Mitigation: 84 kg CO2e / day</div>
+      <div class="ik-breakdown-sub">
+        <div class="ik-sub-pair">
+          <span class="badge-pill green">-33% Steam Load</span>
+          <span class="sub-txt">at 85°C baseline</span>
+        </div>
+      </div>
+      <div class="ik-footer-pill teal-pill">CO2e Mitigation / day: ${num(data.co2eMitigationKg)} kg CO2e</div>
     </div>
 
     <!-- Card 3: CHEMICAL & CAUSTIC -->
@@ -3449,9 +3642,18 @@ function analytics() {
         <span class="ik-label">CHEMICAL &amp; CAUSTIC</span>
         <span class="ik-icon amber">🧪</span>
       </div>
-      <div class="ik-value font-mono">18.4 <span class="u">kg / Day</span></div>
+      <div class="ik-val-block">
+        <span class="val-num font-mono">${num(data.chemKg, 1)}</span>
+        <div class="val-unit font-mono">
+          <span>kg /</span>
+          <span>Day</span>
+        </div>
+      </div>
       <div class="ik-breakdown-sub">
-        <div class="ik-sub-line"><span>-41.2% NaOH &amp; HNO3</span> <span class="badge-mini">Concentrate</span></div>
+        <div class="ik-sub-pair">
+          <span class="badge-pill green">-41.2% NaOH &amp; HNO3</span>
+          <span class="sub-txt">Concentrate</span>
+        </div>
       </div>
       <div class="ik-footer-pill blue-pill">Effluent WWTP Load: Zero Unneutralized</div>
     </div>
@@ -3462,9 +3664,18 @@ function analytics() {
         <span class="ik-label">LINE OEE YIELD</span>
         <span class="ik-icon blue">⚡</span>
       </div>
-      <div class="ik-value font-mono">+4.8 <span class="u">Hrs / Wk</span></div>
+      <div class="ik-val-block">
+        <span class="val-num font-mono">+${num(data.lineOeeHrs, 1)}</span>
+        <div class="val-unit font-mono">
+          <span>Hrs /</span>
+          <span>Wk</span>
+        </div>
+      </div>
       <div class="ik-breakdown-sub">
-        <div class="ik-sub-line"><span>+6.1% Net OEE</span> <span class="badge-mini">23 min/op idle</span></div>
+        <div class="ik-sub-pair">
+          <span class="badge-pill green">+6.1% Net OEE</span>
+          <span class="sub-txt">23 min/op shift idle</span>
+        </div>
       </div>
       <div class="ik-footer-pill purple-pill">Capex Avoidance: €0 New Vessels</div>
     </div>
@@ -3475,9 +3686,18 @@ function analytics() {
         <span class="ik-label">UTILITY REALIZATION</span>
         <span class="ik-icon emerald">💶</span>
       </div>
-      <div class="ik-value font-mono">€648 <span class="u">/ Day</span></div>
+      <div class="ik-val-block">
+        <span class="val-num font-mono">€${num(data.utilityEur)}</span>
+        <div class="val-unit font-mono">
+          <span>/</span>
+          <span>Day</span>
+        </div>
+      </div>
       <div class="ik-breakdown-sub">
-        <div class="ik-sub-line"><span>€236.5k / Annum</span> <span class="badge-mini">Plant Run-Rate</span></div>
+        <div class="ik-sub-pair">
+          <span class="badge-pill gold">€${data.runRateEur}k / Annum</span>
+          <span class="sub-txt">Plant Run-Rate</span>
+        </div>
       </div>
       <div class="ik-footer-pill gold-pill">CSRD Accounting: EU Taxonomy Ready</div>
     </div>
@@ -3499,14 +3719,34 @@ function analytics() {
       Audited physical water volume from unconstrained baseline demand down to verified net municipal intake.
     </p>
 
-    <!-- 6-BAR WATERFALL CHART -->
+    <!-- 6-BAR WATERFALL CHART WITH Y-AXIS & GRID LINES -->
     <div class="waterfall-chart-wrap">
+      <!-- Background Grid Guide Lines -->
+      <div class="wf-grid-lines-layer">
+        <div class="wf-grid-line"><span class="wf-y-tick font-mono">4,000 L</span></div>
+        <div class="wf-grid-line"><span class="wf-y-tick font-mono">3,000 L</span></div>
+        <div class="wf-grid-line"><span class="wf-y-tick font-mono">2,000 L</span></div>
+        <div class="wf-grid-line"><span class="wf-y-tick font-mono">1,000 L</span></div>
+        <div class="wf-grid-line zero"><span class="wf-y-tick font-mono">0 L</span></div>
+      </div>
+
+      <!-- Connecting Dashed Guide Lines Across Columns -->
+      <svg class="wf-connector-lines-svg" viewBox="0 0 1000 220" preserveAspectRatio="none">
+        <line x1="166" y1="26" x2="210" y2="26" stroke="#94a3b8" stroke-dasharray="3 3"/>
+        <line x1="333" y1="78" x2="377" y2="78" stroke="#059669" stroke-dasharray="3 3"/>
+        <line x1="500" y1="99" x2="544" y2="99" stroke="#10b981" stroke-dasharray="3 3"/>
+        <line x1="666" y1="99" x2="710" y2="99" stroke="#a7f3d0" stroke-dasharray="3 3"/>
+        <line x1="833" y1="111" x2="877" y2="111" stroke="#34d399" stroke-dasharray="3 3"/>
+      </svg>
+
       <div class="waterfall-bars-grid">
         <!-- Bar 1: Baseline Demand -->
         <div class="wf-col">
-          <div class="wf-value-label font-mono">3,850 L</div>
+          <div class="wf-val-pill-wrap">
+            <span class="wf-val-text font-mono">${num(data.baselineDemandL)} L</span>
+          </div>
           <div class="wf-bar-track">
-            <div class="wf-bar bar-baseline" style="height: 100%;">
+            <div class="wf-bar bar-baseline" style="height: 96.25%;">
               <span class="bar-inner-txt font-mono">UNCONSTRAINED</span>
             </div>
           </div>
@@ -3518,9 +3758,11 @@ function analytics() {
 
         <!-- Bar 2: Upstream Avoidance -->
         <div class="wf-col">
-          <div class="wf-value-label font-mono green-txt">-920 L</div>
+          <div class="wf-val-pill-wrap">
+            <span class="wf-val-text font-mono green-txt">${num(data.upstreamDeltaL)} L</span>
+          </div>
           <div class="wf-bar-track">
-            <div class="wf-bar bar-avoidance" style="height: 24%; margin-top: 0;">
+            <div class="wf-bar-float bar-avoidance" style="bottom: 73.25%; height: 23%;">
               <span class="bar-inner-txt font-mono">-24.0%</span>
             </div>
           </div>
@@ -3532,9 +3774,11 @@ function analytics() {
 
         <!-- Bar 3: Adaptive CIP Cutoff -->
         <div class="wf-col">
-          <div class="wf-value-label font-mono green-txt">-364 L</div>
+          <div class="wf-val-pill-wrap">
+            <span class="wf-val-text font-mono green-txt">${num(data.adaptiveDeltaL)} L</span>
+          </div>
           <div class="wf-bar-track">
-            <div class="wf-bar bar-adaptive" style="height: 9.5%; margin-top: 24%;">
+            <div class="wf-bar-float bar-adaptive" style="bottom: 64.15%; height: 9.1%;">
               <span class="bar-inner-txt font-mono">-9.5%</span>
             </div>
           </div>
@@ -3546,9 +3790,11 @@ function analytics() {
 
         <!-- Bar 4: Gross Consumed -->
         <div class="wf-col">
-          <div class="wf-value-label font-mono">2,566 L</div>
+          <div class="wf-val-pill-wrap">
+            <span class="wf-val-text font-mono">${num(data.grossConsumedL)} L</span>
+          </div>
           <div class="wf-bar-track">
-            <div class="wf-bar bar-consumed" style="height: 66.5%; margin-top: 33.5%;"></div>
+            <div class="wf-bar bar-consumed" style="height: 64.15%;"></div>
           </div>
           <div class="wf-col-label">
             <b>GROSS CONSUMED</b>
@@ -3558,9 +3804,11 @@ function analytics() {
 
         <!-- Bar 5: Cascade Reclaim -->
         <div class="wf-col">
-          <div class="wf-value-label font-mono green-txt">-210 L</div>
+          <div class="wf-val-pill-wrap">
+            <span class="wf-val-text font-mono green-txt">${num(data.cascadeReclaimL)} L</span>
+          </div>
           <div class="wf-bar-track">
-            <div class="wf-bar bar-reclaim" style="height: 5.5%; margin-top: 33.5%;"></div>
+            <div class="wf-bar-float bar-reclaim" style="bottom: 58.9%; height: 5.25%;"></div>
           </div>
           <div class="wf-col-label">
             <b>CASCADE RECLAIM</b>
@@ -3570,24 +3818,35 @@ function analytics() {
 
         <!-- Bar 6: Net Water Intake -->
         <div class="wf-col">
-          <div class="wf-value-label font-mono green-txt">2,356 L</div>
+          <div class="wf-val-pill-wrap">
+            <span class="wf-val-text font-mono bold">${num(data.netWaterIntakeL)} L</span>
+          </div>
           <div class="wf-bar-track">
-            <div class="wf-bar bar-net-intake" style="height: 61%; margin-top: 39%;">
+            <div class="wf-bar bar-net-intake" style="height: 58.9%;">
               <span class="bar-inner-txt font-mono">-39.5%</span>
             </div>
           </div>
           <div class="wf-col-label">
             <b>NET WATER INTAKE</b>
-            <small class="green-txt">L'Oréal Clean Line Target Sealed</small>
+            <small class="green-txt">-39.5% Net Total</small>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Process Governance Ribbon matching master screenshot -->
+    <div class="wf-process-strip">
+      <span class="wf-ps-cell font-mono">AI RECOMMENDS • PLANT RULES CONSTRAIN • OPERATORS VALIDATE</span>
+      <span class="wf-ps-cell font-mono">L'ORÉAL CLEAN WATER CHARTER 2026 • ISO 14046 &amp; CSRD VERIFIED</span>
+      <span class="wf-ps-cell font-mono"><span class="pulsing-green-dot"></span> LORE AUDIT TRAIL SEALED</span>
+    </div>
+
     <!-- Waterfall Bottom Highlight Bar -->
     <div class="wf-bottom-highlight-strip">
       <div class="wf-hl-left">
-        <div class="wf-hl-icon">💧</div>
+        <div class="wf-hl-icon">
+          <span class="icon">💧</span>
+        </div>
         <div>
           <b>1,494 Liters Net Fresh Water Saved</b>
           <p>Combined direct upstream avoidance (1,284 L) + closed-loop cascade recovery (210 L)</p>
@@ -3596,11 +3855,12 @@ function analytics() {
       <div class="wf-hl-right">
         <div class="hl-stat-cell">
           <small>DAILY AVOIDANCE RATIO</small>
-          <b class="font-mono">33.35% Pre-Wash</b>
+          <div class="hl-stat-val font-mono">33.35% <span class="unit">Pre-Wash</span></div>
         </div>
+        <div class="hl-stat-divider"></div>
         <div class="hl-stat-cell">
           <small>LOOP EFFICIENCY INDEX</small>
-          <b class="font-mono">8.18% Recycled</b>
+          <div class="hl-stat-val font-mono">8.18% <span class="unit">Recycled</span></div>
         </div>
       </div>
     </div>
@@ -3667,9 +3927,15 @@ function analytics() {
           <p class="atp-sub">Dual-sensor Coriolis flow calibration cryptographically hashed per changeover session.</p>
         </div>
         <div class="atp-filters">
-          <button class="btn-filter-sm">FILTER BY VESSEL</button>
-          <button class="btn-filter-sm">FILTER BY SHIFT</button>
-          <button class="btn-export-pack" onclick="exportESGLedgerCSV()">🗎 EXPORT AUDIT PACK (.CSV)</button>
+          <button class="btn-filter-sm ${vesselFilter !== 'all' ? 'active' : ''}" onclick="filterAuditVessel()" title="Cycle filter by vessel">
+            FILTER BY VESSEL ${vesselFilter !== 'all' ? `(${vesselFilter})` : ''}
+          </button>
+          <button class="btn-filter-sm ${shiftFilter !== 'all' ? 'active' : ''}" onclick="filterAuditShift()" title="Cycle filter by shift">
+            FILTER BY SHIFT ${shiftFilter !== 'all' ? `(${shiftFilter})` : ''}
+          </button>
+          <button class="btn-export-pack" onclick="exportAuditPackCSV()">
+            🗎 EXPORT AUDIT PACK (.CSV)
+          </button>
         </div>
       </div>
 
@@ -3687,42 +3953,20 @@ function analytics() {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td class="font-mono">AULN-2026-9831</td>
-              <td><b>Tank 14: Rouge Pur #04 → #08</b><br><small>Sequenced compatible pigments</small></td>
-              <td class="font-mono green-txt">-360 L</td>
-              <td class="font-mono">65 L</td>
-              <td class="font-mono">515 L</td>
-              <td class="font-mono">-94 kWh</td>
-              <td><span class="hash-badge">HASH: 8efb53...f1e (VALIDATED)</span></td>
-            </tr>
-            <tr>
-              <td class="font-mono">AULN-2026-9832</td>
-              <td><b>Tank 09: Hydra-Serum → Night Elixir</b><br><small>Low-surfactant adaptive rinse</small></td>
-              <td class="font-mono green-txt">-290 L</td>
-              <td class="font-mono">45 L</td>
-              <td class="font-mono">480 L</td>
-              <td class="font-mono">-78 kWh</td>
-              <td><span class="hash-badge">HASH: 0c4a99...3c0 (VALIDATED)</span></td>
-            </tr>
-            <tr>
-              <td class="font-mono">AULN-2026-9830</td>
-              <td><b>Tank 03: Fond de Teint → Matte Glow</b><br><small>Optical density dynamic cutoff</small></td>
-              <td class="font-mono green-txt">-390 L</td>
-              <td class="font-mono">50 L</td>
-              <td class="font-mono">690 L</td>
-              <td class="font-mono">-112 kWh</td>
-              <td><span class="hash-badge">HASH: 8c9e13...045 (VALIDATED)</span></td>
-            </tr>
-            <tr>
-              <td class="font-mono">AULN-2026-9809</td>
-              <td><b>Tank 12: UV Defense Prime → Day Veil</b><br><small>Viscosity/nano scheduling</small></td>
-              <td class="font-mono green-txt">-244 L</td>
-              <td class="font-mono">50 L</td>
-              <td class="font-mono">671 L</td>
-              <td class="font-mono">-68 kWh</td>
-              <td><span class="hash-badge">HASH: 8cb020...9e1 (VALIDATED)</span></td>
-            </tr>
+            ${visibleAuditRows.map(r => `
+              <tr>
+                <td class="font-mono"><b>${escape(r.id)}</b></td>
+                <td>
+                  <b>${escape(r.vessel)}: ${escape(r.transition)}</b><br>
+                  <small>${escape(r.sub)}</small>
+                </td>
+                <td class="font-mono green-txt"><b>${num(r.preventedL)} L</b></td>
+                <td class="font-mono">${num(r.reclaimedL)} L</td>
+                <td class="font-mono">${num(r.netFreshL)} L</td>
+                <td class="font-mono green-txt"><b>${num(r.energyKwh)} kWh</b></td>
+                <td><span class="hash-badge">HASH: ${escape(r.hash)} [VALIDATED]</span></td>
+              </tr>
+            `).join('')}
           </tbody>
         </table>
       </div>
