@@ -11,10 +11,10 @@
       "maximum": 3330.7
     },
     "prevent_l": {
-      "mean": 2457.28,
-      "median": 2428.4,
-      "minimum": 1886.0,
-      "maximum": 3321.6
+      "mean": 2315.5,
+      "median": 2317.6,
+      "minimum": 1796.0,
+      "maximum": 3038.0
     },
     "adapt_only_illustrative_l": {
       "mean": 2591.94,
@@ -23,10 +23,10 @@
       "maximum": 3306.7
     },
     "prevent_adapt_l": {
-      "mean": 2433.28,
-      "median": 2404.4,
-      "minimum": 1862.0,
-      "maximum": 3297.6
+      "mean": 2291.5,
+      "median": 2293.6,
+      "minimum": 1772.0,
+      "maximum": 3014.0
     }
   },
   "cascade": "Potential reuse is reported separately and is not added to water-demand reduction.",
@@ -34,169 +34,169 @@
     {
       "seed": 2026,
       "baseline_l": 2347.8,
-      "prevent_l": 2347.8,
+      "prevent_l": 2106.0,
       "adapt_only_illustrative_l": 2323.8,
-      "prevent_adapt_l": 2323.8,
+      "prevent_adapt_l": 2082.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2027,
       "baseline_l": 2675.6,
-      "prevent_l": 2648.6,
+      "prevent_l": 2408.0,
       "adapt_only_illustrative_l": 2651.6,
-      "prevent_adapt_l": 2624.6,
+      "prevent_adapt_l": 2384.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2028,
       "baseline_l": 2506.0,
-      "prevent_l": 2374.0,
+      "prevent_l": 2320.0,
       "adapt_only_illustrative_l": 2482.0,
-      "prevent_adapt_l": 2350.0,
+      "prevent_adapt_l": 2296.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2029,
       "baseline_l": 3321.6,
-      "prevent_l": 3321.6,
+      "prevent_l": 2795.2,
       "adapt_only_illustrative_l": 3297.6,
-      "prevent_adapt_l": 3297.6,
+      "prevent_adapt_l": 2771.2,
       "cascade_potential_l": 42
     },
     {
       "seed": 2030,
       "baseline_l": 2353.0,
-      "prevent_l": 2056.0,
+      "prevent_l": 1972.0,
       "adapt_only_illustrative_l": 2329.0,
-      "prevent_adapt_l": 2032.0,
+      "prevent_adapt_l": 1948.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2031,
       "baseline_l": 2352.0,
-      "prevent_l": 2352.0,
+      "prevent_l": 2086.0,
       "adapt_only_illustrative_l": 2328.0,
-      "prevent_adapt_l": 2328.0,
+      "prevent_adapt_l": 2062.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2032,
       "baseline_l": 2705.6,
-      "prevent_l": 2444.0,
+      "prevent_l": 2366.0,
       "adapt_only_illustrative_l": 2681.6,
-      "prevent_adapt_l": 2420.0,
+      "prevent_adapt_l": 2342.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2033,
       "baseline_l": 2874.5,
-      "prevent_l": 2443.2,
+      "prevent_l": 2407.2,
       "adapt_only_illustrative_l": 2850.5,
-      "prevent_adapt_l": 2419.2,
+      "prevent_adapt_l": 2383.2,
       "cascade_potential_l": 42
     },
     {
       "seed": 2034,
       "baseline_l": 2087.8,
-      "prevent_l": 2044.0,
+      "prevent_l": 1966.0,
       "adapt_only_illustrative_l": 2063.8,
-      "prevent_adapt_l": 2020.0,
+      "prevent_adapt_l": 1942.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2035,
       "baseline_l": 3106.6,
-      "prevent_l": 2956.6,
+      "prevent_l": 2824.0,
       "adapt_only_illustrative_l": 3082.6,
-      "prevent_adapt_l": 2932.6,
+      "prevent_adapt_l": 2800.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2036,
       "baseline_l": 2795.9,
-      "prevent_l": 2586.0,
+      "prevent_l": 2508.0,
       "adapt_only_illustrative_l": 2771.9,
-      "prevent_adapt_l": 2562.0,
+      "prevent_adapt_l": 2484.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2037,
       "baseline_l": 3327.2,
-      "prevent_l": 3278.4,
+      "prevent_l": 2970.0,
       "adapt_only_illustrative_l": 3303.2,
-      "prevent_adapt_l": 3254.4,
+      "prevent_adapt_l": 2946.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2038,
       "baseline_l": 2497.5,
-      "prevent_l": 2387.0,
+      "prevent_l": 2226.0,
       "adapt_only_illustrative_l": 2473.5,
-      "prevent_adapt_l": 2363.0,
+      "prevent_adapt_l": 2202.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2039,
       "baseline_l": 3087.7,
-      "prevent_l": 2809.0,
+      "prevent_l": 2666.0,
       "adapt_only_illustrative_l": 3063.7,
-      "prevent_adapt_l": 2785.0,
+      "prevent_adapt_l": 2642.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2040,
       "baseline_l": 2625.2,
-      "prevent_l": 2522.0,
+      "prevent_l": 2468.0,
       "adapt_only_illustrative_l": 2601.2,
-      "prevent_adapt_l": 2498.0,
+      "prevent_adapt_l": 2444.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2041,
       "baseline_l": 2624.8,
-      "prevent_l": 2624.8,
+      "prevent_l": 2342.0,
       "adapt_only_illustrative_l": 2600.8,
-      "prevent_adapt_l": 2600.8,
+      "prevent_adapt_l": 2318.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2042,
       "baseline_l": 2239.8,
-      "prevent_l": 1974.0,
+      "prevent_l": 1896.0,
       "adapt_only_illustrative_l": 2215.8,
-      "prevent_adapt_l": 1950.0,
+      "prevent_adapt_l": 1872.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2043,
       "baseline_l": 2563.0,
-      "prevent_l": 2464.0,
+      "prevent_l": 2386.0,
       "adapt_only_illustrative_l": 2539.0,
-      "prevent_adapt_l": 2440.0,
+      "prevent_adapt_l": 2362.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2044,
       "baseline_l": 2645.2,
-      "prevent_l": 2301.0,
+      "prevent_l": 2142.0,
       "adapt_only_illustrative_l": 2621.2,
-      "prevent_adapt_l": 2277.0,
+      "prevent_adapt_l": 2118.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2045,
       "baseline_l": 3136.9,
-      "prevent_l": 2677.2,
+      "prevent_l": 2652.0,
       "adapt_only_illustrative_l": 3112.9,
-      "prevent_adapt_l": 2653.2,
+      "prevent_adapt_l": 2628.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2046,
       "baseline_l": 2212.0,
-      "prevent_l": 2176.0,
+      "prevent_l": 2122.0,
       "adapt_only_illustrative_l": 2188.0,
-      "prevent_adapt_l": 2152.0,
+      "prevent_adapt_l": 2098.0,
       "cascade_potential_l": 42
     },
     {
@@ -210,73 +210,73 @@
     {
       "seed": 2048,
       "baseline_l": 2219.2,
-      "prevent_l": 2150.2,
+      "prevent_l": 1984.0,
       "adapt_only_illustrative_l": 2195.2,
-      "prevent_adapt_l": 2126.2,
+      "prevent_adapt_l": 1960.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2049,
       "baseline_l": 2683.9,
-      "prevent_l": 2443.0,
+      "prevent_l": 2186.0,
       "adapt_only_illustrative_l": 2659.9,
-      "prevent_adapt_l": 2419.0,
+      "prevent_adapt_l": 2162.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2050,
       "baseline_l": 2488.0,
-      "prevent_l": 2488.0,
+      "prevent_l": 2302.0,
       "adapt_only_illustrative_l": 2464.0,
-      "prevent_adapt_l": 2464.0,
+      "prevent_adapt_l": 2278.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2051,
       "baseline_l": 2265.8,
-      "prevent_l": 2265.8,
+      "prevent_l": 2174.0,
       "adapt_only_illustrative_l": 2241.8,
-      "prevent_adapt_l": 2241.8,
+      "prevent_adapt_l": 2150.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2052,
       "baseline_l": 2664.7,
-      "prevent_l": 2452.0,
+      "prevent_l": 2440.0,
       "adapt_only_illustrative_l": 2640.7,
-      "prevent_adapt_l": 2428.0,
+      "prevent_adapt_l": 2416.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2053,
       "baseline_l": 2826.0,
-      "prevent_l": 2664.0,
+      "prevent_l": 2586.0,
       "adapt_only_illustrative_l": 2802.0,
-      "prevent_adapt_l": 2640.0,
+      "prevent_adapt_l": 2562.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2054,
       "baseline_l": 2748.5,
-      "prevent_l": 2619.8,
+      "prevent_l": 2372.0,
       "adapt_only_illustrative_l": 2724.5,
-      "prevent_adapt_l": 2595.8,
+      "prevent_adapt_l": 2348.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2055,
       "baseline_l": 2651.6,
-      "prevent_l": 2519.0,
+      "prevent_l": 2262.0,
       "adapt_only_illustrative_l": 2627.6,
-      "prevent_adapt_l": 2495.0,
+      "prevent_adapt_l": 2238.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2056,
       "baseline_l": 2725.4,
-      "prevent_l": 2526.5,
+      "prevent_l": 2252.0,
       "adapt_only_illustrative_l": 2701.4,
-      "prevent_adapt_l": 2502.5,
+      "prevent_adapt_l": 2228.0,
       "cascade_potential_l": 42
     },
     {
@@ -298,49 +298,49 @@
     {
       "seed": 2059,
       "baseline_l": 2787.7,
-      "prevent_l": 2715.7,
+      "prevent_l": 2376.0,
       "adapt_only_illustrative_l": 2763.7,
-      "prevent_adapt_l": 2691.7,
+      "prevent_adapt_l": 2352.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2060,
       "baseline_l": 2213.8,
-      "prevent_l": 1886.0,
+      "prevent_l": 1796.0,
       "adapt_only_illustrative_l": 2189.8,
-      "prevent_adapt_l": 1862.0,
+      "prevent_adapt_l": 1772.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2061,
       "baseline_l": 2588.8,
-      "prevent_l": 2300.0,
+      "prevent_l": 2222.0,
       "adapt_only_illustrative_l": 2564.8,
-      "prevent_adapt_l": 2276.0,
+      "prevent_adapt_l": 2198.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2062,
       "baseline_l": 2592.6,
-      "prevent_l": 2496.0,
+      "prevent_l": 2418.0,
       "adapt_only_illustrative_l": 2568.6,
-      "prevent_adapt_l": 2472.0,
+      "prevent_adapt_l": 2394.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2063,
       "baseline_l": 2695.6,
-      "prevent_l": 2624.6,
+      "prevent_l": 2570.6,
       "adapt_only_illustrative_l": 2671.6,
-      "prevent_adapt_l": 2600.6,
+      "prevent_adapt_l": 2546.6,
       "cascade_potential_l": 42
     },
     {
       "seed": 2064,
       "baseline_l": 2831.9,
-      "prevent_l": 2622.0,
+      "prevent_l": 2490.0,
       "adapt_only_illustrative_l": 2807.9,
-      "prevent_adapt_l": 2598.0,
+      "prevent_adapt_l": 2466.0,
       "cascade_potential_l": 42
     },
     {
@@ -354,25 +354,25 @@
     {
       "seed": 2066,
       "baseline_l": 2279.0,
-      "prevent_l": 2276.0,
+      "prevent_l": 1998.0,
       "adapt_only_illustrative_l": 2255.0,
-      "prevent_adapt_l": 2252.0,
+      "prevent_adapt_l": 1974.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2067,
       "baseline_l": 2536.2,
-      "prevent_l": 2353.2,
+      "prevent_l": 2317.2,
       "adapt_only_illustrative_l": 2512.2,
-      "prevent_adapt_l": 2329.2,
+      "prevent_adapt_l": 2293.2,
       "cascade_potential_l": 42
     },
     {
       "seed": 2068,
       "baseline_l": 2477.7,
-      "prevent_l": 2397.0,
+      "prevent_l": 2196.0,
       "adapt_only_illustrative_l": 2453.7,
-      "prevent_adapt_l": 2373.0,
+      "prevent_adapt_l": 2172.0,
       "cascade_potential_l": 42
     },
     {
@@ -386,33 +386,33 @@
     {
       "seed": 2070,
       "baseline_l": 2658.1,
-      "prevent_l": 2515.1,
+      "prevent_l": 2218.0,
       "adapt_only_illustrative_l": 2634.1,
-      "prevent_adapt_l": 2491.1,
+      "prevent_adapt_l": 2194.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2071,
       "baseline_l": 2229.0,
-      "prevent_l": 2229.0,
+      "prevent_l": 2016.0,
       "adapt_only_illustrative_l": 2205.0,
-      "prevent_adapt_l": 2205.0,
+      "prevent_adapt_l": 1992.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2072,
       "baseline_l": 2482.1,
-      "prevent_l": 2420.8,
+      "prevent_l": 2187.8,
       "adapt_only_illustrative_l": 2458.1,
-      "prevent_adapt_l": 2396.8,
+      "prevent_adapt_l": 2163.8,
       "cascade_potential_l": 42
     },
     {
       "seed": 2073,
       "baseline_l": 2580.0,
-      "prevent_l": 2436.0,
+      "prevent_l": 2322.0,
       "adapt_only_illustrative_l": 2556.0,
-      "prevent_adapt_l": 2412.0,
+      "prevent_adapt_l": 2298.0,
       "cascade_potential_l": 42
     },
     {
@@ -426,41 +426,41 @@
     {
       "seed": 2075,
       "baseline_l": 2714.7,
-      "prevent_l": 2550.0,
+      "prevent_l": 2472.0,
       "adapt_only_illustrative_l": 2690.7,
-      "prevent_adapt_l": 2526.0,
+      "prevent_adapt_l": 2448.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2076,
       "baseline_l": 2861.9,
-      "prevent_l": 2718.9,
+      "prevent_l": 2384.0,
       "adapt_only_illustrative_l": 2837.9,
-      "prevent_adapt_l": 2694.9,
+      "prevent_adapt_l": 2360.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2077,
       "baseline_l": 2802.9,
-      "prevent_l": 2416.0,
+      "prevent_l": 2362.0,
       "adapt_only_illustrative_l": 2778.9,
-      "prevent_adapt_l": 2392.0,
+      "prevent_adapt_l": 2338.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2078,
       "baseline_l": 2579.0,
-      "prevent_l": 2341.2,
+      "prevent_l": 2244.0,
       "adapt_only_illustrative_l": 2555.0,
-      "prevent_adapt_l": 2317.2,
+      "prevent_adapt_l": 2220.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2079,
       "baseline_l": 2597.3,
-      "prevent_l": 2330.6,
+      "prevent_l": 2162.0,
       "adapt_only_illustrative_l": 2573.3,
-      "prevent_adapt_l": 2306.6,
+      "prevent_adapt_l": 2138.0,
       "cascade_potential_l": 42
     },
     {
@@ -474,129 +474,129 @@
     {
       "seed": 2081,
       "baseline_l": 2753.0,
-      "prevent_l": 2576.0,
+      "prevent_l": 2462.0,
       "adapt_only_illustrative_l": 2729.0,
-      "prevent_adapt_l": 2552.0,
+      "prevent_adapt_l": 2438.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2082,
       "baseline_l": 2488.2,
-      "prevent_l": 2253.0,
+      "prevent_l": 2100.0,
       "adapt_only_illustrative_l": 2464.2,
-      "prevent_adapt_l": 2229.0,
+      "prevent_adapt_l": 2076.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2083,
       "baseline_l": 3315.4,
-      "prevent_l": 2515.8,
+      "prevent_l": 2334.0,
       "adapt_only_illustrative_l": 3291.4,
-      "prevent_adapt_l": 2491.8,
+      "prevent_adapt_l": 2310.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2084,
       "baseline_l": 2912.5,
-      "prevent_l": 2716.0,
+      "prevent_l": 2584.0,
       "adapt_only_illustrative_l": 2888.5,
-      "prevent_adapt_l": 2692.0,
+      "prevent_adapt_l": 2560.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2085,
       "baseline_l": 2203.8,
-      "prevent_l": 2058.0,
+      "prevent_l": 2004.0,
       "adapt_only_illustrative_l": 2179.8,
-      "prevent_adapt_l": 2034.0,
+      "prevent_adapt_l": 1980.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2086,
       "baseline_l": 2162.2,
-      "prevent_l": 2027.2,
+      "prevent_l": 1936.0,
       "adapt_only_illustrative_l": 2138.2,
-      "prevent_adapt_l": 2003.2,
+      "prevent_adapt_l": 1912.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2087,
       "baseline_l": 2605.0,
-      "prevent_l": 2416.0,
+      "prevent_l": 2362.0,
       "adapt_only_illustrative_l": 2581.0,
-      "prevent_adapt_l": 2392.0,
+      "prevent_adapt_l": 2338.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2088,
       "baseline_l": 2623.0,
-      "prevent_l": 2623.0,
+      "prevent_l": 2302.0,
       "adapt_only_illustrative_l": 2599.0,
-      "prevent_adapt_l": 2599.0,
+      "prevent_adapt_l": 2278.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2089,
       "baseline_l": 2880.7,
-      "prevent_l": 2680.2,
+      "prevent_l": 2398.0,
       "adapt_only_illustrative_l": 2856.7,
-      "prevent_adapt_l": 2656.2,
+      "prevent_adapt_l": 2374.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2090,
       "baseline_l": 2900.6,
-      "prevent_l": 2652.6,
+      "prevent_l": 2400.0,
       "adapt_only_illustrative_l": 2876.6,
-      "prevent_adapt_l": 2628.6,
+      "prevent_adapt_l": 2376.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2091,
       "baseline_l": 2116.7,
-      "prevent_l": 2113.0,
+      "prevent_l": 1916.0,
       "adapt_only_illustrative_l": 2092.7,
-      "prevent_adapt_l": 2089.0,
+      "prevent_adapt_l": 1892.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2092,
       "baseline_l": 2496.6,
-      "prevent_l": 2376.0,
+      "prevent_l": 2298.0,
       "adapt_only_illustrative_l": 2472.6,
-      "prevent_adapt_l": 2352.0,
+      "prevent_adapt_l": 2274.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2093,
       "baseline_l": 3191.1,
-      "prevent_l": 3082.1,
+      "prevent_l": 2828.0,
       "adapt_only_illustrative_l": 3167.1,
-      "prevent_adapt_l": 3058.1,
+      "prevent_adapt_l": 2804.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2094,
       "baseline_l": 3029.2,
-      "prevent_l": 2896.0,
+      "prevent_l": 2842.0,
       "adapt_only_illustrative_l": 3005.2,
-      "prevent_adapt_l": 2872.0,
+      "prevent_adapt_l": 2818.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2095,
       "baseline_l": 2428.2,
-      "prevent_l": 2371.8,
+      "prevent_l": 2226.0,
       "adapt_only_illustrative_l": 2404.2,
-      "prevent_adapt_l": 2347.8,
+      "prevent_adapt_l": 2202.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2096,
       "baseline_l": 2857.3,
-      "prevent_l": 2701.0,
+      "prevent_l": 2524.0,
       "adapt_only_illustrative_l": 2833.3,
-      "prevent_adapt_l": 2677.0,
+      "prevent_adapt_l": 2500.0,
       "cascade_potential_l": 42
     },
     {
@@ -610,81 +610,81 @@
     {
       "seed": 2098,
       "baseline_l": 2698.0,
-      "prevent_l": 2620.0,
+      "prevent_l": 2488.0,
       "adapt_only_illustrative_l": 2674.0,
-      "prevent_adapt_l": 2596.0,
+      "prevent_adapt_l": 2464.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2099,
       "baseline_l": 2376.2,
-      "prevent_l": 2376.2,
+      "prevent_l": 2126.0,
       "adapt_only_illustrative_l": 2352.2,
-      "prevent_adapt_l": 2352.2,
+      "prevent_adapt_l": 2102.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2100,
       "baseline_l": 2290.0,
-      "prevent_l": 2290.0,
+      "prevent_l": 2236.0,
       "adapt_only_illustrative_l": 2266.0,
-      "prevent_adapt_l": 2266.0,
+      "prevent_adapt_l": 2212.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2101,
       "baseline_l": 2375.9,
-      "prevent_l": 2010.0,
+      "prevent_l": 1956.0,
       "adapt_only_illustrative_l": 2351.9,
-      "prevent_adapt_l": 1986.0,
+      "prevent_adapt_l": 1932.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2102,
       "baseline_l": 2271.8,
-      "prevent_l": 2271.8,
+      "prevent_l": 2048.0,
       "adapt_only_illustrative_l": 2247.8,
-      "prevent_adapt_l": 2247.8,
+      "prevent_adapt_l": 2024.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2103,
       "baseline_l": 2459.2,
-      "prevent_l": 2452.0,
+      "prevent_l": 2320.0,
       "adapt_only_illustrative_l": 2435.2,
-      "prevent_adapt_l": 2428.0,
+      "prevent_adapt_l": 2296.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2104,
       "baseline_l": 2777.0,
-      "prevent_l": 2580.0,
+      "prevent_l": 2544.0,
       "adapt_only_illustrative_l": 2753.0,
-      "prevent_adapt_l": 2556.0,
+      "prevent_adapt_l": 2520.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2105,
       "baseline_l": 2340.0,
-      "prevent_l": 2340.0,
+      "prevent_l": 2280.0,
       "adapt_only_illustrative_l": 2316.0,
-      "prevent_adapt_l": 2316.0,
+      "prevent_adapt_l": 2256.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2106,
       "baseline_l": 2704.0,
-      "prevent_l": 2372.0,
+      "prevent_l": 2318.0,
       "adapt_only_illustrative_l": 2680.0,
-      "prevent_adapt_l": 2348.0,
+      "prevent_adapt_l": 2294.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2107,
       "baseline_l": 2690.2,
-      "prevent_l": 2690.2,
+      "prevent_l": 2464.0,
       "adapt_only_illustrative_l": 2666.2,
-      "prevent_adapt_l": 2666.2,
+      "prevent_adapt_l": 2440.0,
       "cascade_potential_l": 42
     },
     {
@@ -698,9 +698,9 @@
     {
       "seed": 2109,
       "baseline_l": 2262.0,
-      "prevent_l": 1956.0,
+      "prevent_l": 1902.0,
       "adapt_only_illustrative_l": 2238.0,
-      "prevent_adapt_l": 1932.0,
+      "prevent_adapt_l": 1878.0,
       "cascade_potential_l": 42
     },
     {
@@ -714,9 +714,9 @@
     {
       "seed": 2111,
       "baseline_l": 2778.7,
-      "prevent_l": 2751.6,
+      "prevent_l": 2440.0,
       "adapt_only_illustrative_l": 2754.7,
-      "prevent_adapt_l": 2727.6,
+      "prevent_adapt_l": 2416.0,
       "cascade_potential_l": 42
     },
     {
@@ -730,105 +730,105 @@
     {
       "seed": 2113,
       "baseline_l": 3330.7,
-      "prevent_l": 3169.7,
+      "prevent_l": 2782.0,
       "adapt_only_illustrative_l": 3306.7,
-      "prevent_adapt_l": 3145.7,
+      "prevent_adapt_l": 2758.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2114,
       "baseline_l": 3224.6,
-      "prevent_l": 3182.6,
+      "prevent_l": 3038.0,
       "adapt_only_illustrative_l": 3200.6,
-      "prevent_adapt_l": 3158.6,
+      "prevent_adapt_l": 3014.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2115,
       "baseline_l": 2035.2,
-      "prevent_l": 1998.0,
+      "prevent_l": 1920.0,
       "adapt_only_illustrative_l": 2011.2,
-      "prevent_adapt_l": 1974.0,
+      "prevent_adapt_l": 1896.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2116,
       "baseline_l": 2377.8,
-      "prevent_l": 2328.0,
+      "prevent_l": 2166.0,
       "adapt_only_illustrative_l": 2353.8,
-      "prevent_adapt_l": 2304.0,
+      "prevent_adapt_l": 2142.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2117,
       "baseline_l": 2735.9,
-      "prevent_l": 2508.0,
+      "prevent_l": 2376.0,
       "adapt_only_illustrative_l": 2711.9,
-      "prevent_adapt_l": 2484.0,
+      "prevent_adapt_l": 2352.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2118,
       "baseline_l": 2676.6,
-      "prevent_l": 2345.0,
+      "prevent_l": 2162.0,
       "adapt_only_illustrative_l": 2652.6,
-      "prevent_adapt_l": 2321.0,
+      "prevent_adapt_l": 2138.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2119,
       "baseline_l": 2413.8,
-      "prevent_l": 2358.0,
+      "prevent_l": 2190.0,
       "adapt_only_illustrative_l": 2389.8,
-      "prevent_adapt_l": 2334.0,
+      "prevent_adapt_l": 2166.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2120,
       "baseline_l": 2070.0,
-      "prevent_l": 2070.0,
+      "prevent_l": 1920.0,
       "adapt_only_illustrative_l": 2046.0,
-      "prevent_adapt_l": 2046.0,
+      "prevent_adapt_l": 1896.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2121,
       "baseline_l": 2496.0,
-      "prevent_l": 2418.0,
+      "prevent_l": 2286.0,
       "adapt_only_illustrative_l": 2472.0,
-      "prevent_adapt_l": 2394.0,
+      "prevent_adapt_l": 2262.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2122,
       "baseline_l": 2700.8,
-      "prevent_l": 2436.0,
+      "prevent_l": 2322.0,
       "adapt_only_illustrative_l": 2676.8,
-      "prevent_adapt_l": 2412.0,
+      "prevent_adapt_l": 2298.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2123,
       "baseline_l": 2447.1,
-      "prevent_l": 2306.0,
+      "prevent_l": 2162.0,
       "adapt_only_illustrative_l": 2423.1,
-      "prevent_adapt_l": 2282.0,
+      "prevent_adapt_l": 2138.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2124,
       "baseline_l": 2456.9,
-      "prevent_l": 2237.0,
+      "prevent_l": 1944.0,
       "adapt_only_illustrative_l": 2432.9,
-      "prevent_adapt_l": 2213.0,
+      "prevent_adapt_l": 1920.0,
       "cascade_potential_l": 42
     },
     {
       "seed": 2125,
       "baseline_l": 3193.2,
-      "prevent_l": 2944.9,
+      "prevent_l": 2590.0,
       "adapt_only_illustrative_l": 3169.2,
-      "prevent_adapt_l": 2920.9,
+      "prevent_adapt_l": 2566.0,
       "cascade_potential_l": 42
     }
   ]
