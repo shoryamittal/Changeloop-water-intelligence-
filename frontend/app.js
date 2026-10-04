@@ -13,9 +13,10 @@ const state = {
   weight: 1,
   deadlineWeight: 1,
   algorithm: 'two_opt',
-  plant: 'burgos',
+  plant: 'aulnay',
   line: 'line04',
   audioEnabled: true,
+  authenticated: false,
   opt: null,
   clean: null,
   water: null,
@@ -1763,6 +1764,7 @@ function toggleSidebar() {
 function changePlant(plant) {
   state.plant = plant;
   const labels = {
+    aulnay: 'Aulnay-sous-Bois · Skid 04',
     burgos: 'Burgos Plant · Line 04',
     settimo: 'Settimo Torinese · Line 02',
     vorselaar: 'Vorselaar Plant · Line 01',
@@ -1775,6 +1777,241 @@ function changePlant(plant) {
 function changeLine(line) {
   state.line = line;
   toast(`Switched to ${line.toUpperCase()}`);
+}
+
+/* OPERATOR AUTHENTICATION GATEWAY HANDLERS */
+function startGatewayClock() {
+  const clockEl = $('#gatewayClock');
+  if (!clockEl) return;
+  const update = () => {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const y = now.getFullYear();
+    const m = pad(now.getMonth() + 1);
+    const d = pad(now.getDate());
+    const h = pad(now.getHours());
+    const min = pad(now.getMinutes());
+    const s = pad(now.getSeconds());
+    clockEl.textContent = `🕒 ${y}-${m}-${d} ${h}:${min}:${s} CET`;
+  };
+  update();
+  setInterval(update, 1000);
+}
+
+let gatewayTelemetryTimer = null;
+let gwBaseWater = 1284;
+let gwBaseTurbidity = 0.02;
+
+function startGatewayTelemetry() {
+  if (gatewayTelemetryTimer) clearInterval(gatewayTelemetryTimer);
+  gatewayTelemetryTimer = setInterval(() => {
+    if (state.authenticated) return;
+    
+    // Slow drift upward for water saved on shift (+0.1 L every few ticks)
+    gwBaseWater += 0.05;
+    const waterEl = $('#skidWaterSaved');
+    if (waterEl) {
+      waterEl.innerHTML = `${gwBaseWater.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} <span class="unit">L</span>`;
+    }
+
+    // Natural optical spectroscopy micro-jitter for Turbidity
+    const jitter = (Math.random() * 0.004 - 0.002);
+    const currTurb = Math.max(0.01, gwBaseTurbidity + jitter);
+    const turbEl = $('#skidTurbidity');
+    if (turbEl) {
+      turbEl.innerHTML = `${currTurb.toFixed(2)} <span class="unit">NTU</span>`;
+    }
+  }, 2400);
+}
+
+function switchAuthTab(tab) {
+  $$('.auth-tab').forEach(t => t.classList.remove('active'));
+  $(`#tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`)?.classList.add('active');
+
+  const emailInput = $('#authEmail');
+  const label = $('#authIdLabel');
+  const icon = $('#authIdIcon');
+
+  if (tab === 'sso') {
+    if (label) label.textContent = 'OPERATOR CORPORATE ID / EMAIL';
+    if (icon) icon.textContent = '🪪';
+    if (emailInput) {
+      const emailMap = {
+        aulnay: 'camille.laurent@loreal.com',
+        burgos: 'marc.delacroix@loreal.com',
+        settimo: 'elena.rossi@loreal.com',
+        vorselaar: 'jan.vaneyck@loreal.com'
+      };
+      emailInput.value = emailMap[state.plant] || 'camille.laurent@loreal.com';
+    }
+  } else if (tab === 'badge') {
+    if (label) label.textContent = 'RFID SMARTBADGE IDENTIFIER';
+    if (icon) icon.textContent = '💳';
+    if (emailInput) emailInput.value = `LOREAL-SMARTBADGE-${state.plant.toUpperCase()}-#8842-SEC`;
+  } else if (tab === 'fido2') {
+    if (label) label.textContent = 'HARDWARE FIDO2 KEY ID';
+    if (icon) icon.textContent = '🔑';
+    if (emailInput) emailInput.value = `YUBIKEY-5C-NFC-LOREAL-${state.plant.toUpperCase()}-#0091`;
+  }
+  playChime('cutoff');
+}
+
+function togglePassVisibility() {
+  const pass = $('#authPasskey');
+  if (!pass) return;
+  pass.type = pass.type === 'password' ? 'text' : 'password';
+}
+
+function handleSkidChange(val) {
+  state.plant = val;
+  const plantConfigs = {
+    aulnay: {
+      node: "GLOBAL INDUSTRIAL MESH • NODE L'ORÉAL-FR-AULNAY-04",
+      skid: "Plant Aulnay-sous-Bois • Skid 04",
+      batch: "Active Batch: Lancôme L'Absolu Rouge Flush",
+      saved: 1284,
+      turbidity: 0.02,
+      seqDev: "0.00 ppm",
+      avatar: "CL",
+      name: "Dr. Camille Laurent",
+      title: "Head of Sustainable Changeovers • Operations Paris",
+      email: "camille.laurent@loreal.com"
+    },
+    burgos: {
+      node: "GLOBAL INDUSTRIAL MESH • NODE L'ORÉAL-ES-BURGOS-04",
+      skid: "Plant Burgos • Skid 04 (Waterloop)",
+      batch: "Active Batch: Revitalift Laser X3 Emulsion",
+      saved: 2140,
+      turbidity: 0.01,
+      seqDev: "0.00 ppm",
+      avatar: "MD",
+      name: "Marc Delacroix",
+      title: "Plant Operations Director • Burgos Waterloop Factory",
+      email: "marc.delacroix@loreal.com"
+    },
+    settimo: {
+      node: "GLOBAL INDUSTRIAL MESH • NODE L'ORÉAL-IT-SETTIMO-02",
+      skid: "Plant Settimo Torinese • Skid 02",
+      batch: "Active Batch: Color Riche Red Passion #340",
+      saved: 980,
+      turbidity: 0.03,
+      seqDev: "0.00 ppm",
+      avatar: "ER",
+      name: "Elena Rossi",
+      title: "Lead Formulation Specialist • Color Cosmetics",
+      email: "elena.rossi@loreal.com"
+    },
+    vorselaar: {
+      node: "GLOBAL INDUSTRIAL MESH • NODE L'ORÉAL-BE-VORSELAAR-01",
+      skid: "Plant Vorselaar • Skid 01",
+      batch: "Active Batch: Elvive Hyaluronic Plump Rinse",
+      saved: 3410,
+      turbidity: 0.01,
+      seqDev: "0.00 ppm",
+      avatar: "JV",
+      name: "Jan Van Eyck",
+      title: "Head of Surfactants Manufacturing • Vorselaar",
+      email: "jan.vaneyck@loreal.com"
+    }
+  };
+
+  const cfg = plantConfigs[val] || plantConfigs.aulnay;
+  gwBaseWater = cfg.saved;
+  gwBaseTurbidity = cfg.turbidity;
+
+  const nodeEl = $('#gwMeshNodeTitle');
+  if (nodeEl) nodeEl.textContent = cfg.node;
+
+  const skidPEl = $('#skidPlantName');
+  if (skidPEl) skidPEl.textContent = cfg.skid;
+
+  const skidBEl = $('#skidBatchName');
+  if (skidBEl) skidBEl.textContent = cfg.batch;
+
+  const waterEl = $('#skidWaterSaved');
+  if (waterEl) waterEl.innerHTML = `${cfg.saved.toLocaleString()} <span class="unit">L</span>`;
+
+  const turbEl = $('#skidTurbidity');
+  if (turbEl) turbEl.innerHTML = `${cfg.turbidity.toFixed(2)} <span class="unit">NTU</span>`;
+
+  const seqEl = $('#skidSeqDev');
+  if (seqEl) seqEl.innerHTML = `${cfg.seqDev.split(' ')[0]} <span class="unit">${cfg.seqDev.split(' ')[1]}</span>`;
+
+  const avatarEl = $('#gwOperatorAvatar');
+  if (avatarEl) avatarEl.textContent = cfg.avatar;
+
+  const nameEl = $('#gwOperatorName');
+  if (nameEl) nameEl.textContent = cfg.name;
+
+  const titleEl = $('#gwOperatorTitle');
+  if (titleEl) titleEl.textContent = cfg.title;
+
+  const emailInput = $('#authEmail');
+  if (emailInput && $('#tabSso')?.classList.contains('active')) {
+    emailInput.value = cfg.email;
+  }
+
+  const plantSel = $('#plantSelector');
+  if (plantSel) plantSel.value = val;
+
+  playChime('cutoff');
+}
+
+function handleAuthenticate(e) {
+  if (e) e.preventDefault();
+  const btn = $('#authSubmitBtn');
+  if (!btn) return;
+  
+  btn.disabled = true;
+  btn.style.opacity = '0.9';
+  btn.innerHTML = `<span>🔐 VERIFYING BIOMETRICS & FIDO2 TOKEN...</span>`;
+  playChime('cutoff');
+
+  setTimeout(() => {
+    btn.innerHTML = `<span>🏭 HARDWARE SAFETY INTERLOCK VERIFIED...</span>`;
+    playChime('cutoff');
+  }, 220);
+
+  setTimeout(() => {
+    btn.innerHTML = `<span>✓ ACCESS GRANTED • ENTERING COCKPIT...</span>`;
+    playChime('success');
+  }, 440);
+
+  setTimeout(() => {
+    state.authenticated = true;
+    const login = $('#loginScreen');
+    const shell = $('#appShell');
+    if (login) login.style.display = 'none';
+    if (shell) shell.style.display = 'flex';
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.innerHTML = `<span>AUTHENTICATE & ENTER COCKPIT</span><span class="btn-arrow">➔</span>`;
+    render();
+    const opName = $('#gwOperatorName')?.textContent || 'Dr. Camille Laurent';
+    toast(`Authenticated: ${opName} • Cockpit Active`);
+  }, 650);
+}
+
+function handleDemoPitchAccess() {
+  playChime('success');
+  state.authenticated = true;
+  const login = $('#loginScreen');
+  const shell = $('#appShell');
+  if (login) login.style.display = 'none';
+  if (shell) shell.style.display = 'flex';
+  render();
+  openPitchDeck();
+  toast('Executive Judge Access: 60s Presentation Deck Active');
+}
+
+function returnToGateway() {
+  state.authenticated = false;
+  const login = $('#loginScreen');
+  const shell = $('#appShell');
+  if (shell) shell.style.display = 'none';
+  if (login) login.style.display = 'flex';
+  playChime('cutoff');
+  toast('Session Locked: Operator Gateway Active');
 }
 
 async function runOptimization() {
@@ -2169,6 +2406,8 @@ async function load() {
     });
 
     render();
+    startGatewayClock();
+    startGatewayTelemetry();
   } catch (err) {
     console.error('Initialization error:', err);
     $('#page').innerHTML = `
