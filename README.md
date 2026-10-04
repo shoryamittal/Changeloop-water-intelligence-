@@ -42,3 +42,5 @@ docker compose up --build
 4. **Measure** — report incremental layers from one common baseline, avoiding double counting.
 
 See `docs/demo_script.md`, `docs/methodology.md`, and `docs/limitations.md` before presenting.
+
+For the complete conceptual model and a safe contribution process, read [`docs/theory_and_extension_guide.md`](docs/theory_and_extension_guide.md).
