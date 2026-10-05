@@ -110,6 +110,7 @@ def main():
         ("UI & Accessibility Standards Tests (test_ui_and_accessibility.py)", lambda: run_unittest_file("tests/test_ui_and_accessibility.py")),
         ("Frontend View Renderers & Component Tests (test_frontend_renderers.js)", lambda: run_node_file("tests/test_frontend_renderers.js")),
         ("Industrial Stress Tests (test_stress_1000.py)", lambda: run_unittest_file("tests/test_stress_1000.py")),
+        ("Brutal Destruction & Release Certification (test_brutal_destruction.py)", lambda: run_unittest_file("tests/test_brutal_destruction.py")),
     ]
 
     for name, fn in steps:
