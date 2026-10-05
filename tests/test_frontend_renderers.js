@@ -205,7 +205,10 @@ function runTests() {
         judgeSteps, changePlant, changeLine, playChime,
         overview, planning, optimizer, cleaning, cascade,
         analytics, scenarios, business, pilot, alerts, defense,
-        dossier, trust
+        dossier, trust,
+        GLOBAL_BENCHMARKS, setBenchmarkParadigm, setScalingLines,
+        renderGlobalWaterBenchmark, renderEnterpriseScalingSimulator,
+        renderDecisionChainContinuityStrip
       };
     `;
     vm.runInContext(appJsCode + '\n' + bridge, sandbox);
@@ -289,6 +292,60 @@ function runTests() {
 
     exp.changePlant('aulnay');
     assert.strictEqual(exp.state.plant, 'aulnay');
+  });
+
+  // 7. Global Water Benchmark Matrix
+  test('Global Water Benchmark Matrix rendering & paradigm switching', () => {
+    const exp = sandbox.__EXPORTED;
+    assert(exp.GLOBAL_BENCHMARKS, 'GLOBAL_BENCHMARKS object must exist');
+    assert(exp.GLOBAL_BENCHMARKS.changeloop, 'ChangeLoop paradigm definition must exist');
+    assert(exp.GLOBAL_BENCHMARKS.legacy, 'Legacy CIP paradigm definition must exist');
+
+    const html = exp.renderGlobalWaterBenchmark();
+    assert(html.includes('GLOBAL WATER MANAGEMENT BENCHMARK'), 'Benchmark title must render');
+    assert(html.includes('Why ChangeLoop Beats Every Alternative'), 'Subtitle must render');
+    assert(!html.includes('undefined'), 'No undefined values in benchmark HTML');
+
+    // Test paradigm switcher
+    exp.setBenchmarkParadigm('legacy');
+    assert.strictEqual(exp.state.selectedBenchmarkParadigm, 'legacy');
+    exp.setBenchmarkParadigm('changeloop');
+    assert.strictEqual(exp.state.selectedBenchmarkParadigm, 'changeloop');
+  });
+
+  // 8. Enterprise Scaling Simulator
+  test('Enterprise Scaling Simulator rendering & line scaling math', () => {
+    const exp = sandbox.__EXPORTED;
+    const html1 = exp.renderEnterpriseScalingSimulator();
+    assert(html1.includes('Enterprise Fleet Scaling Simulator'), 'Simulator title must render');
+    assert(html1.includes('€355,000'), '1-line operating savings must render');
+    assert(html1.includes('3.2'), 'Payback must include 3.2 Months');
+
+    // Test scaling to 4 lines
+    exp.setScalingLines(4);
+    assert.strictEqual(exp.state.scalingNumLines, 4);
+    const html4 = exp.renderEnterpriseScalingSimulator();
+    assert(html4.includes('€1,420,000'), '4-line annual savings must be €1,420,000');
+    assert(!html4.includes('NaN'), 'No NaN values in simulator HTML');
+
+    // Reset back to 1 line
+    exp.setScalingLines(1);
+    assert.strictEqual(exp.state.scalingNumLines, 1);
+  });
+
+  // 9. Decision-Chain Continuity Strip
+  test('Decision-Chain Continuity Strip rendering across all operational stages', () => {
+    const exp = sandbox.__EXPORTED;
+    const stages = ['planning', 'optimizer', 'cleaning', 'cascade', 'analytics'];
+    
+    stages.forEach(stage => {
+      const stripHtml = exp.renderDecisionChainContinuityStrip(stage);
+      assert(stripHtml.includes('CONNECTED DECISION CHAIN'), `Strip for ${stage} must include title`);
+      assert(stripHtml.includes('decision-chain-continuity-strip'), `Strip for ${stage} must include wrapper class`);
+      assert(stripHtml.includes('ACTIVE WORKFLOW STAGE'), `Strip for ${stage} must indicate active workflow stage`);
+      assert(!stripHtml.includes('undefined'), `Strip for ${stage} must not contain undefined`);
+      assert(!stripHtml.includes('NaN'), `Strip for ${stage} must not contain NaN`);
+    });
   });
 
   // Cleanup recorded timers
