@@ -1,136 +1,111 @@
 /* ==========================================================================
    ChangeLoop - design system
 
-   Direction: a precision instrument panel, not a dashboard and not a
-   document. The discipline is borrowed from process documentation -
-   monospaced tabular numerals as the primary content, hairline rules instead
-   of shadows, an evidence tag on every figure - but the palette is built for
-   a screen in a room: deep graphite ground, crisp type, and semantic colour
-   that is vivid exactly where it carries meaning and absent everywhere else.
+   Deep emerald-black ground, emerald brand accent, brass secondary, a
+   display serif for headings and industrial mono for every number.
 
-   Dark is the default because that is how this gets presented. Light is a
-   full-contrast alternative, not washed paper.
+   One job per colour. Emerald means brand and affirmative; brass means
+   provenance and evidence; cyan is water; gold-brass is salt; orange is
+   energy; violet is carbon. Colour sits on NUMBERS and RULES, never on
+   large surfaces, which is what keeps a saturated palette legible.
 
-   Deliberately absent: gradients on content, glows, emoji, decorative
-   iconography, rounded cards, drop shadows.
+   Deliberately absent: emoji, glows, pulsing indicators, gradients on
+   content, drop shadows, decorative iconography.
    ========================================================================== */
 
-/* ---------- tokens: dark is the default ---------- */
+/* ---------- tokens: dark is the default, because this is presented ------- */
 :root {
-  /* ground - graphite with a cool undertone, stepped for elevation */
-  --paper:        #0d0f14;
-  --paper-raised: #151922;
-  --paper-sunk:   #090b0f;
-  --paper-lift:   #1c212c;
+  /* ground - near-black with a green undertone, stepped for elevation */
+  --paper:        #080b09;
+  --paper-raised: #0f1411;
+  --paper-sunk:   #050706;
+  --paper-lift:   #161d19;
 
-  /* type */
-  --ink:          #f3f5f9;
-  --ink-2:        #c2cad8;
-  --ink-3:        #8c97a8;
-  --ink-4:        #7b8593;
+  /* type - very slightly warm, so it reads as ink rather than pixels */
+  --ink:          #f1f5f1;
+  --ink-2:        #bfc9c1;
+  --ink-3:        #8d978f;
+  --ink-4:        #79857c;
 
   /* structure */
-  --rule:         #242a36;
-  --rule-strong:  #3a4252;
+  --rule:         #1e2621;
+  --rule-strong:  #36423a;
 
-  /* one accent, for interaction only */
-  --accent:       #4d8dff;
-  --accent-ink:   #6fa3ff;
-  --accent-wash:  #14233f;
-  --accent-edge:  #2d5ba8;
+  /* brand accent - emerald. interaction, active state, recommendation. */
+  --accent:       #10b981;
+  --accent-ink:   #34d399;
+  --accent-wash:  #07251a;
+  --accent-edge:  #0b7a57;
 
-  /* semantic - each has one job, used on numbers not surfaces */
-  --water:        #2dd4bf;
-  --water-wash:   #0c2b29;
-  --salt:         #f0b429;
-  --salt-wash:    #2e2210;
-  --energy:       #ff6b4a;
-  --energy-wash:  #331510;
+  /* secondary - brass. provenance, evidence, the masthead spine. */
+  --brass:        #c9a96e;
+  --brass-ink:    #ddc28d;
+  --brass-wash:   #231b0f;
+
+  /* semantic - one job each, applied to numerals */
+  --water:        #38bdf8;
+  --water-wash:   #072231;
+  --salt:         #d4a24c;
+  --salt-wash:    #241a0c;
+  --energy:       #f97316;
+  --energy-wash:  #2b1407;
   --carbon:       #a78bfa;
-  --carbon-wash:  #221b38;
+  --carbon-wash:  #1d1733;
   --good:         #34d399;
-  --good-wash:    #0c2a21;
+  --good-wash:    #07251a;
   --warn:         #fbbf24;
-  --warn-wash:    #2e2410;
-  --stop:         #f87171;
-  --stop-wash:    #331416;
+  --warn-wash:    #2a1f06;
+  --stop:         #fb7185;
+  --stop-wash:    #2d0d14;
 
-  --sans: "Inter", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
-  --mono: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  /* type stacks - display serif for headings, mono for data */
+  --sans:    "Manrope", "Inter", system-ui, -apple-system, sans-serif;
+  --display: "Fraunces", "Playfair Display", Georgia, serif;
+  --mono:    "DM Mono", "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
 
   --rail: 236px;
   --gutter: 28px;
   --radius: 3px;
 }
 
-/* ---------- light: full contrast, not paper ---------- */
+/* ---------- light: the same system inverted, at full contrast ---------- */
 :root[data-theme="light"] {
-  --paper:        #f2f4f8;
+  --paper:        #f4f6f3;
   --paper-raised: #ffffff;
-  --paper-sunk:   #e7ebf1;
+  --paper-sunk:   #e8ece7;
   --paper-lift:   #ffffff;
 
-  --ink:          #0b0d12;
-  --ink-2:        #38414f;
-  --ink-3:        #5f6b7c;
-  --ink-4:        #6d7682;
+  --ink:          #0a0f0c;
+  --ink-2:        #38443c;
+  --ink-3:        #5c6961;
+  --ink-4:        #66736a;
 
-  --rule:         #d6dce5;
-  --rule-strong:  #aab4c2;
+  --rule:         #d8dfd9;
+  --rule-strong:  #a9b4ac;
 
-  --accent:       #1b4fd8;
-  --accent-ink:   #123aa8;
-  --accent-wash:  #e4ebfe;
-  --accent-edge:  #1b4fd8;
+  --accent:       #047857;
+  --accent-ink:   #065f46;
+  --accent-wash:  #d8f0e6;
+  --accent-edge:  #047857;
 
-  --water:        #0f766e;
-  --water-wash:   #d6f2ee;
-  --salt:         #9a6b06;
-  --salt-wash:    #fbf0d6;
+  --brass:        #8a6c2a;
+  --brass-ink:    #6f5520;
+  --brass-wash:   #f6eed9;
+
+  --water:        #0369a1;
+  --water-wash:   #dceefb;
+  --salt:         #8a6c2a;
+  --salt-wash:    #f6eed9;
   --energy:       #c2410c;
-  --energy-wash:  #fde8de;
+  --energy-wash:  #fde8dd;
   --carbon:       #6d28d9;
-  --carbon-wash:  #ece3fe;
+  --carbon-wash:  #ebe3fd;
   --good:         #047857;
-  --good-wash:    #d7f2e6;
+  --good-wash:    #d8f0e6;
   --warn:         #a16207;
-  --warn-wash:    #fbf0d6;
-  --stop:         #b91c1c;
-  --stop-wash:    #fde4e4;
-}
-
-/* Respect an explicit OS light preference when the viewer has not chosen. */
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]):not([data-theme="light"]) {
-    --paper:        #f2f4f8;
-    --paper-raised: #ffffff;
-    --paper-sunk:   #e7ebf1;
-    --paper-lift:   #ffffff;
-    --ink:          #0b0d12;
-    --ink-2:        #38414f;
-    --ink-3:        #5f6b7c;
-    --ink-4:        #6d7682;
-    --rule:         #d6dce5;
-    --rule-strong:  #aab4c2;
-    --accent:       #1b4fd8;
-    --accent-ink:   #123aa8;
-    --accent-wash:  #e4ebfe;
-    --accent-edge:  #1b4fd8;
-    --water:        #0f766e;
-    --water-wash:   #d6f2ee;
-    --salt:         #9a6b06;
-    --salt-wash:    #fbf0d6;
-    --energy:       #c2410c;
-    --energy-wash:  #fde8de;
-    --carbon:       #6d28d9;
-    --carbon-wash:  #ece3fe;
-    --good:         #047857;
-    --good-wash:    #d7f2e6;
-    --warn:         #a16207;
-    --warn-wash:    #fbf0d6;
-    --stop:         #b91c1c;
-    --stop-wash:    #fde4e4;
-  }
+  --warn-wash:    #f9eed4;
+  --stop:         #be123c;
+  --stop-wash:    #fde3e8;
 }
 
 /* ---------- reset ---------- */
@@ -171,7 +146,7 @@ button { font: inherit; color: inherit; }
   display: flex; align-items: stretch;
   background: var(--paper-raised);
   border-bottom: 1px solid var(--rule-strong);
-  box-shadow: inset 0 2px 0 var(--accent);
+  box-shadow: inset 0 2px 0 var(--brass);
 }
 .mast-brand {
   display: flex; align-items: center; gap: 11px;
@@ -180,7 +155,12 @@ button { font: inherit; color: inherit; }
   min-width: var(--rail);
 }
 .mark { flex: none; display: block; color: var(--accent); }
-.mast-name { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+.mast-sub { color: var(--brass); }
+.mast-name {
+  font-family: var(--display);
+  font-size: 18px; font-weight: 600;
+  letter-spacing: -0.01em; line-height: 1.05;
+}
 .mast-sub {
   font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.1em;
   text-transform: uppercase; color: var(--ink-3); margin-top: 2px;
@@ -229,15 +209,15 @@ button { font: inherit; color: inherit; }
 }
 .rail-item:hover { background: var(--paper-sunk); color: var(--ink); }
 .rail-item .idx {
-  font-family: var(--mono); font-size: 10px; color: var(--ink-4);
-  font-variant-numeric: tabular-nums;
+  font-family: var(--mono); font-size: 10px; color: var(--brass);
+  font-variant-numeric: tabular-nums; opacity: .75;
 }
 .rail-item .lbl { font-size: 13px; font-weight: 500; }
 .rail-item[aria-current="page"] {
   border-left-color: var(--accent); background: var(--accent-wash);
   color: var(--ink);
 }
-.rail-item[aria-current="page"] .idx { color: var(--accent); }
+.rail-item[aria-current="page"] .idx { color: var(--accent-ink); }
 .rail-item[aria-current="page"] .lbl { font-weight: 600; }
 .rail-foot {
   margin-top: 22px; padding: 16px var(--gutter) 0;
@@ -255,10 +235,15 @@ button { font: inherit; color: inherit; }
   border-bottom: 1px solid var(--rule); background: var(--paper-raised);
 }
 .sec-eyebrow {
-  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--ink-4); margin-bottom: 7px;
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--brass); margin-bottom: 9px;
 }
-.sec-title { font-size: 28px; letter-spacing: -0.03em; line-height: 1.12; }
+.sec-title {
+  font-family: var(--display);
+  font-size: 31px; font-weight: 600;
+  letter-spacing: -0.015em; line-height: 1.14;
+  text-wrap: balance;
+}
 .sec-lede {
   margin-top: 9px; max-width: 76ch; font-size: 14.5px; line-height: 1.55;
   color: var(--ink-2);
@@ -286,12 +271,12 @@ button { font: inherit; color: inherit; }
 }
 .ev-MEASURED  { color: var(--good);   border-color: var(--good);   background: var(--good-wash); }
 .ev-DERIVED   { color: var(--water);  border-color: var(--water);  background: var(--water-wash); }
-.ev-PUBLISHED { color: var(--accent); border-color: var(--accent); background: var(--accent-wash); }
+.ev-PUBLISHED { color: var(--brass-ink); border-color: var(--brass); background: var(--brass-wash); }
 .ev-ASSUMED   { color: var(--warn);   border-color: var(--warn);   background: var(--warn-wash); }
 .ev-SIMULATED { color: var(--carbon); border-color: var(--carbon); background: var(--carbon-wash); }
 .ev-MODELLED  { color: var(--carbon); border-color: var(--carbon); background: var(--carbon-wash); }
 .ev-PROJECTED { color: var(--salt);   border-color: var(--salt);   background: var(--salt-wash); }
-.ev-PLANNED   { color: var(--accent); border-color: var(--accent); background: var(--accent-wash); }
+.ev-PLANNED   { color: var(--accent-ink); border-color: var(--accent); background: var(--accent-wash); }
 
 /* ==========================================================================
    metric strip
@@ -384,6 +369,9 @@ table.tbl tr.is-blocked td { color: var(--ink-3); }
   border-width: 2px;
   box-shadow: 0 0 0 1px var(--accent-edge);
 }
+/* a thin emerald cap, so the recommendation is identifiable at a glance */
+.opt.is-rec .opt-head { box-shadow: inset 0 3px 0 var(--accent); }
+.opt.is-blocked .opt-head { box-shadow: inset 0 3px 0 var(--stop); }
 .opt.is-blocked { background: var(--paper-sunk); }
 .opt-head {
   padding: 13px 15px; border-bottom: 1px solid var(--rule);
@@ -401,7 +389,11 @@ table.tbl tr.is-blocked td { color: var(--ink-3); }
   background: var(--paper-sunk); color: var(--ink-3);
   border: 1px solid var(--rule-strong);
 }
-.opt-title { font-size: 14.5px; font-weight: 600; letter-spacing: -0.015em; }
+.opt-title {
+  font-family: var(--display);
+  font-size: 16.5px; font-weight: 600; letter-spacing: -0.01em;
+  line-height: 1.2;
+}
 .opt-desc { font-size: 12.5px; color: var(--ink-2); line-height: 1.45; }
 .opt-rows { padding: 4px 0; }
 .opt-row {
@@ -686,7 +678,10 @@ dialog.sheet::backdrop { background: rgba(14,15,18,.5); }
   position: sticky; top: 0; background: var(--paper-raised);
 }
 .sheet-body { padding: 20px 22px; overflow-y: auto; }
-.sheet-title { font-size: 17px; letter-spacing: -0.02em; }
+.sheet-title {
+  font-family: var(--display); font-size: 20px; font-weight: 600;
+  letter-spacing: -0.01em;
+}
 
 dl.defs { margin: 0; display: grid; }
 dl.defs > div {
@@ -749,8 +744,9 @@ dl.defs dd { margin: 0; font-size: 13px; line-height: 1.5; }
   :root {
     --paper: #fff; --paper-raised: #fff; --paper-sunk: #f4f4f4;
     --paper-lift: #fff;
-    --ink: #000; --ink-2: #222; --ink-3: #444; --ink-4: #666;
+    --ink: #000; --ink-2: #222; --ink-3: #444; --ink-4: #555;
     --rule: #ccc; --rule-strong: #888;
+    --brass: #6f5520; --accent: #046c4e;
   }
   .masthead, .rail, .mast-actions, .btn { display: none !important; }
   .metric::before { background: #888 !important; }
