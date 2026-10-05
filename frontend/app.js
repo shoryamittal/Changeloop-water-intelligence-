@@ -151,6 +151,8 @@ function renderMast() {
   }).join('');
   modeSel.onchange = function () {
     S.mode = modeSel.value;
+    // The proof studies are mode-dependent, so drop the cached ones.
+    S.ablation = S.sensitivity = null;
     guard(function () {
       return post('/api/optimise', { mode: S.mode }).then(function (st) {
         S.state = st;
@@ -1246,8 +1248,9 @@ function caseResult(bc) {
 /* ---------- 08 scale & proof ---------- */
 function viewScale() {
   if (!S.ablation) {
-    api('/api/ablation').then(function (d) {
-      S.ablation = d; if (S.view === 'scale') render(); });
+    api('/api/ablation?mode=' + encodeURIComponent(S.mode))
+      .then(function (d) {
+        S.ablation = d; if (S.view === 'scale') render(); });
   }
   if (!S.sensitivity) {
     api('/api/sensitivity').then(function (d) {
@@ -1278,27 +1281,37 @@ function viewScale() {
   '<div class="block"><div class="block-head"><h2 class="block-title">' +
     'Ablation — remove one layer at a time</h2>' +
     '<span class="block-note">' + ev('MODELLED') +
+    ' · under ' + esc(S.modes[S.mode].name) +
     ' · /api/ablation</span></div>' + (ab
     ? '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Variant</th>' +
-      '<th class="num">Freshwater avoided</th><th class="num">Share of full' +
-      '</th><th class="num">Steam avoided</th><th class="num">Breach</th>' +
-      '<th>Capability lost</th></tr></thead><tbody>' +
+      '<th class="num">Freshwater reported</th>' +
+      '<th class="num">vs full</th><th class="num">Steam</th>' +
+      '<th class="num">Breach</th><th>Capability lost</th>' +
+      '</tr></thead><tbody>' +
       ab.variants.map(function (v) {
         var cls = v.variant === 'full' ? ' class="is-rec"'
           : v.firm_breaches > 0 ? ' class="is-blocked"' : '';
         return '<tr' + cls + '><td class="row-label">' + esc(v.label) +
           '</td><td class="num">' + num(v.freshwater_avoided_l, 0) + ' L</td>' +
-          '<td class="num">' + (v.share_of_full_benefit_pct == null ? '—'
-            : num(v.share_of_full_benefit_pct, 0) + '%') + '</td>' +
+          '<td class="num">' + (v.reported_vs_full_pct == null ? '—'
+            : num(v.reported_vs_full_pct, 0) + '%' + (v.overstates
+              ? ' <span class="ev ev-ASSUMED">over-reports</span>'
+              : '')) + '</td>' +
           '<td class="num">' + num(v.mee_thermal_avoided_kwh, 0) + ' kWh</td>' +
           '<td class="num">' + (v.firm_breaches > 0
             ? '<span class="ev ev-ASSUMED">' + v.firm_breaches + '</span>'
             : '0') + '</td><td class="small muted">' +
-          esc(v.capability_lost) + '</td></tr>';
+          esc(v.capability_lost) + (v.overstatement_note
+            ? '<div class="row-sub" style="color:var(--stop)">' +
+              esc(v.overstatement_note) + '</div>' : '') + '</td></tr>';
       }).join('') + '</tbody></table></div>' +
       '<div class="callout insight" style="margin-top:12px">' +
       '<div class="callout-title">What this proves</div><p>' +
-      esc(ab.conclusion) + '</p></div>'
+      esc(ab.conclusion) + '</p>' +
+      '<p class="small muted" style="margin-top:8px">Change the ' +
+      'binding constraint in the masthead and this study re-runs under ' +
+      'that mode. A layer can be inert under one price set and decisive ' +
+      'under another, and the table says which.</p></div>'
     : '<div class="state-msg"><span class="spinner"></span>' +
       'Running ablation&hellip;</div>') + '</div>' +
 

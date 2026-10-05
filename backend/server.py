@@ -520,8 +520,13 @@ class App(SimpleHTTPRequestHandler):
                     scenarios.sensitivity(one("site", s.site_id)))
 
             if route == "/api/ablation":
+                mode_id = one("mode", "NORMAL")
+                if mode_id not in scenarios.constraint_modes():
+                    return self.send_error_json(
+                        400, "UNKNOWN_MODE", "Unknown constraint mode.",
+                        {"valid": sorted(scenarios.constraint_modes())})
                 return self.send_json(
-                    scenarios.ablation(one("site", s.site_id)))
+                    scenarios.ablation(one("site", s.site_id), mode_id))
 
             if route == "/api/impact":
                 return self.send_json(s.impact())

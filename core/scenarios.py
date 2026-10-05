@@ -346,8 +346,16 @@ def sensitivity(site_id: str = DEFAULT_SITE) -> Dict[str, Any]:
 # 3. Ablation
 # ---------------------------------------------------------------------------
 
-def ablation(site_id: str = DEFAULT_SITE) -> Dict[str, Any]:
+def ablation(site_id: str = DEFAULT_SITE,
+             mode_id: str = "NORMAL") -> Dict[str, Any]:
     """Remove one architectural layer at a time and measure what is lost.
+
+    The result depends on the binding constraint, and that is the point.
+    Under NORMAL economics counter-current rinsing is the cheapest plan
+    whether or not the optimiser can see the evaporator, so the
+    ZLD-coupling layer does not change the answer. Price carbon or water
+    scarcity and it does. We report which layers bind in the mode being
+    examined rather than implying every layer always earns its place.
 
     Layers tested:
       full                  everything on
@@ -361,10 +369,14 @@ def ablation(site_id: str = DEFAULT_SITE) -> Dict[str, Any]:
     lots = reference_lots()
     arrival = arrival_order()
     basin = get_basin(site_id)
+    modes = constraint_modes()
+    mode = modes.get(mode_id, modes["NORMAL"])
+    W = mode.weights
+    C = mode.constraints
     out: List[Dict[str, Any]] = []
 
     # ---- full system -------------------------------------------------
-    full = optimise(lots, arrival, site_id)
+    full = optimise(lots, arrival, site_id, W, C)
     full_rec = next(o for o in full["options"]
                     if o["option_id"] == full["recommended_option_id"])
     out.append({
@@ -393,10 +405,8 @@ def ablation(site_id: str = DEFAULT_SITE) -> Dict[str, Any]:
             best_water = seq["changeover_water_l"]
             best_water_order = list(perm)
     if best_water_order:
-        c = evaluate_candidate(lots, best_water_order, site_id,
-                               ObjectiveWeights(), HardConstraints())
-        base_c = evaluate_candidate(lots, arrival, site_id,
-                                    ObjectiveWeights(), HardConstraints())
+        c = evaluate_candidate(lots, best_water_order, site_id, W, C)
+        base_c = evaluate_candidate(lots, arrival, site_id, W, C)
         out.append({
             "variant": "no_zld_coupling",
             "label": "Without downstream ZLD coupling",
@@ -425,7 +435,7 @@ def ablation(site_id: str = DEFAULT_SITE) -> Dict[str, Any]:
     with _with_factor("ro_max_reject_tds_mg_l", 10_000_000.0):
         # An absurdly high ceiling makes the salt constraint never bind, so
         # reject is purely hydraulic - exactly a water-only ZLD model.
-        r = optimise(lots, arrival, site_id)
+        r = optimise(lots, arrival, site_id, W, C)
         rec = next(o for o in r["options"]
                    if o["option_id"] == r["recommended_option_id"])
         out.append({
@@ -447,7 +457,11 @@ def ablation(site_id: str = DEFAULT_SITE) -> Dict[str, Any]:
 
     # ---- no stress weighting ----------------------------------------
     r = optimise(lots, arrival, site_id,
-                 ObjectiveWeights(stress_premium_inr_per_m3_eq=0.0))
+                 ObjectiveWeights(
+                     stress_premium_inr_per_m3_eq=0.0,
+                     carbon_price_inr_per_tonne=W.carbon_price_inr_per_tonne,
+                     lateness_penalty_inr_per_hour=W.lateness_penalty_inr_per_hour),
+                 C)
     rec = next(o for o in r["options"]
                if o["option_id"] == r["recommended_option_id"])
     out.append({
@@ -469,7 +483,10 @@ def ablation(site_id: str = DEFAULT_SITE) -> Dict[str, Any]:
 
     # ---- no hard constraints ----------------------------------------
     r = optimise(lots, arrival, site_id,
-                 ObjectiveWeights(lateness_penalty_inr_per_hour=0.0),
+                 ObjectiveWeights(
+                     stress_premium_inr_per_m3_eq=W.stress_premium_inr_per_m3_eq,
+                     carbon_price_inr_per_tonne=W.carbon_price_inr_per_tonne,
+                     lateness_penalty_inr_per_hour=0.0),
                  HardConstraints(no_firm_date_breach=False,
                                  max_total_lateness_h=1e9,
                                  max_single_lot_lateness_h=1e9))
@@ -495,21 +512,70 @@ def ablation(site_id: str = DEFAULT_SITE) -> Dict[str, Any]:
     })
 
     full_fresh = out[0]["freshwater_avoided_l"] or 0.0
+    full_order = out[0]["recommended_order"]
     for v in out:
         f = v["freshwater_avoided_l"] or 0.0
-        v["share_of_full_benefit_pct"] = (
+        # What the variant would REPORT, relative to the full system. Note
+        # this is not always "benefit captured": two variants report MORE
+        # than is really available, and that over-reporting is precisely
+        # their defect rather than an advantage.
+        v["reported_vs_full_pct"] = (
             round(f / full_fresh * 100.0, 1) if full_fresh else None)
+        v["overstates"] = bool(full_fresh and f > full_fresh + 0.5
+                               and v["variant"] != "full")
+        if v["overstates"]:
+            v["overstatement_note"] = (
+                "This variant REPORTS a larger saving than the full system "
+                "while actually delivering less or breaching a constraint. "
+                "Over-reporting is the defect: a water-only ZLD model "
+                "mis-states how much freshwater a plan really avoids, and an "
+                "unconstrained optimiser books a saving from a plan nobody "
+                "would run."
+            )
+        # Does this layer bind in THIS mode? A layer binds if removing
+        # it changes the plan or produces a constraint breach.
+        if v["variant"] == "full":
+            v["layer_binds_in_this_mode"] = None
+        else:
+            v["layer_binds_in_this_mode"] = bool(
+                v["recommended_order"] != full_order
+                or abs(f - full_fresh) > 0.5
+                or v["firm_breaches"] > 0)
+
+    binding = [v["label"] for v in out
+               if v.get("layer_binds_in_this_mode")]
+    inert = [v["label"] for v in out
+             if v.get("layer_binds_in_this_mode") is False]
+
+    conclusion = (
+        "Under the {} constraint mode, removing these layers changes the "
+        "recommendation: {}. ".format(mode.name.lower(),
+                                      "; ".join(binding) or "none")
+    )
+    if inert:
+        conclusion += (
+            "These layers do NOT change the recommendation in this mode: "
+            "{}. That is reported rather than hidden. A layer can be "
+            "inert under one price set and decisive under another - the "
+            "zero-liquid-discharge coupling is inert while counter-current "
+            "rinsing is the cheapest plan regardless, and becomes decisive "
+            "as soon as carbon or water scarcity is priced. Re-run this "
+            "study under Carbon priority or Drought to see it bind."
+            .format("; ".join(inert)))
+    conclusion += (
+        " The hard-constraint layer is the one that binds in every mode: "
+        "without it the system recommends a plan that breaches a firm "
+        "buyer ship date, which is the single fastest way for a planner "
+        "to stop trusting a scheduling tool.")
 
     return {
         "site_id": site_id,
         "basin": basin.basin_name,
+        "mode_id": mode.mode_id,
+        "mode_name": mode.name,
         "variants": out,
-        "conclusion": (
-            "Each layer is retained because removing it removes a stated "
-            "capability. The salt-mass model and the hard-constraint layer "
-            "are the two that change the answer most: without the first the "
-            "energy consequence is mis-stated, and without the second the "
-            "system recommends a plan that breaches a buyer commitment."
-        ),
+        "layers_binding": binding,
+        "layers_inert_in_this_mode": inert,
+        "conclusion": conclusion,
         "classification": "MODELLED",
     }

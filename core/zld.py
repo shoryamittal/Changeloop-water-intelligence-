@@ -120,11 +120,24 @@ def treat(effluent_volume_l: float,
         salt_mass_kg: dissolved solids carried in that water, kilograms.
         site_id: used only for cost/basin context, not for the physics.
     """
-    v = max(0.0, float(effluent_volume_l))
-    m_salt = max(0.0, float(salt_mass_kg))
+    # Validate BEFORE clamping. max(0.0, nan) returns 0.0 in Python, so
+    # clamping first would silently turn a NaN into a valid zero and the
+    # finite check would never fire. A test caught exactly that.
+    try:
+        v_raw = float(effluent_volume_l)
+        m_raw = float(salt_mass_kg)
+    except (TypeError, ValueError):
+        raise ValueError(
+            "Effluent volume and salt mass must be numeric.")
 
-    if not math.isfinite(v) or not math.isfinite(m_salt):
-        raise ValueError("Effluent volume and salt mass must be finite.")
+    if not math.isfinite(v_raw) or not math.isfinite(m_raw):
+        raise ValueError(
+            "Effluent volume and salt mass must be finite. Received "
+            "volume={!r}, salt={!r}.".format(effluent_volume_l,
+                                             salt_mass_kg))
+
+    v = max(0.0, v_raw)
+    m_salt = max(0.0, m_raw)
 
     c_rej_max = factors.get("ro_max_reject_tds_mg_l")
     r_max = factors.get("ro_max_recovery_frac")
