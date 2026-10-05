@@ -226,10 +226,12 @@ class DemoSession:
             
         gate = self.cleaning_simulation.get("safety_gate", {})
         state_str = gate.get("safety_state", "")
-        if state_str not in {"NORMAL_OPERATION", "ADVISORY_MONITORING"} and self.fault_mode is not None:
+        clearance = gate.get("three_point_clearance", {})
+        all_clear = clearance.get("asymptotic_conductivity") and clearance.get("turbidity_below_threshold") and clearance.get("thermal_contact_satisfied")
+        if state_str not in {"NORMAL_OPERATION", "ADVISORY_MONITORING"} or not all_clear or self.fault_mode is not None:
             return {
                 "status": "BLOCKED",
-                "error": "Safety interlocks active. Early cutoff cannot be authorized under fault condition."
+                "error": "Safety interlocks active. Early cutoff cannot be authorized under fault condition or unverified clearance."
             }
             
         self.operator_validation = "AUTHORIZED"
@@ -258,12 +260,29 @@ class DemoSession:
 
     def authorize_cascade_committal(self) -> Dict[str, Any]:
         """Authorize committal of permeate to cooling towers and utility circuits."""
+        if self.recovery_result.get("quality") != "screened":
+            return {
+                "status": "BLOCKED",
+                "error": "Effluent quality does not meet screening spec. Committal blocked."
+            }
         self.cascade_committed = True
         self._recompute_impact()
         self.demo_step = "07_IMPACT"
         
         ev = record_audit_event("DEMO_CASCADE_COMMITTED", f"Authorized {self.recovery_result['volume_l']} L permeate committal to utility loops.")
         return {"status": "COMMITTED", "volume_l": self.recovery_result["volume_l"], "event": ev}
+
+    def override_cascade_to_wwtp(self) -> Dict[str, Any]:
+        """Operator veto: Divert all effluent to WWTP; zero circular credit."""
+        self.cascade_committed = False
+        if not self.recovery_result:
+            self.recovery_result = analyze_cascade({"volume_l": 210.0, "quality": "screened"})
+        self.recovery_result["destination"] = "WWTP"
+        self.recovery_result["volume_reused_l"] = 0.0
+        self.recovery_result["volume_l"] = 0.0
+        self._recompute_impact()
+        ev = record_audit_event("DEMO_CASCADE_OVERRIDDEN_WWTP", "Operator manual veto: All effluent diverted directly to WWTP bio-treatment.")
+        return {"status": "OVERRIDDEN_WWTP", "cascade_committed": False, "destination": "WWTP", "volume_reused_l": 0.0, "event": ev}
 
     def _recompute_impact(self):
         """Authoritative mass balance calculation reconciling all upstream steps."""
@@ -274,7 +293,9 @@ class DemoSession:
             upstream_avoided = 0.0
             
         # Layer 2: Adapt
-        if self.operator_validation == "AUTHORIZED" and self.fault_mode is None:
+        gate = (self.cleaning_simulation or {}).get("safety_gate", {})
+        state_str = gate.get("safety_state", "")
+        if self.operator_validation == "AUTHORIZED" and self.fault_mode is None and state_str in {"NORMAL_OPERATION", "ADVISORY_MONITORING"}:
             adaptive_avoided = 130.0
             time_avoided_min = 13.0
         else:

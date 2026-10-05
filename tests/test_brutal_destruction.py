@@ -261,6 +261,24 @@ class BrutalDestructionTestSuite(unittest.TestCase):
         self.assertEqual(st, 400)
         self.assertEqual(res["status"], "BLOCKED")
 
+    def test_cascade_04_operator_override_wwtp_diversion(self):
+        """Operator manual override diverts all cascade water directly to WWTP."""
+        st, res = http_post("/api/water/override", {})
+        self.assertEqual(st, 200)
+        self.assertEqual(res["status"], "OVERRIDDEN")
+        self.assertEqual(res["destination"], "WWTP")
+        self.assertEqual(res["volume_reused_l"], 0.0)
+
+    def test_demo_override_veto_actions(self):
+        """Demo step handles operator veto and cascade override deterministically."""
+        st, res1 = http_post("/api/demo/step", {"action": "override_veto"})
+        self.assertEqual(st, 200)
+        self.assertEqual(res1["operator_validation"], "OVERRIDDEN")
+
+        st, res2 = http_post("/api/demo/step", {"action": "cascade_override"})
+        self.assertEqual(st, 200)
+        self.assertEqual(res2["recovery_result"]["destination"], "WWTP")
+
     def test_impact_01_strict_anti_double_counting(self):
         """Avoided water demand never co-mingles with circular cascade reclaim."""
         impact = calculate_impact({

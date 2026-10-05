@@ -213,6 +213,9 @@ class App(SimpleHTTPRequestHandler):
             if action in ("override_veto", "OVERRIDE"):
                 session.override_to_baseline_timer()
                 return self.send_json(session.to_dict())
+            if action in ("cascade_override", "OVERRIDE_WWTP"):
+                session.override_cascade_to_wwtp()
+                return self.send_json(session.to_dict())
             if action in ("cascade_screen", "05_RECOVER", "07_RECOVERY"):
                 vol = body.get("volume_l") or (body.get("payload", {}).get("volume_l") if isinstance(body.get("payload"), dict) else None)
                 session.execute_cascade_screening(vol)
@@ -246,19 +249,37 @@ class App(SimpleHTTPRequestHandler):
             return self.send_json(cascade(body))
 
         if route == "/api/water/authorize":
-            volume_l = float(body.get("volume_l", 145))
-            quality = body.get("quality", "screened")
+            volume_l = float(body.get("volume_l") or body.get("volume_reused_l") or 145)
+            quality = body.get("quality") or ("screened" if body.get("volume_reused_l") else "unknown")
             if quality != "screened":
                 return self.send_json({
                     "error": "Water quality criteria not met. Authorization blocked.",
                     "status": "BLOCKED"
                 }, 400)
-            get_demo_session().authorize_cascade_committal()
+            session = get_demo_session()
+            session.recovery_result["volume_l"] = volume_l
+            session.recovery_result["quality"] = quality
+            auth_res = session.authorize_cascade_committal()
+            if auth_res.get("status") == "BLOCKED":
+                return self.send_json({
+                    "error": auth_res.get("error", "Water cascade authorization blocked."),
+                    "status": "BLOCKED"
+                }, 400)
             event = record("CASCADE_COMMITTAL_AUTHORIZED", f"Authorized {volume_l} L non-contact cascade committal")
             return self.send_json({
                 "status": "AUTHORIZED",
                 "volume_l": volume_l,
                 "event": event,
+                "session": session.to_dict()
+            })
+
+        if route == "/api/water/override":
+            res = get_demo_session().override_cascade_to_wwtp()
+            return self.send_json({
+                "status": "OVERRIDDEN",
+                "destination": "WWTP",
+                "volume_reused_l": 0.0,
+                "event": res.get("event"),
                 "session": get_demo_session().to_dict()
             })
 
@@ -270,7 +291,12 @@ class App(SimpleHTTPRequestHandler):
                     "status": "BLOCKED"
                 }, 400)
             saved_l = float(body.get("water_saved_l", 130))
-            get_demo_session().authorize_early_cutoff()
+            auth_res = get_demo_session().authorize_early_cutoff()
+            if auth_res.get("status") == "BLOCKED":
+                return self.send_json({
+                    "error": auth_res.get("error", "Safety interlocks active. Early cutoff cannot be authorized."),
+                    "status": "BLOCKED"
+                }, 400)
             event = record("GMP_EARLY_RINSE_CUTOFF_AUTHORIZED", f"Operator approved early rinse cutoff ({saved_l} L DIW avoided)")
             return self.send_json({
                 "status": "AUTHORIZED",
