@@ -3298,6 +3298,7 @@ function cascade() {
   const rejectPct = totalEffluent > 0 ? ((divertedL / totalEffluent) * 100).toFixed(1) : '100.0';
   const annualL = Math.round(qualifiedL * 332.4);
   const annualSavingsEuro = Math.round(annualL * 0.382);
+  const scope3Co2 = (qualifiedL * 0.0697 * 0.202).toFixed(1);
   const streamData = {
     'A': {
       tag: 'STREAM A: FINAL WATER POLISH PERMEATE',
@@ -4540,6 +4541,33 @@ function analytics() {
 }
 
 /* 7. WHAT-IF LAB */
+function controls() {
+  return `
+  <div class="panel" style="margin-bottom:18px">
+    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between">
+      <div style="display:flex;gap:12px;align-items:center">
+        <label style="font-size:12px;font-weight:600;color:var(--muted)">PRESET:
+          <select class="topbar-select" style="margin-left:6px" onchange="state.preset=this.value;render()">
+            <option value="balanced" ${state.preset==='balanced'?'selected':''}>Balanced (Water + SLA)</option>
+            <option value="aggressive" ${state.preset==='aggressive'?'selected':''}>Aggressive Water Priority</option>
+            <option value="sla_strict" ${state.preset==='sla_strict'?'selected':''}>Strict Schedule Adherence</option>
+          </select>
+        </label>
+        <label style="font-size:12px;font-weight:600;color:var(--muted)">ALGORITHM:
+          <select class="topbar-select" style="margin-left:6px" onchange="state.algorithm=this.value;render()">
+            <option value="two_opt" ${state.algorithm==='two_opt'?'selected':''}>2-Opt Edge Reversal</option>
+            <option value="nearest_neighbor" ${state.algorithm==='nearest_neighbor'?'selected':''}>Greedy Nearest Neighbor</option>
+          </select>
+        </label>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="button small ghost" onclick="state.seed=(state.seed||2030)+1;render()">🎲 Permute Seed (${state.seed||2030})</button>
+        <button class="button small primary" onclick="toast('Scenario re-calculated');render()">⚡ Run What-If Scenario</button>
+      </div>
+    </div>
+  </div>`;
+}
+
 function scenarios() {
   const st = state.stressTest || {};
   return header(

@@ -85,7 +85,10 @@ class App(SimpleHTTPRequestHandler):
         self.send_header("X-Request-ID", str(uuid.uuid4()))
         self.send_header("Content-Length", str(len(raw)))
         self.end_headers()
-        self.wfile.write(raw)
+        try:
+            self.wfile.write(raw)
+        except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError):
+            pass
 
     def do_OPTIONS(self):
         self.send_response(204)

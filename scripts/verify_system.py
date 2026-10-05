@@ -61,6 +61,12 @@ def verify_ts_types():
     if res.returncode != 0:
         raise RuntimeError(f"TS type check failed:\n{res.stderr or res.stdout}")
 
+def run_node_file(rel_path: str):
+    script_path = os.path.join(PROJECT_ROOT, rel_path)
+    res = subprocess.run(["node", script_path], capture_output=True, text=True)
+    if res.returncode != 0:
+        raise RuntimeError(f"Node test failure in {rel_path}:\nSTDOUT:\n{res.stdout}\nSTDERR:\n{res.stderr}")
+
 def run_unittest_file(rel_path: str):
     test_path = os.path.join(PROJECT_ROOT, rel_path)
     res = subprocess.run([sys.executable, test_path], capture_output=True, text=True)
@@ -94,8 +100,15 @@ def main():
         ("Frontend TypeScript Declarations Check", verify_ts_types),
         ("Core Domain Unit Tests (test_core.py)", lambda: run_unittest_file("tests/test_core.py")),
         ("Domain Invariants Tests (test_domain_invariants.py)", lambda: run_unittest_file("tests/test_domain_invariants.py")),
+        ("Exhaustive Domain & Optimizer Tests (test_domain_exhaustive.py)", lambda: run_unittest_file("tests/test_domain_exhaustive.py")),
+        ("Simulation Telemetry & Fault Tests (test_simulation_and_faults.py)", lambda: run_unittest_file("tests/test_simulation_and_faults.py")),
+        ("Water Accounting & Impact Tests (test_water_accounting_and_impact.py)", lambda: run_unittest_file("tests/test_water_accounting_and_impact.py")),
         ("Canonical Demo Session Tests (test_demo_session.py)", lambda: run_unittest_file("tests/test_demo_session.py")),
+        ("API Contracts & Boundary Tests (test_api_contracts_and_errors.py)", lambda: run_unittest_file("tests/test_api_contracts_and_errors.py")),
         ("API Integration Tests (test_api_integration.py)", lambda: run_unittest_file("tests/test_api_integration.py")),
+        ("Integration Lifecycle & Repeatability Tests (test_integration_lifecycle.py)", lambda: run_unittest_file("tests/test_integration_lifecycle.py")),
+        ("UI & Accessibility Standards Tests (test_ui_and_accessibility.py)", lambda: run_unittest_file("tests/test_ui_and_accessibility.py")),
+        ("Frontend View Renderers & Component Tests (test_frontend_renderers.js)", lambda: run_node_file("tests/test_frontend_renderers.js")),
         ("Industrial Stress Tests (test_stress_1000.py)", lambda: run_unittest_file("tests/test_stress_1000.py")),
     ]
 
