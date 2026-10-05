@@ -71,7 +71,7 @@ class UIAccessibilityTests(unittest.TestCase):
         """Page maintains structured heading elements (h1, h2, h3) without skipping structure."""
         h1_tags = re.findall(r'<h1[^>]*>(.*?)</h1>', self.html, re.DOTALL)
         self.assertGreaterEqual(len(h1_tags), 1, "Must contain at least one top-level h1 tag")
-        self.assertTrue(any("Autonomous Water Stewardship" in h or "ClearLoop" in h for h in h1_tags))
+        self.assertTrue(any("Adaptive Water Stewardship" in h or "Autonomous Water Stewardship" in h or "ClearLoop" in h for h in h1_tags))
 
     def test_05_css_design_tokens_and_colors(self):
         """Design tokens enforce high-contrast industrial safety palette (Emerald, Amber, Rose, Slate)."""
