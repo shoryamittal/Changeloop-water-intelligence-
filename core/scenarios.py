@@ -25,6 +25,16 @@ will make.
 from dataclasses import dataclass
 from typing import Dict, Any, List, Optional
 import copy
+import threading
+
+# sensitivity() and ablation() work by temporarily replacing entries
+# in the GLOBAL core.factors registry. Two of these running at once -
+# which the threading HTTP server allows - would interleave their
+# patches and read each other's coefficients. Every study that
+# patches the registry takes this lock, so a concurrent caller waits
+# instead of seeing a half-patched registry. Re-entrant because
+# ablation() calls _with_factor() while already holding it.
+_REGISTRY_LOCK = threading.RLock()
 
 from . import factors, zld
 from .process import reference_lots, arrival_order, evaluate_sequence
@@ -253,6 +263,9 @@ def _with_factor(key: str, value: float):
 def sensitivity(site_id: str = DEFAULT_SITE) -> Dict[str, Any]:
     """Vary each material coefficient and report what moves.
 
+    Holds the registry lock for the whole sweep, because it mutates
+    global coefficients and must not interleave with another study.
+
     Reports two different things, because they matter differently:
       - how much the HEADLINE NUMBERS move (absolute uncertainty)
       - whether the RECOMMENDED ORDER changes (decision robustness)
@@ -260,6 +273,14 @@ def sensitivity(site_id: str = DEFAULT_SITE) -> Dict[str, Any]:
     lots = reference_lots()
     arrival = arrival_order()
 
+    _REGISTRY_LOCK.acquire()
+    try:
+        return _sensitivity_locked(site_id, lots, arrival)
+    finally:
+        _REGISTRY_LOCK.release()
+
+
+def _sensitivity_locked(site_id, lots, arrival) -> Dict[str, Any]:
     def run() -> Dict[str, Any]:
         r = optimise(lots, arrival, site_id)
         if r.get("status") != "FEASIBLE":
@@ -366,6 +387,11 @@ def ablation(site_id: str = DEFAULT_SITE,
       no_stress_weighting   treat every litre as environmentally equal
       no_hard_constraints   let a water saving override a firm ship date
     """
+    with _REGISTRY_LOCK:
+        return _ablation_locked(site_id, mode_id)
+
+
+def _ablation_locked(site_id: str, mode_id: str) -> Dict[str, Any]:
     lots = reference_lots()
     arrival = arrival_order()
     basin = get_basin(site_id)

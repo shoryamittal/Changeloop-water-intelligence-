@@ -156,7 +156,7 @@ function renderMast() {
     guard(function () {
       return post('/api/optimise', { mode: S.mode }).then(function (st) {
         S.state = st;
-        toast('Re-optimised under: ' + S.modes[S.mode].name);
+        toast('Re-optimised under: ' + modeName());
         if (S.view === 'brief') S.view = 'decision';
       });
     });
@@ -233,6 +233,13 @@ function render() {
   };
   document.getElementById('view').innerHTML = (map[S.view] || viewBrief)();
   wire();
+}
+
+/* The selected mode's display name, tolerant of a registry that has not
+   loaded yet - a view must never crash on missing reference data. */
+function modeName() {
+  var m = S.modes && S.modes[S.mode];
+  return (m && m.name) || S.mode || 'Normal operation';
 }
 
 function head(eyebrow, title, lede) {
@@ -426,7 +433,7 @@ function viewDecision() {
   }
   var decided = st.sequencing_status !== 'PENDING';
 
-  return head('Decision — ' + S.modes[S.mode].name,
+  return head('Decision — ' + modeName(),
     'Three plans, scored on identical coefficients',
     'The recommendation is the lowest total consequence among plans that ' +
     'satisfy every hard constraint. Option C exists to make the constraint ' +
@@ -1281,7 +1288,7 @@ function viewScale() {
   '<div class="block"><div class="block-head"><h2 class="block-title">' +
     'Ablation — remove one layer at a time</h2>' +
     '<span class="block-note">' + ev('MODELLED') +
-    ' · under ' + esc(S.modes[S.mode].name) +
+    ' · under ' + esc(modeName()) +
     ' · /api/ablation</span></div>' + (ab
     ? '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Variant</th>' +
       '<th class="num">Freshwater reported</th>' +

@@ -369,24 +369,47 @@ class App(SimpleHTTPRequestHandler):
     def log_message(self, *_):
         pass
 
+    def handle_one_request(self):
+        """Serve one request, treating a peer disconnect as normal.
+
+        Every response path eventually writes to the socket - including the
+        parent class's static-file serving, which this class does not wrap.
+        A client that closes early (a refreshed browser tab, an aborted
+        fetch) therefore raised out of several different places and printed
+        a traceback each time. Catching it here covers all of them.
+        """
+        try:
+            super().handle_one_request()
+        except (ConnectionResetError, ConnectionAbortedError,
+                BrokenPipeError, TimeoutError):
+            self.close_connection = True
+
     # -- helpers ----------------------------------------------------------
 
     def send_json(self, value: Any, code: int = 200) -> None:
+        """Write a JSON response.
+
+        A client that has gone away makes every socket write raise, and
+        end_headers() writes too - guarding only the body left the header
+        write to escape the handler and print a traceback. A disconnected
+        peer is normal, not an error, so the whole write is guarded.
+        """
         raw = json.dumps(value, default=str).encode("utf-8")
-        self.send_response(code)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Cache-Control", "no-store")
-        self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("X-API-Version", API_VERSION)
-        self.send_header("X-Request-ID", str(uuid.uuid4()))
-        self.send_header("Content-Length", str(len(raw)))
-        self.end_headers()
-        if self.command != "HEAD":
-            try:
+        try:
+            self.send_response(code)
+            self.send_header("Content-Type",
+                             "application/json; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("X-API-Version", API_VERSION)
+            self.send_header("X-Request-ID", str(uuid.uuid4()))
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            if self.command != "HEAD":
                 self.wfile.write(raw)
-            except (ConnectionResetError, ConnectionAbortedError,
-                    BrokenPipeError):
-                pass
+        except (ConnectionResetError, ConnectionAbortedError,
+                BrokenPipeError, OSError):
+            self.close_connection = True
 
     def send_error_json(self, code: int, err_code: str, message: str,
                         extra: Optional[Dict[str, Any]] = None) -> None:
@@ -720,6 +743,20 @@ class App(SimpleHTTPRequestHandler):
                 {"detail": str(exc)[:300]})
 
 
+class Server(ThreadingHTTPServer):
+    """Threading server with a listen backlog big enough for a real client.
+
+    socketserver defaults request_queue_size to 5. The Scale view alone opens
+    five concurrent API calls, and a browser adds static assets on top, so
+    the backlog overflowed and the operating system refused connections -
+    which surfaced as intermittent "connection refused" rather than as a
+    server error. 128 is ample for a single-operator demonstration server.
+    """
+    request_queue_size = 128
+    daemon_threads = True
+    allow_reuse_address = True
+
+
 def main() -> None:
     import os
     os.chdir(ROOT)
@@ -728,7 +765,10 @@ def main() -> None:
     print("ChangeLoop {} - http://localhost:{}".format(core.__version__, port))
     print("Hero use case: reactive dyeing under a Zero Liquid Discharge "
           "mandate")
-    ThreadingHTTPServer(("", port), App).serve_forever()
+    try:
+        Server(("", port), App).serve_forever()
+    except KeyboardInterrupt:
+        print("stopped")
 
 
 if __name__ == "__main__":
