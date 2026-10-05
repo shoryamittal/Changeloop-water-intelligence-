@@ -359,6 +359,13 @@ def claim_register() -> Dict[str, Any]:
 class App(SimpleHTTPRequestHandler):
     server_version = "ChangeLoop/" + API_VERSION
 
+    # Speak HTTP/1.1. Every JSON response below sets an explicit
+    # Content-Length, and SimpleHTTPRequestHandler does the same for static
+    # files, so persistent connections are safe. Left at the HTTP/1.0 default
+    # the server closes the socket after each response, which well-behaved
+    # keep-alive clients mishandle.
+    protocol_version = "HTTP/1.1"
+
     def log_message(self, *_):
         pass
 

@@ -4,3 +4,8 @@ scripts/__pycache__/
 tests/__pycache__/
 **/__pycache__/
 *.pyc
+server.log
+server.err
+__pycache__/
+*.pyc
+data/*.db
