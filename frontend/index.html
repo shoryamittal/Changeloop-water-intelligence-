@@ -1,505 +1,89 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>ClearLoop | Zero-Waste Changeover Engine — L'Oréal Sustainability Challenge</title>
-  <link rel="stylesheet" href="/frontend/style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ChangeLoop — Resource Decision Intelligence</title>
+<meta name="description" content="ChangeLoop prices the downstream zero-liquid-discharge consequence into the upstream dyehouse scheduling decision.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/frontend/style.css">
 </head>
 <body>
-<!-- Operator Authentication & Gatekeeper Launchpad (Matches Specification) -->
-<div id="loginScreen" class="gateway-screen" style="display:none">
-  <!-- Top bar -->
-  <header class="gateway-topbar">
-    <div class="mesh-node">
-      <span class="pulsing-green-dot"></span>
-      <span id="gwMeshNodeTitle">GLOBAL INDUSTRIAL MESH • NODE L'ORÉAL-FR-AULNAY-04</span>
-    </div>
-    <div class="mesh-security">
-      <span>🛡️ TLS 1.3 HARDWARE BOUND</span>
-      <span id="gatewayClock">🕒 2026-10-04 12:50:09 CET</span>
-    </div>
-  </header>
+<a class="skip-link" href="#main">Skip to content</a>
 
-  <!-- Main 2-column card container -->
-  <div class="gateway-container">
-    <div class="gateway-card">
-      
-      <!-- LEFT COLUMN -->
-      <div class="gateway-left">
-        <div class="gateway-brand-row">
-          <div class="gateway-brand">
-            <div class="gateway-logo-mark">
-              <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
-                <circle cx="16" cy="16" r="14" stroke="#103628" stroke-width="2.5"/>
-                <circle cx="16" cy="16" r="9" stroke="#059669" stroke-width="2.5" stroke-dasharray="28 14"/>
-                <circle cx="16" cy="16" r="4" fill="#10b981"/>
-              </svg>
-            </div>
-            <div>
-              <div class="gateway-brand-title">ClearLoop™</div>
-              <div class="gateway-brand-sub">L'ORÉAL INDUSTRIAL OPERATIONS • BEAUTY TECH 2026</div>
-            </div>
-          </div>
-          <div class="gateway-engine-pill">
-            <span class="dot"></span> ZERO-WASTE CHANGEOVER ENGINE
-          </div>
-        </div>
-
-        <h1 class="gateway-headline">
-          Adaptive Water Stewardship for High-Precision Formulations.
-        </h1>
-        <p class="gateway-subheadline">
-          Circular clean-in-place telemetry and valve sequencing calibrated for luxury emulsions.
-        </p>
-
-        <!-- Fluidics Visual Card (Interactive Inspection) -->
-        <div class="fluidics-card" onclick="inspectSpectroscopy()" title="Click to inspect real-time in-line spectroscopy wavelength curve">
-          <img src="/frontend/cip_fluidics.jpg" alt="Circular Hydraulic Fluidics" class="fluidics-img">
-          <div class="fluidics-scanline"></div>
-          <div class="fluidics-overlay-top">
-            🔬 CIRCULAR HYDRAULIC FLUIDICS // IN-LINE REALTIME SPECTROSCOPY
-          </div>
-          <div class="fluidics-crosshair">
-            <span>λ 580 nm • Abs 0.012 AU • 100 Hz</span>
-          </div>
-          <div class="fluidics-overlay-bottom">
-            <div class="scan-tag">✓ 100 Hz OPTICAL SCAN</div>
-            <div class="thesis-text">
-              <b>Causal Circular Thesis:</b> Prevent rinse cycles at molecular detection thresholds before water is expended.
-            </div>
-          </div>
-        </div>
-
-        <!-- Skid Telemetry Box -->
-        <div class="skid-telemetry-box">
-          <div class="skid-telemetry-header">
-            <div class="skid-title-group">
-              <div class="skid-icon">🔬</div>
-              <div>
-                <b id="skidPlantName">Plant Aulnay-sous-Bois • Skid 04</b>
-                <small id="skidBatchName">Active Batch: Lancôme L'Absolu Rouge Flush</small>
-              </div>
-            </div>
-            <span class="sync-pill"><span class="sync-live-dot"></span> 100 Hz SYNC</span>
-          </div>
-
-          <div class="skid-metrics-grid">
-            <div class="skid-metric-cell">
-              <div class="skid-metric-label">WATER SAVED (SHIFT)</div>
-              <div class="skid-metric-value green" id="skidWaterSaved">1,284 <span class="unit">L</span></div>
-              <div class="skid-metric-trend green" id="skidSavedTrend">▲ +14.2% vs Std SOP</div>
-            </div>
-            <div class="skid-metric-cell">
-              <div class="skid-metric-label">TURBIDITY INDEX</div>
-              <div class="skid-metric-value" id="skidTurbidity">0.02 <span class="unit">NTU</span></div>
-              <div class="skid-metric-trend green" id="skidTurbTrend">● Clean Asymptote Flat</div>
-            </div>
-            <div class="skid-metric-cell">
-              <div class="skid-metric-label">SEQUENCE DEV.</div>
-              <div class="skid-metric-value" id="skidSeqDev">0.00 <span class="unit">ppm</span></div>
-              <div class="skid-metric-trend" id="skidDevTrend">0.00% Tolerable Var</div>
-            </div>
-            <div class="skid-metric-cell">
-              <div class="skid-metric-label">SAFETY INTERLOCK</div>
-              <div class="skid-metric-value interlock" id="skidInterlock">ENGAGED</div>
-              <div class="skid-metric-trend green" id="skidLockTrend">21 CFR 11 Locked</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Operator Profile Footer (Interactive Site Persona Cycling) -->
-        <div class="gateway-operator-bar" onclick="cyclePersona()" title="Click to cycle active site operator (Aulnay / Burgos / Settimo / Vorselaar)">
-          <div class="operator-avatar" id="gwOperatorAvatar">CL</div>
-          <div class="operator-meta">
-            <b id="gwOperatorName">Dr. Camille Laurent</b>
-            <small id="gwOperatorTitle">Head of Sustainable Changeovers • Operations Paris</small>
-            <div class="persona-switch-hint">↻ Click avatar to cycle site persona</div>
-          </div>
-          <div class="iso-seal">
-            🛡️ ISO 14046 • SHA-256 SEALED
-          </div>
-        </div>
-      </div>
-
-      <!-- RIGHT COLUMN -->
-      <div class="gateway-right">
-        <div class="terminal-header">
-          <span class="terminal-tag">TERMINAL ACCESS GATEWAY</span>
-          <div class="terminal-title-row">
-            <h2>Operator Authentication</h2>
-            <span class="gmp-badge">🛡️ GMP LEVEL 3</span>
-          </div>
-        </div>
-
-        <!-- Auth Tabs -->
-        <div class="auth-tabs">
-          <button type="button" class="auth-tab active" id="tabSso" onclick="switchAuthTab('sso')">L'Oréal SSO</button>
-          <button type="button" class="auth-tab" id="tabBadge" onclick="switchAuthTab('badge')">SmartBadge</button>
-          <button type="button" class="auth-tab" id="tabFido2" onclick="switchAuthTab('fido2')">YubiKey FIDO2</button>
-        </div>
-
-        <!-- Form -->
-        <form class="gateway-form" onsubmit="handleAuthenticate(event)">
-          <div class="field-group">
-            <div class="label-row">
-              <label id="authIdLabel">OPERATOR CORPORATE ID / EMAIL</label>
-              <span class="fido-ready" id="authModeBadge">● AZURE AD SSO</span>
-            </div>
-            <div class="input-with-icon">
-              <span class="field-icon" id="authIdIcon">🪪</span>
-              <input type="text" id="authEmail" value="camille.laurent@loreal.com" required>
-            </div>
-          </div>
-
-          <div class="field-group">
-            <div class="label-row">
-              <label>BIOMETRIC TOKEN / PASSKEY</label>
-              <span class="fido-ready">🛡️ FIDO2 READY</span>
-            </div>
-            <div class="input-with-icon">
-              <span class="field-icon">🔑</span>
-              <input type="password" id="authPasskey" value="industrial-zero-waste-2026" required>
-              <button type="button" class="pass-toggle" onclick="togglePassVisibility()" title="Toggle visibility">👁️</button>
-            </div>
-          </div>
-
-          <div class="field-group">
-            <div class="label-row">
-              <label>PLANT & FORMULATION SKID ASSIGNMENT</label>
-              <span class="fido-ready" id="skidLiveStatus" style="color:#059669">● TELEMETRY ONLINE</span>
-            </div>
-            <div class="input-with-icon">
-              <span class="field-icon">🏭</span>
-              <select id="authSkidSelect" onchange="handleSkidChange(this.value)">
-                <option value="aulnay">Aulnay-sous-Bois • Skid 04 (Lipstick & Emulsions)</option>
-                <option value="burgos">Burgos Plant • Line 04 (Skincare Emulsions)</option>
-                <option value="settimo">Settimo Torinese • Line 02 (Color Makeup)</option>
-                <option value="vorselaar">Vorselaar Plant • Line 01 (Surfactants)</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Protocol Checkbox -->
-          <label class="protocol-checkbox">
-            <input type="checkbox" id="authProtocolCheck" checked required>
-            <span>
-              <b>Human-in-the-Loop Protocol Enforced.</b> Operator retains manual veto over AI clean-in-place valve sequence swaps.
-            </span>
-          </label>
-
-          <!-- Primary Submit Button -->
-          <button type="submit" class="auth-submit-btn" id="authSubmitBtn">
-            <span>AUTHENTICATE & ENTER COCKPIT</span>
-            <span class="btn-arrow">➔</span>
-          </button>
-
-          <!-- Secondary Direct Presentation Button -->
-          <button type="button" class="auth-demo-btn" onclick="handleDemoPitchAccess()">
-            <span class="demo-play-icon">▶</span>
-            <span>Direct Presentation / Judge Mode Access (60s Pitch)</span>
-          </button>
-        </form>
-
-        <div class="gateway-security-footer">
-          <span>🔒 ISDN RESTRICTED ACCESS • HARDWARE TLS 1.3</span>
-          <span class="version-tag">v4.2.8-STABLE</span>
-        </div>
-      </div>
-
+<header class="masthead">
+  <div class="mast-brand">
+    <svg class="mark" width="26" height="26" viewBox="0 0 26 26" aria-hidden="true">
+      <!-- a loop that does not quite close: water returns, salt accumulates -->
+      <circle cx="13" cy="13" r="10.5" fill="none" stroke="currentColor"
+              stroke-width="1.4" stroke-dasharray="52 14" opacity=".45"/>
+      <circle cx="13" cy="13" r="5.5" fill="none" stroke="currentColor"
+              stroke-width="1.4"/>
+      <circle cx="13" cy="2.5" r="2.1" fill="currentColor"/>
+    </svg>
+    <div>
+      <div class="mast-name">ChangeLoop</div>
+      <div class="mast-sub">Resource Decision Intelligence</div>
     </div>
   </div>
 
-  <!-- Bottom Bar -->
-  <footer class="gateway-bottom-bar">
-    <div>L'Oréal Brandstorm & Sustainability Challenge 2026 • ClearLoop Operations Architecture</div>
-    <div>Certified Zero Liquid Waste Manufacturing Initiative • Circular Beauty 2030</div>
-  </footer>
+  <div class="mast-fields">
+    <div class="mast-field">
+      <label for="siteSelect">Site</label>
+      <select id="siteSelect" aria-label="Production site"></select>
+    </div>
+    <div class="mast-field">
+      <label for="modeSelect">Binding constraint</label>
+      <select id="modeSelect" aria-label="Operating constraint mode"></select>
+    </div>
+    <div class="mast-field">
+      <label>Evidence basis</label>
+      <span class="ev ev-MODELLED">MODELLED &middot; NO METERED DATA</span>
+    </div>
+  </div>
+
+  <div class="mast-actions">
+    <button class="btn btn-sm btn-ghost" id="themeBtn">
+      <span id="themeLabel">Dark</span>
+    </button>
+    <button class="btn btn-sm" id="resetBtn">Reset session</button>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="rail" aria-label="Sections">
+    <div class="rail-head">Contents</div>
+    <div class="rail-nav" id="railNav"></div>
+    <div class="rail-foot">
+      <p class="advisory-note">
+        <strong>Advisory only.</strong> ChangeLoop issues no setpoints and
+        cannot release a bath. Every action needs a named human decision, and
+        refusals are recorded alongside approvals.
+      </p>
+    </div>
+  </nav>
+
+  <main class="work" id="main" tabindex="-1">
+    <div id="view">
+      <div class="sec-body">
+        <div class="state-msg"><span class="spinner"></span>Loading engine state&hellip;</div>
+      </div>
+    </div>
+  </main>
 </div>
 
-<div class="app-shell" id="appShell" style="display:flex">
-  <!-- Master Cockpit Full-Width Topbar -->
-  <header class="topbar">
-    <div class="topbar-left-cluster">
-      <div class="topbar-brand">
-        <div class="topbar-logo-circle">
-          <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
-            <circle cx="16" cy="16" r="14" stroke="#059669" stroke-width="2.5"/>
-            <circle cx="16" cy="16" r="9" stroke="#34d399" stroke-width="2.5" stroke-dasharray="28 14"/>
-            <circle cx="16" cy="16" r="4" fill="#10b981"/>
-          </svg>
-        </div>
-        <div>
-          <div class="topbar-brand-title">ClearLoop <span class="jury-spec-tag">JURY SPEC V2.6</span></div>
-          <div class="topbar-brand-sub">L'ORÉAL BEAUTY TECH INCUBATOR • OPERATIONS 4.0</div>
-        </div>
-      </div>
-
-      <div class="site-badge-group">
-        <span class="site-label">FACILITY</span>
-        <select class="topbar-select" id="plantSelector" onchange="changePlant(this.value)">
-          <option value="aulnay">FR-AULNAY-04 • Aulnay-sous-Bois (Lipsticks &amp; Emulsions)</option>
-          <option value="burgos">ES-BURGOS-01 • Burgos Waterloop Benchmark (Circular)</option>
-          <option value="settimo">IT-SETTIMO-02 • Settimo Torinese (Zero-Emission)</option>
-          <option value="vorselaar">BE-VORSELAAR-01 • Vorselaar (Active Cosmetics)</option>
-        </select>
-      </div>
-
-      <div class="site-badge-group">
-        <span class="site-label">PROCESS NODE</span>
-        <select class="topbar-select" id="lineSelector" onchange="changeLine(this.value)">
-          <option value="line04">Line 04 (Lipstick &amp; Emulsions)</option>
-          <option value="line02">Line 02 (Color Cosmetics)</option>
-          <option value="line01">Line 01 (Surfactants)</option>
-        </select>
-      </div>
-
-      <span class="simulation-mode-pill">SIMULATION MODE</span>
-      <span class="sensors-sync-pill"><span class="sync-live-dot"></span> 100 HZ ACTIVE</span>
-      <span class="topbar-clock" id="topbarClock">2026-03-29 16:42:18 CET</span>
-    </div>
-
-    <div class="topbar-actions">
-      <button class="button gold present-clearloop-btn" onclick="openPitchDeck()">⏱ PRESENT CLEARLOOP (JURY DEMO)</button>
-      <div class="topbar-profile" onclick="returnToGateway()" title="Lock Session / Return to Operator Gateway">
-        <div class="avatar" id="topbarAvatar">CL</div>
-        <div class="profile-info">
-          <b id="topbarOpName">Dr. Camille Laurent</b>
-          <small id="topbarOpTitle">Head of Sustainable Changeovers</small>
-        </div>
-        <span class="topbar-lock-icon">🔒</span>
-      </div>
-    </div>
-  </header>
-
-  <div class="app-body-layout">
-    <aside class="sidebar" id="sidebar">
-      <div class="nav-section-title">CORE ARCHITECTURE</div>
-      <nav class="nav" aria-label="Primary navigation">
-        <button data-view="overview" onclick="showView('overview')">
-          <i>🧭</i><span>Overview</span><span class="nav-badge live">Live</span>
-        </button>
-        <button data-view="planning" onclick="showView('planning')">
-          <i>📊</i><span>Planning</span><span class="nav-badge">14</span>
-        </button>
-        <button data-view="optimizer" onclick="showView('optimizer')">
-          <i>⚡</i><span>Changeover Optimizer</span><span class="nav-badge green">-38%</span>
-        </button>
-        <button data-view="cleaning" onclick="showView('cleaning')">
-          <i>🔬</i><span>Adaptive Cleaning</span><span class="nav-badge">CIP</span>
-        </button>
-        <button data-view="cascade" onclick="showView('cascade')">
-          <i>🔄</i><span>Water Cascade</span><span class="nav-badge">Loop</span>
-        </button>
-        <button data-view="analytics" class="active" onclick="showView('analytics')">
-          <i>📜</i><span>Impact / ESG Verification</span><span class="nav-badge active-esg">ESG</span>
-        </button>
-      </nav>
-
-      <div class="nav-section-title">VERIFICATION &amp; TRIALS</div>
-      <nav class="nav secondary-nav" aria-label="Verification navigation">
-        <button data-view="scenarios" onclick="showView('scenarios')">
-          <i>🧪</i><span>Scenario Simulator</span><span class="nav-badge">↗</span>
-        </button>
-        <button data-view="pilot" onclick="showView('pilot')">
-          <i>🚀</i><span>6-Week Pilot</span><span class="nav-badge gold">Phase 2</span>
-        </button>
-      </nav>
-
-      <div class="sidebar-bottom">
-        <div class="sidebar-integrity-card">
-          <div class="integrity-head">
-            <span class="icon">🛡</span>
-            <b>INTEGRITY GUARD</b>
-            <span class="pulsing-green-dot"></span>
-          </div>
-          <div class="integrity-desc">Formulation safety parameters lock-step activated.</div>
-        </div>
-      </div>
-    </aside>
-
-    <main class="workspace">
-      <!-- Universal Canonical Demo Control Dock -->
-      <div id="demoDock" class="demo-dock-bar"></div>
-      <div class="page" id="page">
-        <div class="loading"><span></span> Preparing deterministic demonstration…</div>
-      </div>
-    </main>
+<dialog class="sheet" id="sheet">
+  <div class="sheet-head">
+    <h2 class="sheet-title" id="sheetTitle">Detail</h2>
+    <button class="btn btn-sm btn-ghost" id="sheetClose">Close</button>
   </div>
-
-  <!-- Bottom Global Audit Seal Bar (Matches Master Specification) -->
-  <footer class="app-bottom-audit-bar">
-    <div class="audit-bar-left">
-      <span class="icon">👤</span>
-      <b>HUMAN-IN-THE-LOOP ARCHITECTURE:</b> AI RECOMMENDS • PLANT RULES CONSTRAIN • OPERATORS VETO ENABLED
-    </div>
-    <div class="audit-bar-center">
-      L'ORÉAL CLEAN WATER CHARTER 2026 • ISO 14046 VERIFIED
-    </div>
-    <div class="audit-bar-right">
-      <span class="pulsing-green-dot"></span>
-      <b>AUDIT TRAIL SEALED</b>
-    </div>
-  </footer>
-</div>
-
-<!-- Interactive Guided Judge Tour Modal -->
-<dialog id="judgeDialog">
-  <div class="dialog-header">
-    <span class="eyebrow" id="judgeEyebrow">L'ORÉAL CHALLENGE 2026 — 3-MINUTE WINNING TOUR</span>
-    <button class="close-x" onclick="judgeFinish()">×</button>
-  </div>
-  <h2 id="judgeTitle"></h2>
-  <div class="judge-content">
-    <p id="judgeText"></p>
-    <div id="judgeActionArea" class="judge-actions-area"></div>
-  </div>
-  <div class="judge-footer">
-    <div class="judge-progress" id="judgeProgress"></div>
-    <div class="dialog-actions">
-      <button class="button ghost" onclick="judgePrevious()">‹ Previous</button>
-      <button class="button primary" onclick="judgeNext()">Next Step ›</button>
-      <button class="button ghost" onclick="judgeFinish()">Exit Tour</button>
-    </div>
-  </div>
+  <div class="sheet-body" id="sheetBody"></div>
 </dialog>
 
-<!-- Full-Screen Pitch Presentation Deck Modal -->
-<dialog id="pitchDialog" class="pitch-modal">
-  <div class="pitch-modal-shell" id="pitchModalShell">
-    <div class="pitch-topbar">
-      <div class="pitch-brand">
-        <span class="brand-mark" style="height:28px;width:28px;font-size:14px">C</span>
-        <b>CLEARLOOP PITCH DECK</b>
-        <small>L'ORÉAL SUSTAINABILITY CHALLENGE 2026</small>
-      </div>
-      <div class="pitch-nav-controls">
-        <span class="eyebrow" id="slideCounter" style="margin:0;color:#c9a96e">SLIDE 1 OF 8</span>
-        <button class="icon-button" onclick="prevSlide()">‹</button>
-        <button class="icon-button" onclick="nextSlide()">›</button>
-        <button class="icon-button" onclick="closePitchDeck()">×</button>
-      </div>
-    </div>
-    
-    <div class="pitch-slide-viewport" id="pitchSlideViewport">
-      <!-- Slides injected dynamically -->
-    </div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <div class="pitch-bottom-bar">
-      <div class="pitch-dots" id="pitchDots"></div>
-      <div class="button-row">
-        <button class="button ghost" onclick="prevSlide()">‹ Previous Slide</button>
-        <button class="button primary" onclick="nextSlide()">Next Slide ›</button>
-        <button class="button gold" id="slideActionBtn" onclick="jumpToCurrentSlideView()">▶ Live Product Moment</button>
-      </div>
-    </div>
-  </div>
-</dialog>
-
-<!-- Real-Time Optical Spectroscopy Telemetry Inspection Modal -->
-<dialog id="spectroscopyDialog" class="spectroscopy-modal">
-  <div class="spectroscopy-shell">
-    <div class="spectroscopy-header">
-      <div class="spectroscopy-header-title">
-        <span class="pulsing-green-dot"></span>
-        <b>IN-LINE UV-VIS SPECTROSCOPY // 100 Hz OPTICAL TELEMETRY</b>
-      </div>
-      <button class="close-x" onclick="closeSpectroscopy()">×</button>
-    </div>
-
-    <div class="spectroscopy-body">
-      <div class="spectroscopy-meta-bar">
-        <div>
-          <small>MONITORED LINE</small>
-          <b id="specPlantSkid">Plant Aulnay-sous-Bois • Skid 04</b>
-        </div>
-        <div>
-          <small>FORMULATION MATRIX</small>
-          <b id="specBatch">Lancôme L'Absolu Rouge Flush</b>
-        </div>
-        <div>
-          <small>OPTICAL DETECTION PEAK</small>
-          <b>λ = 580 nm (Lake Pigment Band)</b>
-        </div>
-        <div>
-          <small>SENSOR HARDWARE</small>
-          <b>Maya2000 Pro Flow Cell (100 Hz)</b>
-        </div>
-      </div>
-
-      <div class="spectroscopy-chart-box">
-        <div class="chart-tag">REAL-TIME CLEAN-IN-PLACE RINSE ABSORPTION DECAY CURVE (0 — 42 MIN)</div>
-        <svg viewBox="0 0 680 220" class="spectroscopy-svg">
-          <!-- Background Grid Lines -->
-          <line x1="60" y1="30" x2="650" y2="30" stroke="rgba(255,255,255,0.08)" stroke-dasharray="4 4"/>
-          <line x1="60" y1="80" x2="650" y2="80" stroke="rgba(255,255,255,0.08)" stroke-dasharray="4 4"/>
-          <line x1="60" y1="130" x2="650" y2="130" stroke="rgba(255,255,255,0.08)" stroke-dasharray="4 4"/>
-          <line x1="60" y1="180" x2="650" y2="180" stroke="rgba(255,255,255,0.18)"/>
-
-          <!-- Axis Labels -->
-          <text x="18" y="34" fill="#9bb7ad" font-family="DM Mono" font-size="10">2.5 AU</text>
-          <text x="18" y="84" fill="#9bb7ad" font-family="DM Mono" font-size="10">1.5 AU</text>
-          <text x="18" y="134" fill="#9bb7ad" font-family="DM Mono" font-size="10">0.5 AU</text>
-          <text x="18" y="184" fill="#9bb7ad" font-family="DM Mono" font-size="10">0.0 AU</text>
-
-          <text x="60" y="202" fill="#9bb7ad" font-family="DM Mono" font-size="10">0m</text>
-          <text x="210" y="202" fill="#9bb7ad" font-family="DM Mono" font-size="10">10m</text>
-          <text x="360" y="202" fill="#9bb7ad" font-family="DM Mono" font-size="10">20m</text>
-          <text x="495" y="202" fill="#34d399" font-family="DM Mono" font-size="10" font-weight="bold">29m (Cutoff)</text>
-          <text x="630" y="202" fill="#9bb7ad" font-family="DM Mono" font-size="10">42m (SOP)</text>
-
-          <!-- Standard Blind SOP Timer Area (Wasted Rinse) -->
-          <rect x="495" y="30" width="155" height="150" fill="rgba(239, 68, 68, 0.12)" stroke="rgba(239, 68, 68, 0.35)" stroke-dasharray="4 4"/>
-          <text x="505" y="52" fill="#f87171" font-family="DM Mono" font-size="10" font-weight="bold">13 MIN BLIND TIMER OVER-RINSE</text>
-          <text x="505" y="68" fill="#fca5a5" font-family="DM Mono" font-size="9.5">130 L Fresh Water Saved by Cutoff</text>
-
-          <!-- Safe Baseline Release Threshold Line -->
-          <line x1="60" y1="174" x2="650" y2="174" stroke="#eab308" stroke-dasharray="6 4" stroke-width="1.5"/>
-          <text x="70" y="168" fill="#fde047" font-family="DM Mono" font-size="9.5">Clean Baseline Release Threshold (&lt; 0.015 AU)</text>
-
-          <!-- Actual Optical Absorbance Curve -->
-          <path d="M 60,35 C 100,60 160,140 240,165 C 320,172 400,174 495,174 C 550,174 600,174 650,174" fill="none" stroke="#34d399" stroke-width="3"/>
-
-          <!-- Cutoff Point Marker -->
-          <circle cx="495" cy="174" r="6" fill="#10b981" stroke="#ffffff" stroke-width="2"/>
-        </svg>
-      </div>
-
-      <div class="spectroscopy-kpis">
-        <div class="spec-kpi">
-          <small>CURRENT ABSORBANCE</small>
-          <b class="green" id="specCurrAbs">0.012 <span class="unit">AU</span></b>
-          <span>Threshold: &lt; 0.015 AU</span>
-        </div>
-        <div class="spec-kpi">
-          <small>RINSE TURBIDITY</small>
-          <b class="green" id="specCurrTurb">0.02 <span class="unit">NTU</span></b>
-          <span>Incoming baseline: 0.02 NTU</span>
-        </div>
-        <div class="spec-kpi">
-          <small>CONDUCTIVITY PLATEAU</small>
-          <b>&lt; 0.04 <span class="unit">mS/cm</span></b>
-          <span>Stable across &gt;120s window</span>
-        </div>
-        <div class="spec-kpi">
-          <small>CUTOFF RECOMMENDATION</small>
-          <b class="safe">TERMINATE RINSE</b>
-          <span>Early release validated</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="spectroscopy-footer">
-      <span class="cert-text">🛡️ ISO 14046 / GAMP 5 VALIDATED OPTICAL FLOW CELL ALGORITHM</span>
-      <div class="button-row">
-        <button class="button ghost" onclick="closeSpectroscopy()">Close Readout</button>
-        <button class="button primary" onclick="closeSpectroscopy(); handleAuthenticate();">Enter Cockpit with Active Skid ➔</button>
-      </div>
-    </div>
-  </div>
-</dialog>
-
-<div class="toast" id="toast" role="status"></div>
 <script src="/frontend/app.js"></script>
 </body>
 </html>
