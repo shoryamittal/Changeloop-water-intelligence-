@@ -208,7 +208,10 @@ function runTests() {
         dossier, trust,
         GLOBAL_BENCHMARKS, setBenchmarkParadigm, setScalingLines,
         renderGlobalWaterBenchmark, renderEnterpriseScalingSimulator,
-        renderDecisionChainContinuityStrip
+        renderDecisionChainContinuityStrip,
+        SANKALP_WATERSHEDS, selectTradeoffOption, commitResourceDecision,
+        selectVertical, renderResourceDecisionWorkbench,
+        renderWatershedStressMatrix, renderDualVerticalGeneralityPanel
       };
     `;
     vm.runInContext(appJsCode + '\n' + bridge, sandbox);
@@ -346,6 +349,61 @@ function runTests() {
       assert(!stripHtml.includes('undefined'), `Strip for ${stage} must not contain undefined`);
       assert(!stripHtml.includes('NaN'), `Strip for ${stage} must not contain NaN`);
     });
+  });
+
+  // 10. SANKALP Resource Decision Workbench
+  test('SANKALP Resource Decision Workbench (3-way trade-offs, explainability, commit)', () => {
+    const exp = sandbox.__EXPORTED;
+    const wbHtml = exp.renderResourceDecisionWorkbench();
+    assert(wbHtml.includes('RESOURCE DECISION WORKBENCH'), 'Workbench title must render');
+    assert(wbHtml.includes('OPTION A · STATUS QUO'), 'Option A must render');
+    assert(wbHtml.includes('OPTION B · RECOMMENDED'), 'Option B must render');
+    assert(wbHtml.includes('OPTION C · AGGRESSIVE'), 'Option C must render');
+    assert(wbHtml.includes('WHY CHANGELOOP RECOMMENDS OPTION B'), 'Explainable why-box must render');
+    assert(!wbHtml.includes('undefined'), 'Workbench must not contain undefined');
+    assert(!wbHtml.includes('NaN'), 'Workbench must not contain NaN');
+
+    // Test option selection
+    exp.selectTradeoffOption('OPTION_C');
+    assert.strictEqual(exp.state.selectedTradeoffOption, 'OPTION_C');
+    exp.selectTradeoffOption('OPTION_B');
+    assert.strictEqual(exp.state.selectedTradeoffOption, 'OPTION_B');
+  });
+
+  // 11. Watershed Hydrological Scarcity Matrix
+  test('Watershed Hydrological Scarcity Matrix (ISO 14046 / AWARE basins)', () => {
+    const exp = sandbox.__EXPORTED;
+    assert(exp.SANKALP_WATERSHEDS, 'SANKALP_WATERSHEDS dictionary must exist');
+    assert(exp.SANKALP_WATERSHEDS.aulnay, 'Aulnay watershed must exist');
+    assert(exp.SANKALP_WATERSHEDS.burgos, 'Burgos watershed must exist');
+    assert.strictEqual(exp.SANKALP_WATERSHEDS.burgos.aware, 3.4, 'Burgos AWARE factor must be 3.4');
+
+    const wmHtml = exp.renderWatershedStressMatrix();
+    assert(wmHtml.includes('WATERSHED HYDROLOGICAL SCARCITY MATRIX'), 'Watershed matrix title must render');
+    assert(wmHtml.includes('Duero River Basin'), 'Duero River Basin must render');
+    assert(wmHtml.includes('Seine-Normandie Basin'), 'Seine basin must render');
+    assert(!wmHtml.includes('undefined'), 'Watershed matrix must not contain undefined');
+  });
+
+  // 12. Dual-Vertical Generality Panel
+  test('Dual-Vertical Generality Panel (Hero FMCG vs AI Data Center Cooling)', () => {
+    const exp = sandbox.__EXPORTED;
+    const gpMfgHtml = exp.renderDualVerticalGeneralityPanel();
+    assert(gpMfgHtml.includes('UNIVERSAL DECISION ARCHITECTURE'), 'Generality panel title must render');
+    assert(gpMfgHtml.includes('Hero Manufacturing Decision Flow Active'), 'Manufacturing hero text must render');
+
+    // Test switching to Data Center vertical
+    exp.selectVertical('datacenter');
+    assert.strictEqual(exp.state.activeVertical, 'datacenter');
+    const gpDcHtml = exp.renderDualVerticalGeneralityPanel();
+    assert(gpDcHtml.includes('64x NVIDIA H100 CLUSTER'), 'Data center cluster specs must render');
+    assert(gpDcHtml.includes('MODE 1 · EVAPORATIVE'), 'Evaporative cooling mode must render');
+    assert(gpDcHtml.includes('MODE 3 · CHANGELOOP DISPATCH'), 'ChangeLoop dispatch mode must render');
+    assert(!gpDcHtml.includes('undefined'), 'Data center panel must not contain undefined');
+
+    // Reset back to manufacturing
+    exp.selectVertical('manufacturing');
+    assert.strictEqual(exp.state.activeVertical, 'manufacturing');
   });
 
   // Cleanup recorded timers

@@ -79,7 +79,10 @@ def verify_live_server_endpoints():
         "/health",
         "/api/batches",
         "/api/planning/data",
-        "/api/impact/timespan?range=24h"
+        "/api/impact/timespan?range=24h",
+        "/api/decision/tradeoffs",
+        "/api/decision/watersheds",
+        "/api/datacenter/workload"
     ]
     for ep in endpoints:
         req = urllib.request.Request(f"{base_url}{ep}")
@@ -109,6 +112,7 @@ def main():
         ("Integration Lifecycle & Repeatability Tests (test_integration_lifecycle.py)", lambda: run_unittest_file("tests/test_integration_lifecycle.py")),
         ("UI & Accessibility Standards Tests (test_ui_and_accessibility.py)", lambda: run_unittest_file("tests/test_ui_and_accessibility.py")),
         ("Frontend View Renderers & Component Tests (test_frontend_renderers.js)", lambda: run_node_file("tests/test_frontend_renderers.js")),
+        ("SANKALP Decision Engine & Watershed Tests (test_sankalp_decision_engine.py)", lambda: run_unittest_file("tests/test_sankalp_decision_engine.py")),
         ("Industrial Stress Tests (test_stress_1000.py)", lambda: run_unittest_file("tests/test_stress_1000.py")),
         ("Brutal Destruction & Release Certification (test_brutal_destruction.py)", lambda: run_unittest_file("tests/test_brutal_destruction.py")),
     ]

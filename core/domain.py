@@ -341,3 +341,197 @@ class AuditEvent:
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
+
+
+# ======================================================================
+# SANKALP CLIMATE EDITION — RESOURCE DECISION ARCHITECTURE EXTENSIONS
+# ======================================================================
+
+@dataclass(frozen=True)
+class WatershedStressProfile:
+    """Local basin hydrological scarcity index (WRI Aqueduct 4.0 / AWARE)."""
+    site_id: str
+    site_name: str
+    basin_name: str
+    wri_category: str                  # e.g., "Low", "Low-Medium", "High", "Extremely High"
+    aware_factor: float                # 1.0 (baseline) to 42.0+ (extreme scarcity)
+    water_cost_eur_per_m3: float
+    municipal_quota_m3_day: float
+    description: str
+
+    def calculate_stress_equated_litres(self, litres: float) -> float:
+        """Convert physical consumption litres into watershed-scarcity-equated litres (L-eq)."""
+        return round(litres * self.aware_factor, 1)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+
+KNOWN_WATERSHEDS: Dict[str, WatershedStressProfile] = {
+    "FR-AULNAY-04": WatershedStressProfile(
+        site_id="FR-AULNAY-04",
+        site_name="L'Oréal Aulnay Excellence Hub",
+        basin_name="Seine-Normandie Basin",
+        wri_category="Low-Medium Stress",
+        aware_factor=1.2,
+        water_cost_eur_per_m3=3.85,
+        municipal_quota_m3_day=85.0,
+        description="Temperate catchment; moderate seasonal drought pressure during July-August."
+    ),
+    "ES-BURGOS-01": WatershedStressProfile(
+        site_id="ES-BURGOS-01",
+        site_name="L'Oréal Burgos Dry Factory",
+        basin_name="Duero River Basin",
+        wri_category="High Water Stress",
+        aware_factor=3.4,
+        water_cost_eur_per_m3=5.40,
+        municipal_quota_m3_day=45.0,
+        description="Mediterranean dry catchment; strict regional quotas; 100% industrial water loop required."
+    ),
+    "IT-SETTIMO-02": WatershedStressProfile(
+        site_id="IT-SETTIMO-02",
+        site_name="L'Oréal Settimo Torinese Plant",
+        basin_name="Po River Catchment",
+        wri_category="Low Stress (Alpine Feed)",
+        aware_factor=1.0,
+        water_cost_eur_per_m3=2.90,
+        municipal_quota_m3_day=110.0,
+        description="Alpine glacial recharge; low baseline scarcity; primary focus on chemical COD segregation."
+    ),
+    "BE-VORSELAAR-01": WatershedStressProfile(
+        site_id="BE-VORSELAAR-01",
+        site_name="L'Oréal Vorselaar Plant",
+        basin_name="Scheldt River Basin",
+        wri_category="High Water Stress",
+        aware_factor=3.1,
+        water_cost_eur_per_m3=6.10,
+        municipal_quota_m3_day=40.0,
+        description="High population density and low groundwater recharge rate; high effluent discharge tariffs."
+    ),
+    "US-PHOENIX-DC01": WatershedStressProfile(
+        site_id="US-PHOENIX-DC01",
+        site_name="Hyperscale AI Data Center West-1",
+        basin_name="Lower Colorado River Basin",
+        wri_category="Extremely High Stress",
+        aware_factor=8.5,
+        water_cost_eur_per_m3=8.20,
+        municipal_quota_m3_day=120.0,
+        description="Severe arid watershed; Tier-1 Colorado River shortage declaration; evaporative cooling strictly constrained."
+    )
+}
+
+
+@dataclass
+class DecisionOption:
+    """Rigorous multi-resource trade-off option presented to human supervisor."""
+    option_id: str                      # "OPTION_A" | "OPTION_B" | "OPTION_C"
+    title: str
+    description: str
+    water_l: float
+    freshwater_l: float
+    water_stress_l_eq: float
+    energy_kwh: float
+    carbon_kg_co2e: float
+    cost_eur: float
+    schedule_delay_min: float
+    operational_risk: str               # "LOW" | "BALANCED" | "TIGHT_SLA" | "HIGH_BURDEN"
+    is_recommended: bool
+    tradeoff_rationale: str
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class ResourceDecisionEvent:
+    """Canonical Resource Decision Event answering:
+    'Which operational decision caused this environmental outcome,
+    what alternatives existed, and how was it verified?'
+    """
+    event_id: str
+    timestamp: str
+    site: str
+    asset: str
+    context: Dict[str, Any]
+    decision_type: str                  # e.g., "BATCH_SEQUENCE_OPTIMIZATION", "CIP_OPTICAL_CUTOFF", "CASCADE_SEGREGATION"
+    selected_option_id: str
+    alternatives: List[DecisionOption]
+    hard_constraints_satisfied: bool
+    expected_water_l: float
+    expected_freshwater_l: float
+    watershed_stress_multiplier: float
+    expected_water_stress_impact_l_eq: float
+    expected_energy_kwh: float
+    expected_carbon_kg_co2e: float
+    expected_cost_eur: float
+    operational_risk: str
+    recommendation: str
+    rationale: str
+    confidence_score: float
+    human_validation_status: str        # "PENDING" | "VALIDATED" | "OVERRIDDEN" | "REJECTED"
+    operator_id: str
+    water_recovered_l: float
+    water_reused_l: float
+    final_net_impact: Dict[str, Any]
+    provenance_hash: str
+    provenance_signature: str
+    calculation_version: str = "v2.6-Sankalp"
+    classification: str = "MODEL_OUTPUT"
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "event_id": self.event_id,
+            "timestamp": self.timestamp,
+            "site": self.site,
+            "asset": self.asset,
+            "context": self.context,
+            "decision_type": self.decision_type,
+            "selected_option_id": self.selected_option_id,
+            "alternatives": [a.to_dict() for a in self.alternatives],
+            "hard_constraints_satisfied": self.hard_constraints_satisfied,
+            "expected_water_l": round(self.expected_water_l, 1),
+            "expected_freshwater_l": round(self.expected_freshwater_l, 1),
+            "watershed_stress_multiplier": round(self.watershed_stress_multiplier, 2),
+            "expected_water_stress_impact_l_eq": round(self.expected_water_stress_impact_l_eq, 1),
+            "expected_energy_kwh": round(self.expected_energy_kwh, 2),
+            "expected_carbon_kg_co2e": round(self.expected_carbon_kg_co2e, 2),
+            "expected_cost_eur": round(self.expected_cost_eur, 2),
+            "operational_risk": self.operational_risk,
+            "recommendation": self.recommendation,
+            "rationale": self.rationale,
+            "confidence_score": round(self.confidence_score, 3),
+            "human_validation_status": self.human_validation_status,
+            "operator_id": self.operator_id,
+            "water_recovered_l": round(self.water_recovered_l, 1),
+            "water_reused_l": round(self.water_reused_l, 1),
+            "final_net_impact": self.final_net_impact,
+            "provenance_hash": self.provenance_hash,
+            "provenance_signature": self.provenance_signature,
+            "calculation_version": self.calculation_version,
+            "classification": self.classification
+        }
+
+
+@dataclass(frozen=True)
+class DataCenterWorkloadProfile:
+    """Secondary vertical: AI Data Center thermal & cooling workload dispatch."""
+    workload_id: str
+    model_type: str                     # "LLM Pre-training", "Inference Batch", "Embedding Indexing", "Fine-Tuning"
+    gpu_cluster: str                    # "8x H100 SXM5", "64x H100 SXM5"
+    duration_h: float
+    power_draw_kw: float
+    thermal_load_kwh: float
+    cooling_mode: str                   # "Direct Evaporative", "Dry Hybrid Closed-Loop", "Direct-to-Chip Liquid"
+    wue_l_per_kwh: float                # Water Usage Effectiveness
+    pue: float                          # Power Usage Effectiveness
+    direct_water_l: float
+    indirect_water_l: float
+    total_water_l: float
+    carbon_kg_co2e: float
+    cost_eur: float
+    flexible_deferral_h: float
+    dispatch_recommendation: str
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+

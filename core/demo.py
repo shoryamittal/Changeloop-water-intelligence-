@@ -12,13 +12,14 @@ import hashlib
 from .domain import (
     Batch, TransitionBurden, ScheduleEvaluation, OptimizationResult,
     CleaningSimulation, CascadeResult, WaterStream, SustainabilityLedger, ImpactRecord,
-    SafetyLevel
+    SafetyLevel, KNOWN_WATERSHEDS
 )
 from .cleanability import PLANNING_BATCHES, PLANNING_MATRIX_SPEC, calculate_burden
 from .optimizer import evaluate_order, score_order_two_opt
 from .simulator import simulate_cleaning_cycle
 from .cascade import analyze_cascade
 from .audit import record_audit_event, get_audit_events
+from .decision_engine import evaluate_changeover_tradeoffs, evaluate_datacenter_workload
 
 DEMO_STEPS = [
     "01_PLAN",
@@ -397,24 +398,31 @@ class DemoSession:
             "cascade_result": self.cascade_result,
             "cascade_committed": self.cascade_committed,
             "impact_record": self.impact_record,
-            "audit_events": get_audit_events()
+            "audit_events": get_audit_events(),
+            "watershed": KNOWN_WATERSHEDS.get(self.selected_plant, KNOWN_WATERSHEDS["FR-AULNAY-04"]).to_dict(),
+            "decision_tradeoffs": evaluate_changeover_tradeoffs({}, {}, self.selected_plant),
+            "datacenter_generality_proof": evaluate_datacenter_workload()
         }
 
     def export_summary(self) -> Dict[str, Any]:
         """Export auditable ESG & CSRD changeover ledger."""
         self._recompute_impact()
+        ws = KNOWN_WATERSHEDS.get(self.selected_plant, KNOWN_WATERSHEDS["FR-AULNAY-04"])
         summary = {
             "session_id": str(uuid.uuid4()),
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "plant": self.selected_plant,
             "line": self.selected_line,
-            "standard": "ISO 14046 / CSRD / EU Taxonomy",
+            "watershed_basin": ws.basin_name,
+            "watershed_aware_factor": ws.aware_factor,
+            "standard": "ISO 14046 / CSRD / EU Taxonomy / WRI Aqueduct",
             "baseline_sequence": self.baseline_sequence,
             "executed_sequence": self.current_sequence,
             "decision_status": self.decision_status,
             "water_avoided_upstream_l": self.impact_record["upstream_avoided_l"],
             "water_avoided_adaptive_l": self.impact_record["adaptive_avoided_l"],
             "total_water_avoided_l": self.impact_record["total_water_demand_avoided_l"],
+            "watershed_stress_saved_l_eq": round(self.impact_record["total_water_demand_avoided_l"] * ws.aware_factor, 1),
             "water_reclaimed_cascade_l": self.impact_record["cascade_reclaimed_l"],
             "net_fresh_water_intake_l": self.impact_record["net_water_intake_l"],
             "thermal_energy_saved_kwh": self.impact_record["thermal_kwh"],

@@ -10,8 +10,8 @@
     "mean_reduction_pct": 10.33,
     "max_reduction_pct": 29.6,
     "baseline_safeguard_triggers": 13,
-    "mean_latency_ms": 30.02,
-    "p95_latency_ms": 98.43
+    "mean_latency_ms": 8.71,
+    "p95_latency_ms": 17.68
   },
   "safety_gate_metrics": {
     "runs": 1000,
@@ -32,6 +32,6 @@
     "financial_invariants_verified": true,
     "sensitivity_ordering_verified": true
   },
-  "total_execution_time_s": 73.12,
+  "total_execution_time_s": 17.83,
   "status": "ALL 4,000 STRESS TESTS PASSED CLEANLY"
 }

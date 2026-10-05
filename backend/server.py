@@ -26,7 +26,11 @@ from core import (
     record_audit_event as record,
     get_audit_events as audit_events,
     get_demo_session,
-    RULES
+    RULES,
+    evaluate_changeover_tradeoffs,
+    create_resource_decision_event,
+    evaluate_datacenter_workload,
+    KNOWN_WATERSHEDS
 )
 
 def pilot():
@@ -165,6 +169,20 @@ class App(SimpleHTTPRequestHandler):
                 "required_fields": ["changeovers_per_year", "water_avoided_per_changeover_l", "water_cost_per_l", "implementation_cost", "annual_software_cost"],
                 "notice": "Enter verified site inputs. This prototype contains no L'Oréal costs or savings assumptions."
             })
+
+        if route == "/api/decision/tradeoffs":
+            plant = query.get("plant", ["FR-AULNAY-04"])[0]
+            from_b = {"id": "B-217", "family": "colour", "shade": "medium", "viscosity": "high", "residue": "high"}
+            to_b = {"id": "B-218", "family": "colour", "shade": "medium", "viscosity": "low", "residue": "medium"}
+            return self.send_json(evaluate_changeover_tradeoffs(from_b, to_b, plant))
+
+        if route == "/api/decision/watersheds":
+            return self.send_json({k: w.to_dict() for k, w in KNOWN_WATERSHEDS.items()})
+
+        if route == "/api/datacenter/workload":
+            workload = query.get("workload", ["LLM Pre-training"])[0]
+            site = query.get("site", ["US-PHOENIX-DC01"])[0]
+            return self.send_json(evaluate_datacenter_workload(workload, site))
 
         if route in ("/health", "/api/health"):
             return self.send_json({"status": "ok", "classification": "REAL", "storage": "sqlite with in-memory fallback"})
@@ -342,6 +360,28 @@ class App(SimpleHTTPRequestHandler):
                 "notice": "Planner decision recorded in local session audit trail; no plant schedule was changed.",
                 "event": event,
                 "session": get_demo_session().to_dict()
+            })
+
+        if route == "/api/decision/commit":
+            site_id = body.get("site_id", "FR-AULNAY-04")
+            asset_id = body.get("asset_id", "Packaging Line 04")
+            decision_type = body.get("decision_type", "BATCH_SEQUENCE_OPTIMIZATION")
+            selected_option = body.get("selected_option_id", "OPTION_B")
+            options = body.get("options", [])
+            operator = body.get("operator_id", "Dr. Camille Laurent [11425]")
+            event = create_resource_decision_event(
+                site_id=site_id,
+                asset_id=asset_id,
+                decision_type=decision_type,
+                selected_option_id=selected_option,
+                options=options,
+                operator_id=operator
+            )
+            audit_entry = record("RESOURCE_DECISION_COMMITTED", f"{decision_type} committed {selected_option} (SHA-256: {event.provenance_hash[:16]})")
+            return self.send_json({
+                "status": "COMMITTED",
+                "event": event.to_dict(),
+                "audit": audit_entry
             })
 
         return self.send_json({"error": "Unknown route"}, 404)
