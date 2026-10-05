@@ -24,7 +24,8 @@ from . import factors, provenance, zld, telemetry
 from .basin import get_basin, all_basins, methodology, DEFAULT_SITE
 from .process import (
     reference_lots, arrival_order, evaluate_sequence, changeover_matrix,
-    MACHINES, salt_dose_g_per_l, washoff_baths,
+    MACHINES, salt_dose_g_per_l, washoff_baths, strategies,
+    DEFAULT_STRATEGY,
 )
 from .optimizer import optimise, ObjectiveWeights, HardConstraints
 from .ledger import new_decision_event, build_ledger, trace
@@ -62,6 +63,10 @@ class Session:
         self.decision_event: Optional[Dict[str, Any]] = None
         self.sequencing_status = "PENDING"      # PENDING|APPROVED|REJECTED
         self.sequencing_actor: Optional[str] = None
+        # The decision has TWO parts: the lot order and the process
+        # strategy. Approving the recommendation adopts both; until then
+        # the site stays on current practice.
+        self.selected_strategy = DEFAULT_STRATEGY
 
         self.fault_mode: Optional[str] = None
         self.washoff: Optional[Dict[str, Any]] = None
@@ -90,6 +95,7 @@ class Session:
         self.decision_event = None
         self.sequencing_status = "PENDING"
         self.sequencing_actor = None
+        self.selected_strategy = DEFAULT_STRATEGY
         self.washoff = None
         self.washoff_status = "NOT_RUN"
         self.washoff_actor = None
@@ -186,11 +192,16 @@ class Session:
                         "state": self.state()}
             self.sequencing_status = "APPROVED"
             self.current_order = list(rec["order"])
-            detail = "Planner approved the recommended order {}.".format(
-                " -> ".join(self.current_order))
+            self.selected_strategy = rec.get("strategy_id",
+                                             DEFAULT_STRATEGY)
+            detail = ("Planner approved the recommended plan: order {} "
+                      "using {}.".format(
+                          " -> ".join(self.current_order),
+                          rec["strategy"]["name"]))
         else:
             self.sequencing_status = "REJECTED"
             self.current_order = list(self.arrival)
+            self.selected_strategy = DEFAULT_STRATEGY
             detail = ("Planner rejected the recommendation and retained the "
                       "arrival order. No saving is credited.")
 
@@ -208,6 +219,7 @@ class Session:
             {"event_id": self.decision_event["event_id"],
              "decision": "APPROVED" if approve else "REJECTED",
              "order": self.current_order,
+             "strategy": self.selected_strategy,
              "note": note},
             actor=actor,
         )
@@ -332,9 +344,10 @@ class Session:
     # ------------------------------------------------------------------
 
     def _scenario(self, order: List[str],
-                  washoff_credit: bool) -> Dict[str, Any]:
+                  washoff_credit: bool,
+                  strategy_id: str = DEFAULT_STRATEGY) -> Dict[str, Any]:
         """Evaluate one running order, optionally crediting the release."""
-        seq = evaluate_sequence(self.lots, order)
+        seq = evaluate_sequence(self.lots, order, strategy_id)
         pw = seq["process_water_l"]
         ps = seq["process_salt_kg"]
 
@@ -351,23 +364,43 @@ class Session:
         )
         out["_changeover_water_l"] = seq["changeover_water_l"]
         out["_sequence"] = seq
+        out["_strategy_cost_inr"] = seq["strategy_cost_inr"]
         return out
 
     def impact(self) -> Dict[str, Any]:
         """The one impact ledger. Every screen reads this."""
-        baseline = self._scenario(self.arrival, washoff_credit=False)
+        # Baseline is always the arrival order under current practice.
+        # That is the counterfactual: what would have happened with no
+        # intervention at all.
+        baseline = self._scenario(self.arrival, washoff_credit=False,
+                                  strategy_id=DEFAULT_STRATEGY)
         released = (self.washoff_status == "RELEASED")
-        achieved = self._scenario(self.current_order, washoff_credit=released)
+        achieved = self._scenario(self.current_order,
+                                  washoff_credit=released,
+                                  strategy_id=self.selected_strategy)
 
         base_seq = baseline["_sequence"]
         ach_seq = achieved["_sequence"]
 
-        seq_water_avoided = (
-            base_seq["changeover_water_l"] - ach_seq["changeover_water_l"]
-            if self.sequencing_status == "APPROVED" else 0.0)
-        seq_salt_avoided = (
-            base_seq["changeover_salt_kg"] - ach_seq["changeover_salt_kg"]
-            if self.sequencing_status == "APPROVED" else 0.0)
+        # The approved decision covers BOTH levers, so its attribution is
+        # the whole difference that decision caused: changeover burden
+        # removed by resequencing, plus rinse water and electrolyte
+        # removed by the process strategy.
+        #
+        # These two attributions are DISJOINT and therefore additive.
+        # ach_seq is the chosen plan's demand BEFORE any wash-off
+        # release, so the release credit is a further, separate
+        # reduction inside that plan. Subtracting it here as well would
+        # remove the same litres twice and break the balance invariant -
+        # which is exactly what the invariant caught.
+        if self.sequencing_status == "APPROVED":
+            seq_water_avoided = max(0.0, base_seq["total_water_l"]
+                                    - ach_seq["total_water_l"])
+            seq_salt_avoided = max(0.0, base_seq["total_salt_kg"]
+                                   - ach_seq["total_salt_kg"])
+        else:
+            seq_water_avoided = 0.0
+            seq_salt_avoided = 0.0
 
         wash_water = (self.washoff["water_avoidable_l"]
                       if released and self.washoff else 0.0)
@@ -417,6 +450,9 @@ class Session:
             "decision_event": self.decision_event,
             "sequencing_status": self.sequencing_status,
             "sequencing_actor": self.sequencing_actor,
+            "selected_strategy": self.selected_strategy,
+            "strategies": {k: v.to_dict()
+                           for k, v in strategies().items()},
 
             "fault_mode": self.fault_mode,
             "washoff": self.washoff,
@@ -461,6 +497,7 @@ class Session:
                     "actor": self.sequencing_actor,
                     "arrival_order": self.arrival,
                     "executed_order": self.current_order,
+                    "executed_strategy": self.selected_strategy,
                 },
                 "washoff_release": {
                     "status": self.washoff_status,

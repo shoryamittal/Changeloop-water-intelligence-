@@ -6,7 +6,7 @@ An append-only hash chain over decision records, persisted in SQLite, with a
 keyed MAC (HMAC-SHA256) over each link.
 
   record_hash = HMAC_SHA256(key, seq | timestamp | actor | action |
-                            payload_hash | prev_hash)
+                            detail | payload_hash | prev_hash)
 
 Each record commits to its predecessor, so altering or deleting any record
 invalidates every record after it. `verify_chain()` recomputes the whole
@@ -90,9 +90,19 @@ def _payload_hash(payload: Any) -> str:
 
 
 def _link_hash(seq: int, ts: str, actor: str, action: str,
-               payload_hash: str, prev_hash: str) -> str:
-    msg = "{}|{}|{}|{}|{}|{}".format(
-        seq, ts, actor, action, payload_hash, prev_hash).encode("utf-8")
+               detail: str, payload_hash: str,
+               prev_hash: str) -> str:
+    """MAC over every field a reader can see.
+
+    `detail` is included deliberately. It is the human-readable text
+    an auditor actually reads, so leaving it outside the MAC would
+    allow the record's meaning to be rewritten while the chain still
+    verified. An earlier revision of this module made exactly that
+    mistake and the tamper test caught it.
+    """
+    msg = "{}|{}|{}|{}|{}|{}|{}".format(
+        seq, ts, actor, action, detail, payload_hash, prev_hash
+    ).encode("utf-8")
     return hmac.new(_key(), msg, hashlib.sha256).hexdigest()
 
 
@@ -181,7 +191,7 @@ def append(action: str,
     ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     rid = str(uuid.uuid4())
     ph = _payload_hash(payload)
-    rh = _link_hash(seq, ts, actor, action, ph, prev_hash)
+    rh = _link_hash(seq, ts, actor, action, detail, ph, prev_hash)
     payload_json = json.dumps(payload, sort_keys=True, default=str)
 
     rec = LedgerRecord(
@@ -291,7 +301,8 @@ def verify_chain(db_path: Optional[Path] = None) -> Dict[str, Any]:
         if r["prev_hash"] != prev:
             break_at, reason = r["seq"], "prev_hash does not match the chain"
             break
-        expect = _link_hash(r["seq"], r["timestamp"], r["actor"], r["action"],
+        expect = _link_hash(r["seq"], r["timestamp"], r["actor"],
+                            r["action"], r["detail"],
                             r["payload_hash"], r["prev_hash"])
         if not hmac.compare_digest(expect, r["record_hash"]):
             break_at, reason = r["seq"], "record_hash does not verify"
