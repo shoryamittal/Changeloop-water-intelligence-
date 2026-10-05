@@ -290,7 +290,7 @@ body {
 .page {
   max-width: 1480px;
   width: 100%;
-  padding: 32px 36px 64px;
+  padding: 18px 36px 64px;
   margin: 0 auto;
 }
 
@@ -1049,7 +1049,8 @@ dialog::backdrop {
   .app-shell { flex-direction: column; }
   .workspace { margin: 0; }
   .topbar { height: auto; padding: 14px 18px; flex-direction: column; align-items: flex-start; gap: 10px; }
-  .page { padding: 20px 16px; }
+  .demo-dock-bar { width: calc(100% - 32px); margin: 12px auto 0; flex-wrap: wrap; gap: 8px; }
+  .page { padding: 16px 16px; }
   .split, .business-form, .sensitivity, .trust-grid, .line-grid { grid-template-columns: 1fr; }
 }
 
@@ -9870,9 +9871,12 @@ dialog::backdrop {
   background: #ffffff;
   border: 1px solid #c2eed5;
   border-radius: 8px;
-  padding: 8px 14px;
-  margin-bottom: 16px;
+  padding: 8px 16px;
+  max-width: 1408px;
+  width: calc(100% - 72px);
+  margin: 18px auto 0;
   box-shadow: 0 1px 4px rgba(16, 185, 129, 0.05);
+  box-sizing: border-box;
 }
 .demo-dock-left {
   display: flex;

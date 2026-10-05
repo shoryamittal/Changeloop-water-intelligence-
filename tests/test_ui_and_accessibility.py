@@ -13,7 +13,7 @@ import os
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://127.0.0.1:8000"
 
 class UIAccessibilityTests(unittest.TestCase):
     """Rigorous frontend inspection, accessibility checks, and design token validation."""

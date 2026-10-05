@@ -15,7 +15,7 @@ import concurrent.futures
 import sys
 from pathlib import Path
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://127.0.0.1:8000"
 
 def get(route):
     req = urllib.request.Request(f"{BASE_URL}{route}")
