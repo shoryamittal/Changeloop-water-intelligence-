@@ -1,4 +1,4 @@
-name: ClearLoop Continuous Integration
+name: ChangeLoop CI
 
 on:
   push:
@@ -8,33 +8,94 @@ on:
 
 jobs:
   test:
-    name: Core Invariants & 1,000-Scenario Industrial Stress Suite
+    name: Engine invariants, safety gate, determinism, render
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.11', '3.12']
+        python-version: ['3.11', '3.12', '3.13']
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Verify zero external dependencies (Standard Library Only)
-      run: |
-        python -c "import http.server, sqlite3, json, math, random, urllib.request; print('Python standard library verification successful.')"
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-    - name: Execute Core Unit & Invariant Tests (21 Tests)
-      run: |
-        python -m unittest discover -s tests -p "test_core.py"
+      - name: Verify zero external dependencies
+        run: python -c "import http.server, sqlite3, json, math, random, hmac, hashlib; print('standard library only')"
 
-    - name: Execute 1,000-Scenario Industrial Monte Carlo Stress Suite (4,000 Assertions)
-      run: |
-        python tests/test_stress_1000.py
+      - name: Engine test suite
+        run: python -m unittest discover -s tests -p "test_engine.py" -v
 
-    - name: Verify Front-End JavaScript Syntax
-      run: |
-        node -c frontend/app.js
+      - name: Golden path, safety gate, determinism, tamper detection
+        run: python tests/verify_system.py
+
+      - name: Front-end syntax
+        run: node --check frontend/app.js
+
+      - name: Start server
+        run: |
+          python backend/server.py &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/api/health > /dev/null 2>&1; then
+              echo "server up"
+              break
+            fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:8000/api/health > /dev/null
+
+      - name: Every endpoint responds
+        run: |
+          set -e
+          for ep in /api/health /api/state /api/sites /api/lots \
+                    /api/changeover-matrix /api/strategies \
+                    /api/insight/salt-is-water /api/modes /api/modes/compare \
+                    /api/sensitivity /api/ablation /api/impact /api/trace \
+                    /api/evidence /api/ledger /api/ledger/verify /api/faults \
+                    /api/pilot /api/governance /api/claims /api/export \
+                    /api/business-case /api/cluster-projection / ; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:8000$ep")
+            echo "$code  $ep"
+            [ "$code" = "200" ] || exit 1
+          done
+
+      - name: Golden path over HTTP
+        run: |
+          set -e
+          post() {
+            curl -fsS -X POST "http://127.0.0.1:8000$1" \
+              -H 'Content-Type: application/json' -d "$2" -o /dev/null
+          }
+          post /api/session/reset '{}'
+          post /api/optimise '{}'
+          post /api/decision/sequence '{"approve":true}'
+          post /api/washoff/run '{}'
+          post /api/washoff/release '{"approve":true}'
+          echo "golden path ok"
+
+      - name: Safety interlock must refuse release under a fault
+        run: |
+          set -e
+          curl -fsS -X POST http://127.0.0.1:8000/api/session/reset -H 'Content-Type: application/json' -d '{}' -o /dev/null
+          curl -fsS -X POST http://127.0.0.1:8000/api/optimise -H 'Content-Type: application/json' -d '{}' -o /dev/null
+          curl -fsS -X POST http://127.0.0.1:8000/api/decision/sequence -H 'Content-Type: application/json' -d '{"approve":true}' -o /dev/null
+          curl -fsS -X POST http://127.0.0.1:8000/api/washoff/run -H 'Content-Type: application/json' -d '{"fault_mode":"sensor_drift"}' -o /dev/null
+          code=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://127.0.0.1:8000/api/washoff/release -H 'Content-Type: application/json' -d '{"approve":true}')
+          echo "release under drift returned $code (409 expected)"
+          [ "$code" = "409" ] || exit 1
+
+      - name: Client cannot supply a decision implicitly
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://127.0.0.1:8000/api/decision/sequence -H 'Content-Type: application/json' -d '{}')
+          echo "missing decision returned $code (400 expected)"
+          [ "$code" = "400" ] || exit 1
+
+      - name: All eight views render
+        run: node tests/test_frontend_render.js

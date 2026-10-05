@@ -1,7 +1,7 @@
 services:
-  clearloop:
+  changeloop:
     build: .
     ports:
       - "8000:8000"
     environment:
-      CLEARLOOP_ENV: demo
+      PORT: "8000"
