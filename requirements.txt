@@ -1,0 +1,23 @@
+# ChangeLoop runs on the Python standard library alone.
+#
+# This file deliberately declares NO packages. It exists because Render and
+# most Python platforms detect a Python service by the presence of
+# requirements.txt and run `pip install -r requirements.txt` as the build
+# step. Without the file the build fails before the service ever starts,
+# which is a confusing way to learn that your app has no dependencies.
+#
+# pip accepts a comment-only requirements file and installs nothing, which
+# is exactly the intent: the build succeeds, installs zero packages, and
+# the service starts in about a second.
+#
+# Zero dependencies is a design property of this project, not an accident:
+#   - the whole engine is auditable without trusting a supply chain
+#   - there is no build step, no lockfile and no version drift
+#   - a reviewer can read every line that produces every number
+#
+# Adding a package here changes that property. If you need one, say why in
+# the commit message.
+#
+# The deck generator (submission/build_deck.js) does use npm packages, but
+# it is a build-time authoring tool, not part of the running service, and
+# is never installed on the server.
