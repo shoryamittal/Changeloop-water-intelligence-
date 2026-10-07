@@ -46,7 +46,36 @@ import time
 import uuid
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DB_PATH = ROOT / "data" / "changeloop_ledger.db"
+
+
+def _default_data_dir() -> Path:
+    """Where the ledger lives.
+
+    Defaults to ./data inside the repository, which is right for local use
+    and for a container that owns its own filesystem.
+
+    CHANGELOOP_DATA_DIR overrides it, because a hosted deployment usually
+    cannot keep anything in the deployed tree. Render's filesystem is
+    EPHEMERAL: every deploy, restart and free-tier spin-down replaces it,
+    so a ledger written next to the code is silently discarded. Pointing
+    this at a mounted persistent disk makes the chain survive.
+
+    That is a real limitation rather than a bug, and the interface reports
+    it: an append-only chain whose storage can vanish still proves nothing
+    was edited within a session, which is what the ledger claims. It does
+    not promise durability nobody paid for. On the free tier the honest
+    position is that each deploy starts a fresh chain from the genesis
+    record, and the UI will show exactly that.
+    """
+    import os
+    override = os.environ.get("CHANGELOOP_DATA_DIR")
+    if override:
+        return Path(override).expanduser().resolve()
+    return ROOT / "data"
+
+
+DATA_DIR = _default_data_dir()
+DEFAULT_DB_PATH = DATA_DIR / "changeloop_ledger.db"
 
 GENESIS_HASH = "0" * 64
 
