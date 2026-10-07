@@ -30,8 +30,22 @@ jobs:
       - name: Verify zero external dependencies
         run: python -c "import http.server, sqlite3, json, math, random, hmac, hashlib; print('standard library only')"
 
-      - name: Engine test suite
-        run: python -m unittest discover -s tests -p "test_engine.py" -v
+      # Every suite, not one of them. This step used to run test_engine.py
+      # alone, which silently skipped the published-data cross-validation
+      # and the registry concurrency tests as they were added.
+      - name: All test suites
+        run: python -m unittest discover -s tests -p "test_*.py" -v
+
+      - name: Coefficients are still sourced, and still unmeasured
+        run: |
+          python -m unittest tests.test_published_validation -v
+
+      - name: Registry reads cannot observe a patched coefficient
+        run: |
+          python -m unittest tests.test_concurrency -v
+
+      - name: The deck's figures still match the engine
+        run: python submission/build_figures.py --check
 
       - name: Golden path, safety gate, determinism, tamper detection
         run: python tests/verify_system.py
@@ -60,7 +74,10 @@ jobs:
                     /api/sensitivity /api/ablation /api/impact /api/trace \
                     /api/evidence /api/ledger /api/ledger/verify /api/faults \
                     /api/pilot /api/governance /api/claims /api/export \
-                    /api/business-case /api/cluster-projection / ; do
+                    /api/business-case /api/cluster-projection \
+                    /api/forecast /api/narrative /api/narrative/plain \
+                    /api/validation \
+                    /frontend/app.js /frontend/style.css / ; do
             code=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:8000$ep")
             echo "$code  $ep"
             [ "$code" = "200" ] || exit 1
@@ -99,3 +116,107 @@ jobs:
 
       - name: All eight views render
         run: node tests/test_frontend_render.js
+
+  deploy-readiness:
+    name: Deploys the way a platform deploys it
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Render reads .python-version. Use the same file so CI cannot pass
+      # on a different interpreter than production runs.
+      - name: Set up Python from .python-version
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: '.python-version'
+
+      - name: Build exactly as Render builds
+        run: pip install -r requirements.txt
+
+      - name: No dependency crept in
+        run: |
+          set -e
+          installed=$(pip freeze | grep -v '^pip==' | grep -v '^setuptools==' | grep -v '^wheel==' || true)
+          if [ -n "$installed" ]; then
+            echo "Unexpected packages installed:"; echo "$installed"
+            echo "ChangeLoop is standard library only. If a dependency is"
+            echo "intended, say why in the commit message and update this step."
+            exit 1
+          fi
+          echo "zero dependencies, as declared"
+
+      # The failure this guards against: a service that binds loopback, or
+      # ignores the injected port, is unreachable from outside its
+      # container and looks exactly like a crashed app.
+      - name: Honours an injected PORT and binds a routable address
+        env:
+          PORT: '10000'
+        run: |
+          set -e
+          python backend/server.py > boot.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS "http://127.0.0.1:${PORT}/api/health" > /dev/null 2>&1 && break
+            sleep 1
+          done
+          echo "--- startup log ---"; cat boot.log
+          grep -q "0.0.0.0:${PORT}" boot.log || { echo "did not bind 0.0.0.0:${PORT}"; exit 1; }
+          curl -fsS "http://127.0.0.1:${PORT}/api/health" | python -c "import json,sys; d=json.load(sys.stdin); assert d['status']=='ok'; print('health ok, engine', d['application_version'])"
+
+      - name: Starts with no data directory and creates its own ledger
+        env:
+          PORT: '10001'
+        run: |
+          set -e
+          rm -rf data
+          python backend/server.py > boot2.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS "http://127.0.0.1:${PORT}/api/health" > /dev/null 2>&1 && break
+            sleep 1
+          done
+          test -f data/changeloop_ledger.db || { echo "ledger was not created"; cat boot2.log; exit 1; }
+          echo "ledger created from nothing"
+
+      - name: Writes its ledger wherever CHANGELOOP_DATA_DIR points
+        env:
+          PORT: '10002'
+          CHANGELOOP_DATA_DIR: /tmp/changeloop-disk
+        run: |
+          set -e
+          python backend/server.py > boot3.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS "http://127.0.0.1:${PORT}/api/health" > /dev/null 2>&1 && break
+            sleep 1
+          done
+          test -f /tmp/changeloop-disk/changeloop_ledger.db || { echo "override ignored"; cat boot3.log; exit 1; }
+          echo "ledger honours the mounted-disk path"
+
+      - name: The Blueprint is valid and says what we think it says
+        run: |
+          pip install --quiet pyyaml
+          python - <<'PY'
+          import yaml
+          svc = yaml.safe_load(open('render.yaml'))['services'][0]
+          assert svc['type'] == 'web', svc['type']
+          assert svc['runtime'] == 'python', svc['runtime']
+          assert svc['healthCheckPath'] == '/api/health', svc['healthCheckPath']
+          assert 'requirements.txt' in svc['buildCommand'], svc['buildCommand']
+          assert 'backend/server.py' in svc['startCommand'], svc['startCommand']
+          pinned = [e for e in svc['envVars'] if e['key'] == 'PYTHON_VERSION'][0]['value']
+          declared = open('.python-version').read().strip()
+          assert pinned == declared, 'render.yaml pins %s, .python-version says %s' % (pinned, declared)
+          print('blueprint consistent; python', declared)
+          PY
+
+      - name: Dockerfile builds and the container answers on an injected port
+        run: |
+          set -e
+          docker build -t changeloop:ci .
+          docker run -d --name cl -e PORT=10003 -p 10003:10003 changeloop:ci
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:10003/api/health > /dev/null 2>&1 && break
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:10003/api/health > /dev/null
+          echo "container healthy on an injected port"
+          docker logs cl | head -5
+          docker rm -f cl
