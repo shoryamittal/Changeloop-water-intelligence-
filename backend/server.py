@@ -775,17 +775,39 @@ class Server(ThreadingHTTPServer):
 
 
 def main() -> None:
+    """Start the server.
+
+    HOST and PORT come from the environment because every hosting platform
+    injects them. Render, in particular, assigns a port per service and
+    routes to it; a server that hardcodes 8000 is simply never reached and
+    the deploy fails a health check for no visible reason.
+
+    The default host is 0.0.0.0, not localhost. Binding to 127.0.0.1 inside
+    a container means the process is reachable only from inside that
+    container, which looks identical to a crashed app from the outside.
+    socketserver treats "" as INADDR_ANY, so the previous ("", port) was
+    already correct - but it was correct by accident of an empty string, and
+    a deployment detail this easy to get wrong should be written down.
+    """
     import os
     os.chdir(ROOT)
     provenance.init_db()
+
+    host = os.environ.get("HOST", "0.0.0.0")
     port = int(os.environ.get("PORT", "8000"))
-    print("ChangeLoop {} - http://localhost:{}".format(core.__version__, port))
+
+    print("ChangeLoop {} listening on {}:{}".format(
+        core.__version__, host, port), flush=True)
+    print("Ledger: {}".format(provenance.DEFAULT_DB_PATH), flush=True)
     print("Hero use case: reactive dyeing under a Zero Liquid Discharge "
-          "mandate")
+          "mandate", flush=True)
+    # flush=True throughout: platform log collectors read stdout, and a
+    # block-buffered pipe can hold these lines until the process exits,
+    # which is precisely when nobody needs them.
     try:
-        Server(("", port), App).serve_forever()
+        Server((host, port), App).serve_forever()
     except KeyboardInterrupt:
-        print("stopped")
+        print("stopped", flush=True)
 
 
 if __name__ == "__main__":
