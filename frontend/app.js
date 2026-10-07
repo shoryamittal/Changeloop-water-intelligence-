@@ -323,18 +323,11 @@ function updateCtx() {
 }
 
 /* ---------- theme ----------------------------------------------------
-   Three states: explicit dark, explicit light, or follow the operating
-   system when nothing has been chosen. The label always names what the
-   button will DO, not the current state. */
-function prefersDark() {
-  return window.matchMedia &&
-    window.matchMedia('(prefers-color-scheme: dark)').matches;
-}
+   Dark is the default, set in CSS so it holds without JavaScript. Only an
+   explicit light choice is recorded. The button label always names what it
+   will DO, not the current state. */
 function isDark() {
-  var t = document.documentElement.getAttribute('data-theme');
-  if (t === 'dark') return true;
-  if (t === 'light') return false;
-  return prefersDark();
+  return document.documentElement.getAttribute('data-theme') !== 'light';
 }
 function syncThemeLabel() {
   var el = document.getElementById('themeLbl');
@@ -353,18 +346,6 @@ function wireTheme() {
   var b = document.getElementById('themeBtn');
   if (b) b.onclick = function () { setTheme(isDark() ? 'light' : 'dark'); };
   syncThemeLabel();
-  /* If the viewer has made no explicit choice, track the OS live. */
-  if (window.matchMedia) {
-    var mq = window.matchMedia('(prefers-color-scheme: dark)');
-    var onChange = function () {
-      if (!document.documentElement.getAttribute('data-theme')) {
-        syncThemeLabel();
-        render();
-      }
-    };
-    if (mq.addEventListener) mq.addEventListener('change', onChange);
-    else if (mq.addListener) mq.addListener(onChange);
-  }
 }
 
 function renderNav() {

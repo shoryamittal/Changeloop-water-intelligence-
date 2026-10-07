@@ -115,6 +115,9 @@
 /* ==========================================================================
    1b. DARK TOKENS
 
+   THE DEFAULT. Applied to any root not explicitly marked light, so the
+   dark ground holds even if JavaScript never runs.
+
    The same system in different light. Structure, spacing, geometry, the
    flow grammar and every semantic meaning are unchanged - only values move.
 
@@ -123,7 +126,7 @@
    and the pale area fills become dark tints of the same hue rather than
    inverting to light washes that would glare.
    ========================================================================== */
-:root[data-theme="dark"] {
+:root:not([data-theme="light"]) {
   /* ground: deep slate-teal, stepped */
   --pearl:        #0d1214;
   --surface:      #141b1d;
@@ -176,54 +179,14 @@
   --on-coral:     #2b0f0b;
 }
 
-/* Follow the operating system when the viewer has not chosen. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]):not([data-theme="dark"]) {
-    --pearl:        #0d1214;
-    --surface:      #141b1d;
-    --aquifer:      #1c2528;
-    --aquifer-deep: #233035;
-    --graphite:     #e8eeec;
-    --slate:        #aebab6;
-    --slate-2:      #8e9b97;
-    --slate-3:      #78867f;
-    --hair:         #233035;
-    --hair-2:       #314146;
-    --hair-3:       #44575d;
-    --water:        #4fb3c7;
-    --water-ink:    #7fcbda;
-    --water-lift:   #6ec4d6;
-    --water-pale:   #1b3f49;
-    --water-wash:   #15282e;
-    --emerald:      #3dbd8c;
-    --emerald-pale: #16382c;
-    --emerald-wash: #112a22;
-    --cyan:         #45b8e0;
-    --cyan-pale:    #11313f;
-    --amber:        #dca350;
-    --amber-pale:   #3a2a10;
-    --amber-wash:   #2a1f0c;
-    --coral:        #ef8373;
-    --coral-pale:   #40201c;
-    --coral-wash:   #2e1816;
-    --salt:         #d6ad5c;
-    --salt-pale:    #352a12;
-    --carbon:       #a9a0c8;
-    --carbon-pale:  #262238;
-    --on-accent:    #07171c;
-    --on-emerald:   #04231a;
-    --on-coral:     #2b0f0b;
-  }
-}
-
 /* The shade swatches in lot chips are real dye colours, so they must not be
    dimmed by the theme. A hairline keeps them legible on either ground. */
-:root[data-theme="dark"] .chip .sw,
-:root[data-theme="dark"] .seq .sw { border-color: rgba(255, 255, 255, .28); }
+:root:not([data-theme="light"]) .chip .sw,
+:root:not([data-theme="light"]) .seq .sw { border-color: rgba(255, 255, 255, .28); }
 
 /* Sheet and palette scrims need more weight on a dark ground. */
-:root[data-theme="dark"] .sheet-bd,
-:root[data-theme="dark"] .cp-bd { background: rgba(0, 0, 0, .55); }
+:root:not([data-theme="light"]) .sheet-bd,
+:root:not([data-theme="light"]) .cp-bd { background: rgba(0, 0, 0, .55); }
 
 /* ==========================================================================
    2. RESET
@@ -1024,7 +987,7 @@ dl.defs dd { margin: 0; font-size: var(--t-small); line-height: 1.5; }
 
 @media print {
   /* Force the light set: a dark screen theme must not print as ink. */
-  :root, :root[data-theme="dark"] {
+  :root, :root:not([data-theme="light"]), :root[data-theme="dark"] {
     --pearl: #fff; --surface: #fff; --aquifer: #f1f3f2;
     --aquifer-deep: #e8ebea;
     --graphite: #000; --slate: #333; --slate-2: #555; --slate-3: #666;
