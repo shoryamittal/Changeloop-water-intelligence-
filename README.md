@@ -17,8 +17,10 @@ dry-weather flow to dilute treated effluent. ZLD worked: the cluster now
 treats and recycles on the order of **130 million litres a day**, recovering
 most of its water. But it is expensive — reported to have raised unit
 operating costs by **25–30%**, and the cost of dyed fabric by **12–15%**,
-reducible to around **5% with salt and water recovery**. Recycled water is
-reported at **₹120–150/kL against ₹30–60/kL** for fresh abstraction.
+reducible to around **5% with salt and water recovery**. Tamil Nadu pollution
+board plant-level data puts the ZLD charge at **₹150–220/kL** where plants run at
+or above 30% of capacity, against **₹45/kL** for Bhavani river water — and at
+**₹375–450/kL** where a plant is stuck below viable utilisation.
 
 So water *recovery* is largely solved. What is not solved is the **energy and
 salt burden of achieving it** — and that burden is decided upstream, by a
@@ -152,11 +154,65 @@ premium costs more than the steam it saves. Price water scarcity or carbon
 and the same engine starts recommending it. That is this product's argument in
 one table.
 
-## 8. Honesty rules, enforced in code
+## 8. How a model with no meters is checked
 
-- **Nothing here is measured.** The coefficient registry holds 5 PUBLISHED,
-  2 DERIVED and 13 ASSUMED values and **zero MEASURED**. A test asserts that
-  no value may claim MEASURED status while this is a prototype.
+Nothing in this system is measured, and that is the hardest fair objection
+to it. But a model with no measurements can still be **falsified** — by
+asking whether its outputs land where real plants actually sit.
+
+Two published facts, from unrelated sources, neither of which the engine
+reads as an input:
+
+- CPCB measured **18,340 mg/L** of dissolved solids entering the evaporation
+  stage at an assessed Tirupur dyeing unit.
+- Indian textile ZLD operators separately report RO reject at
+  **20–30% of inlet volume**.
+
+Feed the engine the first and check whether it predicts the second:
+
+| Inlet TDS fed in | What that number is | Model predicts |
+|---|---|---|
+| 12,000 mg/L | lower end of observed CETP inlet strength | **20.0%** — band floor, exact |
+| 15,000 mg/L | midpoint of observed CETP inlet strength | **25.0%** — midpoint, exact |
+| 18,340 mg/L | **TDS CPCB measured at a real Tirupur unit** | **30.6%** — band ceiling |
+
+The published band is reproduced floor to ceiling. Nothing is tuned to make
+it happen: the only inputs are conservation of salt mass and the 60,000 mg/L
+concentration ceiling. Enforced by
+`tests/test_published_validation.py`.
+
+**This is cross-validation against published operating data. It is not
+measurement, and the system never calls it that.** Promoting any coefficient
+to MEASURED needs one site visit and two instrument readings — steam
+flow to the evaporator, and reject conductivity. Full source register in
+[docs/data_sources.md](docs/data_sources.md).
+
+### The same conclusion by a second route
+
+The forecast reaches the core finding independently of the ZLD model. It
+projects hourly freshwater abstraction against the site's allowance, via
+`zld.account_for_water` — and in a closed loop freshwater makeup is the
+evaporative loss, which is the reject volume, which is set by salt:
+
+| Lever | Utilisation of allowance | Risk |
+|---|---|---|
+| Do nothing | **132.3%** | breaches |
+| Counter-current rinsing (the water lever) | **132.3%** | breaches |
+| Low-electrolyte chemistry (the salt lever) | **82.1%** | clears |
+
+Counter-current rinsing moves the abstraction envelope by **exactly
+nothing**. Two unrelated code paths, one conclusion.
+
+---
+
+## 9. Honesty rules, enforced in code
+
+- **Nothing here is measured.** The coefficient registry holds 17 PUBLISHED,
+  4 DERIVED and 4 ASSUMED values and **zero MEASURED**. A test asserts
+  that no value may claim MEASURED status while this is a prototype. The 4
+  that remain ASSUMED are commercial prices and premiums public literature
+  cannot settle, and a test pins that exact set so none can be quietly
+  promoted. We did not relabel what we could not source.
 - **No number may be used unless it is registered** in `core/factors.py` with
   a unit, a derivation or source, and an evidence class. `factors.get()`
   raises on an unregistered key.
@@ -177,7 +233,7 @@ one table.
 - **A rejected recommendation credits exactly zero**, and the rejection is
   recorded. Tests assert this for every decision combination.
 
-## 9. Safety
+## 10. Safety
 
 The wash-off release gate is **fail-closed and never automatic**.
 `automatic_release` is hardcoded `False` with no code path that sets it true.
@@ -192,7 +248,7 @@ residual dye slug, bath under temperature — each force lockout. Tests assert
 that under every one of them release is refused at the gate *and* at the API,
 and that exactly zero saving is credited.
 
-## 10. Run it
+## 11. Run it
 
 No dependencies, no build step. Python 3.9+ standard library only.
 
@@ -213,7 +269,7 @@ node tests/test_frontend_render.js                         # all 8 views
 
 Keyboard: `1`–`8` jump between sections.
 
-## 11. Architecture
+## 12. Architecture
 
 ```
 core/factors.py     every coefficient, with unit, derivation, evidence class
@@ -235,7 +291,7 @@ Every figure the interface shows comes from the server. Nothing is computed
 in the browser and nothing is hardcoded. `/api/trace?metric=...` returns the
 formula, upstream chain and coefficients behind any headline number.
 
-## 12. Documents
+## 13. Documents
 
 - [`docs/strategy.md`](docs/strategy.md) — hero use-case decision, white
   space, moat, what we deliberately did not build
@@ -248,7 +304,7 @@ formula, upstream chain and coefficients behind any headline number.
 - [`docs/archive/loreal_edition.md`](docs/archive/loreal_edition.md) — the
   superseded cosmetics variant, how to restore it, and the defects it carries
 
-## 13. Scale
+## 14. Scale
 
 A cluster projection — clearly labelled **PROJECTED**, not a result — for 400
 units at 900 lots each: ~399 ML/yr freshwater, ~4,500 t/yr salt, ~13,400
@@ -263,7 +319,7 @@ far less to onboard than the first. The CETP is the natural channel: it
 already has a commercial relationship with every unit, and it directly
 benefits from a lower, steadier inlet salt load.
 
-## 14. What would change our conclusions
+## 15. What would change our conclusions
 
 Our own sensitivity sweep flags the coefficients that matter. The lot
 **order** never changes across the whole sweep; what flips is the process
