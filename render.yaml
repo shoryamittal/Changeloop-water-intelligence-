@@ -1,0 +1,87 @@
+# ChangeLoop - Render Blueprint.
+#
+# With this file in the repository root, Render can create the service from
+# the repo without anything being typed into a form. In the dashboard:
+#   New  ->  Blueprint  ->  pick this repository  ->  Apply
+#
+# Every setting a web service needs is declared below, so there is nothing
+# to get wrong by hand and nothing that differs between a redeploy and the
+# first deploy.
+#
+# Why the native Python runtime rather than Docker: this service has no
+# dependencies, so there is no image to build and nothing to cache. The
+# Python runtime installs an empty requirements file and starts in about a
+# second. The Dockerfile in this repository is kept working as a fallback
+# and for local use, but it is not what Render runs here.
+
+services:
+  - type: web
+    name: changeloop
+    runtime: python
+    plan: free
+
+    # Singapore is the closest Render region to India, which is where the
+    # cluster this models actually is and where the people reviewing it are.
+    region: singapore
+
+    branch: main
+    autoDeploy: true
+
+    # pip accepts a comment-only requirements file and installs nothing.
+    # The command is still required: it is how Render identifies the build.
+    buildCommand: pip install -r requirements.txt
+
+    # HOST and PORT are read from the environment by backend/server.py.
+    # Render injects PORT; HOST defaults to 0.0.0.0.
+    startCommand: python backend/server.py
+
+    # Render polls this path and will not route traffic to an instance that
+    # does not answer it. /api/health returns the engine version, the
+    # calculation version and the ledger's integrity state, so a green
+    # health check means the engine actually initialised - not merely that
+    # a socket is open.
+    healthCheckPath: /api/health
+
+    envVars:
+      # Pinned to match .python-version. Declared here as well so the
+      # version is visible in the service configuration rather than only
+      # in a dotfile somebody has to go looking for.
+      - key: PYTHON_VERSION
+        value: 3.12.4
+
+      # The ledger's MAC key. Without this the service falls back to the
+      # published demonstration constant, and the Evidence screen says so
+      # in as many words. generateValue asks Render to mint a real secret
+      # once, at service creation, and keep it across deploys - so the
+      # deployed instance reports its key provenance as "environment"
+      # rather than "built-in demonstration constant", which is the honest
+      # state for something running in public.
+      - key: CHANGELOOP_LEDGER_KEY
+        generateValue: true
+
+      # Where the decision ledger is written.
+      #
+      # IMPORTANT, and disclosed rather than hidden: Render's filesystem is
+      # EPHEMERAL on every plan unless a persistent disk is attached, and
+      # disks are not available on the free plan. So each deploy - and each
+      # wake from free-tier spin-down - starts a fresh chain from its
+      # genesis record.
+      #
+      # That is acceptable for a demonstration and it does not weaken what
+      # the ledger claims: it proves no record was altered within a
+      # session, which is exactly what it still does. It does not claim
+      # durability nobody provisioned.
+      #
+      # To make the chain survive, upgrade the plan, attach a disk at
+      # /var/changeloop, and uncomment the disk block below.
+      - key: CHANGELOOP_DATA_DIR
+        value: /opt/render/project/src/data
+
+    # Persistent ledger storage. Requires a paid plan; free plans cannot
+    # mount disks. If you enable this, change CHANGELOOP_DATA_DIR above to
+    # /var/changeloop to match.
+    #
+    # disk:
+    #   name: changeloop-ledger
+    #   mountPath: /var/changeloop
+    #   sizeGB: 1
