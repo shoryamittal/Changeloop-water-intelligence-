@@ -31,8 +31,8 @@
   /* --- ink ------------------------------------------------------------- */
   --graphite:     #1e2927;
   --slate:        #55635f;
-  --slate-2:      #6d7b77;
-  --slate-3:      #8d9a96;
+  --slate-2:      #65726f;
+  --slate-3:      #6d7774;
 
   /* --- structure: hairlines, never borders ---------------------------- */
   --hair:         #dfe4e2;
@@ -67,6 +67,13 @@
 
   --carbon:       #5b5470;   /* emissions */
   --carbon-pale:  #e4e1ea;
+
+  /* --- text that sits ON an accent fill ------------------------------
+     A naive #fff breaks in dark mode, where the accents lift and white
+     label text drops below AA. These flip with the theme. */
+  --on-accent:    #ffffff;
+  --on-emerald:   #ffffff;
+  --on-coral:     #ffffff;
 
   /* --- type: one family, plus mono for data -------------------------- */
   --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -104,6 +111,119 @@
   --gut: 28px;
   --measure: 72ch;
 }
+
+/* ==========================================================================
+   1b. DARK TOKENS
+
+   The same system in different light. Structure, spacing, geometry, the
+   flow grammar and every semantic meaning are unchanged - only values move.
+
+   Ground keeps a teal undertone rather than going neutral black, so the
+   product still reads as water. Accents LIFT (a dark teal would vanish),
+   and the pale area fills become dark tints of the same hue rather than
+   inverting to light washes that would glare.
+   ========================================================================== */
+:root[data-theme="dark"] {
+  /* ground: deep slate-teal, stepped */
+  --pearl:        #0d1214;
+  --surface:      #141b1d;
+  --aquifer:      #1c2528;
+  --aquifer-deep: #233035;
+
+  /* ink */
+  --graphite:     #e8eeec;
+  --slate:        #aebab6;
+  --slate-2:      #8e9b97;
+  --slate-3:      #78867f;
+
+  /* structure */
+  --hair:         #233035;
+  --hair-2:       #314146;
+  --hair-3:       #44575d;
+
+  /* water: lifted so it carries on a dark ground */
+  --water:        #4fb3c7;
+  --water-ink:    #7fcbda;
+  --water-lift:   #6ec4d6;
+  --water-pale:   #1b3f49;
+  --water-wash:   #15282e;
+
+  /* semantic */
+  --emerald:      #3dbd8c;
+  --emerald-pale: #16382c;
+  --emerald-wash: #112a22;
+
+  --cyan:         #45b8e0;
+  --cyan-pale:    #11313f;
+
+  --amber:        #dca350;
+  --amber-pale:   #3a2a10;
+  --amber-wash:   #2a1f0c;
+
+  --coral:        #ef8373;
+  --coral-pale:   #40201c;
+  --coral-wash:   #2e1816;
+
+  --salt:         #d6ad5c;
+  --salt-pale:    #352a12;
+
+  --carbon:       #a9a0c8;
+  --carbon-pale:  #262238;
+
+  /* text on an accent fill: dark ink, because the accents are now light */
+  --on-accent:    #07171c;
+  --on-emerald:   #04231a;
+  --on-coral:     #2b0f0b;
+}
+
+/* Follow the operating system when the viewer has not chosen. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    --pearl:        #0d1214;
+    --surface:      #141b1d;
+    --aquifer:      #1c2528;
+    --aquifer-deep: #233035;
+    --graphite:     #e8eeec;
+    --slate:        #aebab6;
+    --slate-2:      #8e9b97;
+    --slate-3:      #78867f;
+    --hair:         #233035;
+    --hair-2:       #314146;
+    --hair-3:       #44575d;
+    --water:        #4fb3c7;
+    --water-ink:    #7fcbda;
+    --water-lift:   #6ec4d6;
+    --water-pale:   #1b3f49;
+    --water-wash:   #15282e;
+    --emerald:      #3dbd8c;
+    --emerald-pale: #16382c;
+    --emerald-wash: #112a22;
+    --cyan:         #45b8e0;
+    --cyan-pale:    #11313f;
+    --amber:        #dca350;
+    --amber-pale:   #3a2a10;
+    --amber-wash:   #2a1f0c;
+    --coral:        #ef8373;
+    --coral-pale:   #40201c;
+    --coral-wash:   #2e1816;
+    --salt:         #d6ad5c;
+    --salt-pale:    #352a12;
+    --carbon:       #a9a0c8;
+    --carbon-pale:  #262238;
+    --on-accent:    #07171c;
+    --on-emerald:   #04231a;
+    --on-coral:     #2b0f0b;
+  }
+}
+
+/* The shade swatches in lot chips are real dye colours, so they must not be
+   dimmed by the theme. A hairline keeps them legible on either ground. */
+:root[data-theme="dark"] .chip .sw,
+:root[data-theme="dark"] .seq .sw { border-color: rgba(255, 255, 255, .28); }
+
+/* Sheet and palette scrims need more weight on a dark ground. */
+:root[data-theme="dark"] .sheet-bd,
+:root[data-theme="dark"] .cp-bd { background: rgba(0, 0, 0, .55); }
 
 /* ==========================================================================
    2. RESET
@@ -414,13 +534,20 @@ kbd {
 .btn:hover:not(:disabled) { background: var(--pearl); border-color: var(--hair-3); }
 .btn:disabled { opacity: .42; cursor: not-allowed; }
 .btn-pri {
-  background: var(--water); border-color: var(--water); color: #fff;
+  background: var(--water); border-color: var(--water);
+  color: var(--on-accent);
 }
 .btn-pri:hover:not(:disabled) { background: var(--water-ink); border-color: var(--water-ink); }
-.btn-ok { background: var(--emerald); border-color: var(--emerald); color: #fff; }
+.btn-ok {
+  background: var(--emerald); border-color: var(--emerald);
+  color: var(--on-emerald);
+}
 .btn-ok:hover:not(:disabled) { filter: brightness(.92); }
 .btn-no { color: var(--coral); border-color: var(--coral-pale); background: var(--coral-wash); }
-.btn-no:hover:not(:disabled) { background: var(--coral); border-color: var(--coral); color: #fff; }
+.btn-no:hover:not(:disabled) {
+  background: var(--coral); border-color: var(--coral);
+  color: var(--on-coral);
+}
 .btn-q { border-color: transparent; background: none; color: var(--slate); }
 .btn-q:hover:not(:disabled) { background: var(--aquifer); color: var(--graphite); }
 .btn-sm { padding: 4px 9px; font-size: var(--t-micro); }
@@ -816,7 +943,10 @@ dl.defs dd { margin: 0; font-size: var(--t-small); line-height: 1.5; }
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
-.skip { position: absolute; left: -9999px; top: 0; z-index: 100; background: var(--water); color: #fff; padding: 10px 16px; }
+.skip {
+  position: absolute; left: -9999px; top: 0; z-index: 100;
+  background: var(--water); color: var(--on-accent); padding: 10px 16px;
+}
 .skip:focus { left: 8px; top: 8px; }
 
 .chip {
@@ -841,7 +971,7 @@ dl.defs dd { margin: 0; font-size: var(--t-small); line-height: 1.5; }
   transition: opacity var(--m-norm) var(--ease), transform var(--m-norm) var(--ease);
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-.toast.err { background: var(--coral); color: #fff; }
+.toast.err { background: var(--coral); color: var(--on-coral); }
 
 /* ==========================================================================
    24. RESPONSIVE - preserve state, decision, action, impact
@@ -893,6 +1023,19 @@ dl.defs dd { margin: 0; font-size: var(--t-small); line-height: 1.5; }
 }
 
 @media print {
+  /* Force the light set: a dark screen theme must not print as ink. */
+  :root, :root[data-theme="dark"] {
+    --pearl: #fff; --surface: #fff; --aquifer: #f1f3f2;
+    --aquifer-deep: #e8ebea;
+    --graphite: #000; --slate: #333; --slate-2: #555; --slate-3: #666;
+    --hair: #ddd; --hair-2: #ccc; --hair-3: #aaa;
+    --water: #14596a; --water-ink: #0e3f4c; --water-pale: #dceaee;
+    --water-wash: #f2f8f9;
+    --emerald: #0a6347; --emerald-pale: #dcebe4;
+    --amber:        #dca350; --coral: #96301f; --salt: #74591a;
+    --carbon: #4b4560;
+    --on-accent: #fff; --on-emerald: #fff; --on-coral: #fff;
+  }
   .rail, .ctxbar, .btn, .why, .sheet, .sheet-bd, .cp, .cp-bd, .toast { display: none !important; }
   .app { grid-template-columns: 1fr; }
   body { background: #fff; }

@@ -10,6 +10,18 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/frontend/style.css">
+<script>
+/* Applied before first paint so the correct ground is never flashed.
+   No stored choice means the operating system preference is followed. */
+(function () {
+  try {
+    var t = localStorage.getItem('cl-theme');
+    if (t === 'dark' || t === 'light') {
+      document.documentElement.setAttribute('data-theme', t);
+    }
+  } catch (e) { /* private mode: fall through to the OS preference */ }
+})();
+</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -76,6 +88,10 @@
       </div>
       <div class="ctx-spacer"></div>
       <div class="ctx-actions">
+        <button class="btn btn-sm btn-q" id="themeBtn"
+                aria-label="Toggle colour theme">
+          <span id="themeLbl">Dark</span>
+        </button>
         <button class="btn btn-sm btn-q" id="cmdBtn">Commands</button>
         <button class="btn btn-sm" id="resetBtn">Reset</button>
       </div>

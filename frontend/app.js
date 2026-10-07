@@ -286,6 +286,7 @@ function renderChrome() {
     });
   };
   document.getElementById('cmdBtn').onclick = openPalette;
+  wireTheme();
 
   updateCtx();
 }
@@ -319,6 +320,51 @@ function updateCtx() {
   document.getElementById('ctxSystem').innerHTML =
     '<span class="dot ' + (ok && lok ? '' : 'fault') + '"></span>' +
     (ok && lok ? 'OPERATIONAL' : 'CHECK FAILED');
+}
+
+/* ---------- theme ----------------------------------------------------
+   Three states: explicit dark, explicit light, or follow the operating
+   system when nothing has been chosen. The label always names what the
+   button will DO, not the current state. */
+function prefersDark() {
+  return window.matchMedia &&
+    window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function isDark() {
+  var t = document.documentElement.getAttribute('data-theme');
+  if (t === 'dark') return true;
+  if (t === 'light') return false;
+  return prefersDark();
+}
+function syncThemeLabel() {
+  var el = document.getElementById('themeLbl');
+  if (el) el.textContent = isDark() ? 'Light' : 'Dark';
+}
+function setTheme(next) {
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('cl-theme', next); } catch (e) { /* ignore */ }
+  syncThemeLabel();
+  /* The SVG visuals read their colours from custom properties, so they are
+     re-rendered to pick the new set up cleanly rather than being restyled
+     in place. */
+  render();
+}
+function wireTheme() {
+  var b = document.getElementById('themeBtn');
+  if (b) b.onclick = function () { setTheme(isDark() ? 'light' : 'dark'); };
+  syncThemeLabel();
+  /* If the viewer has made no explicit choice, track the OS live. */
+  if (window.matchMedia) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    var onChange = function () {
+      if (!document.documentElement.getAttribute('data-theme')) {
+        syncThemeLabel();
+        render();
+      }
+    };
+    if (mq.addEventListener) mq.addEventListener('change', onChange);
+    else if (mq.addListener) mq.addListener(onChange);
+  }
 }
 
 function renderNav() {
@@ -2294,7 +2340,9 @@ function buildCmds() {
     { lbl: 'Download export', grp: 'Action', ico: 'export',
       run: function () { act('download'); } },
     { lbl: 'Reset session', grp: 'Action', ico: 'reset',
-      run: function () { document.getElementById('resetBtn').click(); } }
+      run: function () { document.getElementById('resetBtn').click(); } },
+    { lbl: 'Toggle dark mode', grp: 'View', ico: 'evidence',
+      run: function () { setTheme(isDark() ? 'light' : 'dark'); } }
   ]);
 }
 
