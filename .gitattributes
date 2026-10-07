@@ -1,0 +1,42 @@
+# Line endings, pinned.
+#
+# This repository is developed on Windows and deployed on Linux. Git here
+# runs with core.autocrlf=true, which stores LF and checks out CRLF - the
+# right behaviour, but it depends on each contributor's local config being
+# the same. It is not something a deployment should rely on.
+#
+# A CRLF that reaches the server is a genuinely nasty failure: a shebang
+# becomes `#!/usr/bin/env python3\r` and the kernel reports "no such file
+# or directory" naming an interpreter that plainly exists, and a version
+# file containing "3.12.4\r" fails to match any installed Python. Both
+# look like infrastructure faults and are neither.
+#
+# So normalise everything in the repository to LF, and be explicit about
+# the files a build platform parses.
+
+* text=auto eol=lf
+
+# Build and deploy inputs - read by Render, pip, Docker and pyenv.
+requirements.txt  text eol=lf
+.python-version   text eol=lf
+render.yaml       text eol=lf
+Dockerfile        text eol=lf
+.dockerignore     text eol=lf
+*.yml             text eol=lf
+*.yaml            text eol=lf
+
+# Source.
+*.py              text eol=lf
+*.js              text eol=lf
+*.css             text eol=lf
+*.html            text eol=lf
+*.json            text eol=lf
+*.md              text eol=lf
+*.sh              text eol=lf
+
+# Binaries - never touch these.
+*.pdf             binary
+*.pptx            binary
+*.png             binary
+*.jpg             binary
+*.db              binary
