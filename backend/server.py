@@ -29,7 +29,7 @@ sys.path.insert(0, str(ROOT))
 import core
 from core import (
     factors, basin, process, zld, telemetry, provenance, economics,
-    scenarios, ledger, forecast,
+    scenarios, ledger, forecast, narrative,
 )
 from core.session import get_session
 
@@ -527,6 +527,20 @@ class App(SimpleHTTPRequestHandler):
 
             if route == "/api/insight/salt-is-water":
                 return self.send_json(zld.sensitivity_salt_vs_water())
+
+            # The explanation ladder. Served from core.narrative so the
+            # interface, the deck and the video script cannot drift apart.
+            if route == "/api/narrative":
+                return self.send_json(narrative.bundle())
+
+            if route == "/api/narrative/plain":
+                return self.send_json(narrative.plain_summary())
+
+            if route == "/api/validation":
+                return self.send_json({
+                    "validation": narrative.validation(),
+                    "evidence_posture": narrative.evidence_posture(),
+                })
 
             if route == "/api/modes":
                 return self.send_json({

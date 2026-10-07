@@ -111,20 +111,21 @@ async function main() {
   await postJson('/api/washoff/release', { approve: true });
 
   const [state, sites, modes, insight, ablation, sens, modeCmp, evidence,
-         pilot, cluster, forecast, matrix] = await Promise.all([
+         pilot, cluster, forecast, matrix, narrative] = await Promise.all([
     get('/api/state'), get('/api/sites'), get('/api/modes'),
     get('/api/insight/salt-is-water'), get('/api/ablation'),
     get('/api/sensitivity'), get('/api/modes/compare'), get('/api/evidence'),
     get('/api/pilot'), get('/api/cluster-projection'),
     get('/api/forecast'), get('/api/changeover-matrix'),
+    get('/api/narrative'),
   ]);
   const businessCase = await postJson('/api/business-case', {
     lots_per_year: 9000,
     freshwater_avoided_per_lot_l: 1108,
     salt_avoided_per_lot_kg: 12.5,
     freshwater_cost_inr_per_m3: 45,
-    recycled_water_cost_inr_per_m3: 135,
-    steam_cost_inr_per_kwh_th: 2.4,
+    recycled_water_cost_inr_per_m3: 185,
+    steam_cost_inr_per_kwh_th: 2.03,
     salt_cost_inr_per_kg: 9,
     implementation_cost_inr: 450000,
     annual_subscription_inr: 240000,
@@ -172,6 +173,7 @@ async function main() {
   S.businessCase = businessCase;
   S.forecast = forecast;
   S.matrix = matrix.matrix;
+  S.narrative = narrative;
 
   const VIEWS = vm.runInContext('VIEWS', ctx);
 
@@ -197,6 +199,28 @@ async function main() {
       check('  ' + v.id + ' has no "NaN"', html.indexOf('NaN') === -1);
       check('  ' + v.id + ' has no "[object Object]"',
         html.indexOf('[object Object]') === -1);
+
+      /* The plain-language band is the answer to "a screener will not get
+         past the vocabulary". It must be present on Command, must carry
+         the one-sentence hook, and must show the two halves of the proof
+         the engine computed rather than numbers we typed. */
+      if (v.id === 'command') {
+        check('  command renders the plain-language band',
+          html.indexOf('class="pb"') !== -1);
+        check('  band carries the jargon-free hook',
+          html.indexOf('the coal bill is set by how much salt') !== -1);
+        check('  band shows the water half of the proof (0.0%)',
+          /pb-flat[\s\S]{0,240}0\.0%/.test(html));
+        check('  band shows the salt half of the proof (-20.0%)',
+          /pb-move[\s\S]{0,240}-20\.0%/.test(html));
+        check('  band shows the published-band validation',
+          html.indexOf('published band 20–30%') !== -1 ||
+          html.indexOf('published band 20') !== -1);
+        check('  band offers the reasoning ladder',
+          html.indexOf('data-why="reasoning"') !== -1);
+        check('  band states the equation',
+          html.indexOf('V_reject = M_salt / C_reject_max') !== -1);
+      }
     }
   }
 

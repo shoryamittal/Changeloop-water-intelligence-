@@ -1004,3 +1004,143 @@ dl.defs dd { margin: 0; font-size: var(--t-small); line-height: 1.5; }
   body { background: #fff; }
   .panel, .tw, .viz { break-inside: avoid; }
 }
+
+
+/* =====================================================================
+   The plain-language band and the explanation ladder.
+
+   The finding is subtle; the statement of it must not be. This band is
+   the first thing on the Command view: one sentence set in the largest
+   editorial type on the page, the consequence beneath it, and four
+   engine-computed numbers to its right. The full six-rung reasoning is a
+   click away in the side sheet, not in the reader's face.
+   ===================================================================== */
+.pb {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: var(--s6);
+  align-items: start;
+  padding: var(--s5) var(--s6);
+  border: 1px solid var(--hair);
+  border-left: 3px solid var(--water);
+  border-radius: var(--r-lg);
+  background: var(--aquifer);
+}
+.pb-eyebrow {
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--slate-2);
+  margin-bottom: 10px;
+}
+.pb-hook {
+  margin: 0;
+  font-size: clamp(19px, 2.05vw, 26px);
+  line-height: 1.28;
+  font-weight: 600;
+  letter-spacing: -.012em;
+  color: var(--graphite);
+  text-wrap: balance;
+}
+.pb-sub {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.58;
+  color: var(--slate);
+  max-width: 62ch;
+}
+.pb-acts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: var(--s4);
+}
+.pb-eq {
+  font-size: 11px;
+  color: var(--slate-2);
+  padding: 4px 9px;
+  border: 1px dashed var(--hair-2);
+  border-radius: var(--r);
+  white-space: nowrap;
+}
+
+/* the four computed facts */
+.pb-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--hair);
+  border: 1px solid var(--hair);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.pb-fact {
+  padding: 12px 13px;
+  background: var(--surface);
+  min-width: 0;
+}
+.pb-fact-k {
+  font-size: 9.5px;
+  font-weight: 650;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--slate-2);
+}
+.pb-fact-v {
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.15;
+  margin: 5px 0 4px;
+  letter-spacing: -.02em;
+  color: var(--graphite);
+  font-variant-numeric: tabular-nums;
+}
+.pb-fact-t {
+  font-size: 10.5px;
+  line-height: 1.42;
+  color: var(--slate-2);
+}
+/* the two halves of the proof, coloured so the contrast reads instantly */
+.pb-flat .pb-fact-v { color: var(--slate-2); }
+.pb-move .pb-fact-v { color: var(--water); }
+.pb-val  .pb-fact-v { color: var(--emerald); }
+.pb-ev   .pb-fact-v { color: var(--graphite); }
+
+@media (max-width: 1100px) {
+  .pb { grid-template-columns: 1fr; gap: var(--s5); }
+}
+@media (max-width: 560px) {
+  .pb { padding: var(--s4); }
+  .pb-facts { grid-template-columns: 1fr; }
+}
+
+/* the six rungs, in the side sheet */
+.rung {
+  padding: var(--s4) 0;
+  border-bottom: 1px solid var(--hair);
+}
+.rung:last-of-type { border-bottom: 0; }
+.rung-hd {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.rung-n {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--surface);
+  background: var(--slate-2);
+  border-radius: 3px;
+  padding: 2px 6px;
+  flex: none;
+}
+.rung-l {
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: -.005em;
+  color: var(--graphite);
+}
+.rung-a { margin-left: auto; }

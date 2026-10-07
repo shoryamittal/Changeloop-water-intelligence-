@@ -1,372 +1,534 @@
 {
- "candidates": 480,
- "optimality": "PROVEN_GLOBAL_OPTIMUM",
- "options": {
-  "OPTION_A": {
-   "strategy": "CONVENTIONAL",
-   "fresh": 11906.8,
-   "salt": 714.41,
-   "mee": 2132.871,
-   "co2": 3015.03,
-   "cost": 33205.7,
-   "late": 0.0,
-   "feasible": true,
-   "breaches": 0,
-   "title": "No intervention - ERP arrival order, current practice"
-  },
-  "OPTION_B": {
-   "strategy": "COUNTER_CURRENT",
-   "fresh": 11186.8,
-   "salt": 671.21,
-   "mee": 2003.897,
-   "co2": 2259.6,
-   "cost": 25907.52,
-   "late": 0.0,
-   "feasible": true,
-   "breaches": 0,
-   "title": "ChangeLoop recommendation - constrained optimum"
-  },
-  "OPTION_C": {
-   "strategy": "LOW_SALT",
-   "fresh": 5888.8,
-   "salt": 353.33,
-   "mee": 1054.867,
-   "co2": 2170.67,
-   "cost": 31822.91,
-   "late": 2.6,
-   "feasible": false,
-   "breaches": 1,
-   "title": "Freshwater minimum - refused"
-  }
- },
- "impact": {
-  "fresh_base": 11906.8,
-  "fresh_ach": 10862.6,
-  "fresh_av": 1044.2,
-  "leq": 11569.7,
-  "salt_av": 62.65,
-  "mee_av": 187.0,
-  "co2_base": 3015.03,
-  "co2_av": 922.18,
-  "cost_base": 33205.7,
-  "cost_av": 9514.05,
-  "invariants": 8,
-  "all_pass": true
- },
- "envelopes": {
-  "baseline": {
-   "draw": 11906.8,
-   "alloc": 9000.0,
-   "util": 132.3,
-   "risk": "BREACH_PROJECTED",
-   "breach": "14:00",
-   "basis": "72,000 L/day site allowance / (4 machines x 2 shifts) = 9,000 L per machine-shift"
-  },
-  "water_lever": {
-   "draw": 11186.8,
-   "alloc": 9000.0,
-   "util": 124.3,
-   "risk": "BREACH_PROJECTED",
-   "breach": "14:00",
-   "basis": "72,000 L/day site allowance / (4 machines x 2 shifts) = 9,000 L per machine-shift"
-  },
-  "salt_lever": {
-   "draw": 6368.8,
-   "alloc": 9000.0,
-   "util": 70.8,
-   "risk": "WITHIN_ALLOWANCE",
-   "breach": null,
-   "basis": "72,000 L/day site allowance / (4 machines x 2 shifts) = 9,000 L per machine-shift"
-  }
- },
- "insight": {
-  "baseline": {
-   "volume_l": 60000.0,
-   "salt_kg": 700.0,
-   "reject_l": 11666.7,
-   "mee_thermal_kwh": 2089.8,
-   "binding_constraint": "SALT_BALANCE"
-  },
-  "cut_water_20pct_only": {
-   "reject_l": 11666.7,
-   "mee_thermal_kwh": 2089.8,
-   "mee_energy_change_pct": 0.0,
-   "binding_constraint": "SALT_BALANCE"
-  },
-  "cut_salt_20pct_only": {
-   "reject_l": 9333.3,
-   "mee_thermal_kwh": 1671.9,
-   "mee_energy_change_pct": -20.0,
-   "binding_constraint": "SALT_BALANCE"
-  },
-  "cut_both_20pct": {
-   "reject_l": 9333.3,
-   "mee_thermal_kwh": 1671.9,
-   "mee_energy_change_pct": -20.0,
-   "binding_constraint": "SALT_BALANCE"
-  },
-  "interpretation": "While the stream is salt-limited, evaporator energy tracks salt mass and is almost indifferent to water volume. Cutting water alone concentrates the same salt into less water and moves the evaporator load hardly at all. This is why ChangeLoop optimises the joint water-and-salt objective instead of a water headline.",
-  "classification": "DERIVED"
- },
- "ablation": [
-  {
-   "v": "full",
-   "label": "Full ChangeLoop",
-   "fresh": 5538.0,
-   "share": 100.0,
-   "breach": 0,
-   "over": false
-  },
-  {
-   "v": "no_zld_coupling",
-   "label": "Without downstream ZLD coupling",
-   "fresh": 720.0,
-   "share": 13.0,
-   "breach": 0,
-   "over": false
-  },
-  {
-   "v": "no_salt_model",
-   "label": "Without the salt-mass model (water-only ZLD)",
-   "fresh": 2342.6,
-   "share": 42.3,
-   "breach": 0,
-   "over": false
-  },
-  {
-   "v": "no_stress_weighting",
-   "label": "Without basin stress weighting",
-   "fresh": 5538.0,
-   "share": 100.0,
-   "breach": 0,
-   "over": false
-  },
-  {
-   "v": "no_hard_constraints",
-   "label": "Without hard-constraint enforcement",
-   "fresh": 6018.0,
-   "share": 108.7,
-   "breach": 1,
-   "over": true
-  }
- ],
- "cluster": {
-  "basis": "Linear projection from one modelled dyeing unit.",
-  "units": 400,
-  "lots_per_year_total": 360000,
-  "freshwater_avoided_m3_per_year": 398880.0,
-  "freshwater_avoided_million_litres_per_year": 398.9,
-  "salt_avoided_tonnes_per_year": 4500.0,
-  "evaporator_reject_avoided_m3_per_year": 75000.0,
-  "evaporator_steam_avoided_mwh_per_year": 13434.8,
-  "co2e_avoided_tonnes_per_year": 6073.0,
-  "honesty": "This is a PROJECTION, not a result. It assumes every unit resembles the modelled one, that every recommendation is approved, and that per-lot avoidance holds at scale. None of those assumptions has been tested. It is here to size the opportunity and must never be quoted as achieved impact.",
-  "classification": "PROJECTED"
- },
- "evidence": {
-  "PUBLISHED": 5,
-  "ASSUMED": 13,
-  "DERIVED": 2
- },
- "mee_specific": 179.13,
- "forecast_series": {
-  "baseline": [
-   {
-    "clock": "06:00",
-    "cum": 1255.5
-   },
-   {
-    "clock": "07:00",
-    "cum": 2510.9
-   },
-   {
-    "clock": "08:00",
-    "cum": 3506.0
-   },
-   {
-    "clock": "09:00",
-    "cum": 4305.1
-   },
-   {
-    "clock": "10:00",
-    "cum": 5189.1
-   },
-   {
-    "clock": "11:00",
-    "cum": 6088.5
-   },
-   {
-    "clock": "12:00",
-    "cum": 7357.2
-   },
-   {
-    "clock": "13:00",
-    "cum": 8738.3
-   },
-   {
-    "clock": "14:00",
-    "cum": 10119.5
-   },
-   {
-    "clock": "15:00",
-    "cum": 10895.1
-   },
-   {
-    "clock": "16:00",
-    "cum": 11627.8
-   },
-   {
-    "clock": "17:00",
-    "cum": 11906.8
-   },
-   {
-    "clock": "18:00",
-    "cum": 11906.8
-   },
-   {
-    "clock": "19:00",
-    "cum": 11906.8
-   },
-   {
-    "clock": "20:00",
-    "cum": 11906.8
-   }
+  "_do_not_edit": "Generated from the engine. Edit core/, not this file. Regenerate with: python submission/build_figures.py",
+  "_generated_by": "submission/build_figures.py",
+  "ablation": [
+    {
+      "fresh": 720.0,
+      "label": "Full ChangeLoop",
+      "share": 100.0,
+      "v": "full"
+    },
+    {
+      "fresh": 720.0,
+      "label": "Without downstream ZLD coupling",
+      "share": 100.0,
+      "v": "no_zld_coupling"
+    },
+    {
+      "fresh": 2342.6,
+      "label": "Without the salt-mass model (water-only ZLD)",
+      "share": 325.4,
+      "v": "no_salt_model"
+    },
+    {
+      "fresh": 720.0,
+      "label": "Without basin stress weighting",
+      "share": 100.0,
+      "v": "no_stress_weighting"
+    },
+    {
+      "fresh": 1200.0,
+      "label": "Without hard-constraint enforcement",
+      "share": 166.7,
+      "v": "no_hard_constraints"
+    }
   ],
-  "water_lever": [
-   {
-    "clock": "06:00",
-    "cum": 761.1
-   },
-   {
-    "clock": "07:00",
-    "cum": 1967.1
-   },
-   {
-    "clock": "08:00",
-    "cum": 3222.5
-   },
-   {
-    "clock": "09:00",
-    "cum": 4277.7
-   },
-   {
-    "clock": "10:00",
-    "cum": 5056.1
-   },
-   {
-    "clock": "11:00",
-    "cum": 5936.3
-   },
-   {
-    "clock": "12:00",
-    "cum": 6835.7
-   },
-   {
-    "clock": "13:00",
-    "cum": 8056.3
-   },
-   {
-    "clock": "14:00",
-    "cum": 9437.4
-   },
-   {
-    "clock": "15:00",
-    "cum": 10818.5
-   },
-   {
-    "clock": "16:00",
-    "cum": 11186.8
-   },
-   {
-    "clock": "17:00",
-    "cum": 11186.8
-   },
-   {
-    "clock": "18:00",
-    "cum": 11186.8
-   },
-   {
-    "clock": "19:00",
-    "cum": 11186.8
-   },
-   {
-    "clock": "20:00",
-    "cum": 11186.8
-   }
-  ],
-  "salt_lever": [
-   {
-    "clock": "06:00",
-    "cum": 418.6
-   },
-   {
-    "clock": "07:00",
-    "cum": 1081.9
-   },
-   {
-    "clock": "08:00",
-    "cum": 1772.4
-   },
-   {
-    "clock": "09:00",
-    "cum": 2450.9
-   },
-   {
-    "clock": "10:00",
-    "cum": 2996.9
-   },
-   {
-    "clock": "11:00",
-    "cum": 3481.0
-   },
-   {
-    "clock": "12:00",
-    "cum": 3975.6
-   },
-   {
-    "clock": "13:00",
-    "cum": 4646.9
-   },
-   {
-    "clock": "14:00",
-    "cum": 5406.6
-   },
-   {
-    "clock": "15:00",
-    "cum": 6166.2
-   },
-   {
-    "clock": "16:00",
-    "cum": 6368.8
-   },
-   {
-    "clock": "17:00",
-    "cum": 6368.8
-   },
-   {
-    "clock": "18:00",
-    "cum": 6368.8
-   },
-   {
-    "clock": "19:00",
-    "cum": 6368.8
-   },
-   {
-    "clock": "20:00",
-    "cum": 6368.8
-   }
-  ]
- },
- "flow": {
-  "demand": 40772.5,
-  "reuse": 29909.9,
-  "fresh": 10862.6,
-  "reject": 10862.633,
-  "permeate": 29909.867,
-  "recovery": 73.4,
-  "mee": 1945.824,
-  "co2": 879.51,
-  "salt": 651.76,
-  "tds": 15985.235
- }
+  "candidates": 480,
+  "cluster": {
+    "basis": "Linear projection from one modelled dyeing unit.",
+    "classification": "PROJECTED",
+    "co2e_avoided_tonnes_per_year": 6376.0,
+    "evaporator_reject_avoided_m3_per_year": 75000.0,
+    "evaporator_steam_avoided_mwh_per_year": 14106.0,
+    "freshwater_avoided_m3_per_year": 398880.0,
+    "freshwater_avoided_million_litres_per_year": 398.9,
+    "honesty": "This is a PROJECTION, not a result. It assumes every unit resembles the modelled one, that every recommendation is approved, and that per-lot avoidance holds at scale. None of those assumptions has been tested. It is here to size the opportunity and must never be quoted as achieved impact.",
+    "lots_per_year_total": 360000,
+    "salt_avoided_tonnes_per_year": 4500.0,
+    "units": 400
+  },
+  "counts": {
+    "endpoints": 32,
+    "test_files": 4,
+    "tests": 140
+  },
+  "envelope_note": "All three projections are the same queue, same order, same pre-decision state; only the process strategy differs. The water lever (counter-current rinsing) moves the abstraction envelope by exactly nothing, because in a closed loop freshwater makeup equals evaporative loss, which equals RO reject volume, which is set by salt mass. Only the salt lever moves it. This is the same finding as the salt-vs-water sensitivity, arriving independently through the forecast.",
+  "envelopes": {
+    "baseline": {
+      "alloc": 9000.0,
+      "basis": "72,000 L/day site allowance / (4 machines x 2 shifts) = 9,000 L per machine-shift",
+      "breach": "14:00",
+      "draw": 11906.8,
+      "risk": "BREACH_PROJECTED",
+      "util": 132.3
+    },
+    "salt_lever": {
+      "alloc": 9000.0,
+      "basis": "72,000 L/day site allowance / (4 machines x 2 shifts) = 9,000 L per machine-shift",
+      "breach": null,
+      "draw": 7386.5,
+      "risk": "AT_RISK",
+      "util": 82.1
+    },
+    "water_lever": {
+      "alloc": 9000.0,
+      "basis": "72,000 L/day site allowance / (4 machines x 2 shifts) = 9,000 L per machine-shift",
+      "breach": "14:00",
+      "draw": 11906.8,
+      "risk": "BREACH_PROJECTED",
+      "util": 132.3
+    }
+  },
+  "evidence": {
+    "ASSUMED": 4,
+    "DERIVED": 4,
+    "PUBLISHED": 17
+  },
+  "flow": {
+    "co2": 957.95,
+    "demand": 40772.5,
+    "fresh": 10862.6,
+    "mee": 2043.044,
+    "permeate": 29909.867,
+    "recovery": 73.4,
+    "reject": 10862.633,
+    "reuse": 29909.9,
+    "salt": 651.76,
+    "tds": 15985.235
+  },
+  "forecast_series": {
+    "baseline": [
+      {
+        "clock": "06:00",
+        "cum": 1255.5
+      },
+      {
+        "clock": "07:00",
+        "cum": 2510.9
+      },
+      {
+        "clock": "08:00",
+        "cum": 3506.0
+      },
+      {
+        "clock": "09:00",
+        "cum": 4305.1
+      },
+      {
+        "clock": "10:00",
+        "cum": 5189.1
+      },
+      {
+        "clock": "11:00",
+        "cum": 6088.5
+      },
+      {
+        "clock": "12:00",
+        "cum": 7357.2
+      },
+      {
+        "clock": "13:00",
+        "cum": 8738.3
+      },
+      {
+        "clock": "14:00",
+        "cum": 10119.5
+      },
+      {
+        "clock": "15:00",
+        "cum": 10895.1
+      },
+      {
+        "clock": "16:00",
+        "cum": 11627.8
+      },
+      {
+        "clock": "17:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "18:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "19:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "20:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "21:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "22:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "23:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "00:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "01:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "02:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "03:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "04:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "05:00",
+        "cum": 11906.8
+      }
+    ],
+    "salt_lever": [
+      {
+        "clock": "06:00",
+        "cum": 690.5
+      },
+      {
+        "clock": "07:00",
+        "cum": 1381.0
+      },
+      {
+        "clock": "08:00",
+        "cum": 2055.9
+      },
+      {
+        "clock": "09:00",
+        "cum": 2618.8
+      },
+      {
+        "clock": "10:00",
+        "cum": 3181.7
+      },
+      {
+        "clock": "11:00",
+        "cum": 3770.8
+      },
+      {
+        "clock": "12:00",
+        "cum": 4468.6
+      },
+      {
+        "clock": "13:00",
+        "cum": 5228.3
+      },
+      {
+        "clock": "14:00",
+        "cum": 5987.9
+      },
+      {
+        "clock": "15:00",
+        "cum": 6659.9
+      },
+      {
+        "clock": "16:00",
+        "cum": 7202.5
+      },
+      {
+        "clock": "17:00",
+        "cum": 7386.5
+      },
+      {
+        "clock": "18:00",
+        "cum": 7386.5
+      },
+      {
+        "clock": "19:00",
+        "cum": 7386.5
+      },
+      {
+        "clock": "20:00",
+        "cum": 7386.5
+      },
+      {
+        "clock": "21:00",
+        "cum": 7386.5
+      },
+      {
+        "clock": "22:00",
+        "cum": 7386.5
+      },
+      {
+        "clock": "23:00",
+        "cum": 7386.5
+      },
+      {
+        "clock": "00:00",
+        "cum": 7386.5
+      },
+      {
+        "clock": "01:00",
+        "cum": 7386.5
+      },
+      {
+        "clock": "02:00",
+        "cum": 7386.5
+      },
+      {
+        "clock": "03:00",
+        "cum": 7386.5
+      },
+      {
+        "clock": "04:00",
+        "cum": 7386.5
+      },
+      {
+        "clock": "05:00",
+        "cum": 7386.5
+      }
+    ],
+    "water_lever": [
+      {
+        "clock": "06:00",
+        "cum": 1255.5
+      },
+      {
+        "clock": "07:00",
+        "cum": 2510.9
+      },
+      {
+        "clock": "08:00",
+        "cum": 3506.0
+      },
+      {
+        "clock": "09:00",
+        "cum": 4305.1
+      },
+      {
+        "clock": "10:00",
+        "cum": 5189.1
+      },
+      {
+        "clock": "11:00",
+        "cum": 6088.5
+      },
+      {
+        "clock": "12:00",
+        "cum": 7357.2
+      },
+      {
+        "clock": "13:00",
+        "cum": 8738.3
+      },
+      {
+        "clock": "14:00",
+        "cum": 10119.5
+      },
+      {
+        "clock": "15:00",
+        "cum": 10895.1
+      },
+      {
+        "clock": "16:00",
+        "cum": 11627.8
+      },
+      {
+        "clock": "17:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "18:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "19:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "20:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "21:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "22:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "23:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "00:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "01:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "02:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "03:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "04:00",
+        "cum": 11906.8
+      },
+      {
+        "clock": "05:00",
+        "cum": 11906.8
+      }
+    ]
+  },
+  "impact": {
+    "all_pass": true,
+    "co2_av": 926.23,
+    "co2_base": 3062.78,
+    "cost_av": 10171.18,
+    "cost_base": 33897.36,
+    "fresh_ach": 10862.6,
+    "fresh_av": 1044.2,
+    "fresh_base": 11906.8,
+    "invariants": 8,
+    "leq": 11569.7,
+    "mee_av": 196.4,
+    "salt_av": 62.65
+  },
+  "insight": {
+    "baseline": {
+      "binding_constraint": "SALT_BALANCE",
+      "mee_thermal_kwh": 2194.3,
+      "reject_l": 11666.7,
+      "salt_kg": 700.0,
+      "volume_l": 60000.0
+    },
+    "classification": "DERIVED",
+    "cut_both_20pct": {
+      "binding_constraint": "SALT_BALANCE",
+      "mee_energy_change_pct": -20.0,
+      "mee_thermal_kwh": 1755.4,
+      "reject_l": 9333.3
+    },
+    "cut_salt_20pct_only": {
+      "binding_constraint": "SALT_BALANCE",
+      "mee_energy_change_pct": -20.0,
+      "mee_thermal_kwh": 1755.4,
+      "reject_l": 9333.3
+    },
+    "cut_water_20pct_only": {
+      "binding_constraint": "SALT_BALANCE",
+      "mee_energy_change_pct": 0.0,
+      "mee_thermal_kwh": 2194.3,
+      "reject_l": 11666.7
+    },
+    "interpretation": "While the stream is salt-limited, evaporator energy tracks salt mass and is almost indifferent to water volume. Cutting water alone concentrates the same salt into less water and moves the evaporator load hardly at all. This is why ChangeLoop optimises the joint water-and-salt objective instead of a water headline."
+  },
+  "mee_specific": 188.08,
+  "narrative": {
+    "analogy": "Think of wringing out a wet cloth. Most of the water comes out easily - that is the membrane stage, and it is cheap. But you can never wring it fully dry, and what stays behind clings to whatever is dissolved in it. The more salt you put in, the more you are left holding. And the part you cannot wring out is the part you have to boil.",
+    "consequence": "Which means almost every water-saving project in the cluster is aimed at the wrong number. Cut effluent volume by 20% and the evaporator burns exactly the same coal. Cut the salt by 20% and it burns 20% less. Two levers that both look like 'saving water' do completely different things to the energy bill, and nobody on the dyehouse floor can see which is which.",
+    "equation": "V_reject = M_salt / C_reject_max",
+    "hook": "In a zero-discharge dyehouse, the coal bill is set by how much salt goes into the dye bath \u2014 not by how much water comes out.",
+    "hook_short": "Salt sets the coal bill. Not water.",
+    "mechanism": "A zero-discharge plant is not allowed to release anything, so whatever it cannot recycle it has to boil dry. Membranes pull most of the clean water back cheaply, but they have to stop before the leftover brine gets thick enough to scale up the tubes - around 60,000 mg/L of dissolved solids. That ceiling is fixed by chemistry, not by choice. So the volume left to boil is simply the salt mass divided by that ceiling. Put in more water with the same salt and the membranes just recover more clean water; the brine left at the end is the same, and so is the steam. Put in more salt and there is more brine to boil, whatever you did about water. Water is the carrier. Salt is the load.",
+    "not_claimed": [
+      "Counter-current rinsing is not our invention. It is established Best Available Technique and has been for decades.",
+      "Low-electrolyte reactive dye chemistry is not our invention either. It is commercially available from several suppliers.",
+      "We have not measured anything. Every number in this system is published, derived from published values, or an openly labelled assumption. Zero coefficients are classed MEASURED, and a test enforces that.",
+      "The system issues no setpoints and releases no bath. It is advisory. Every action requires a named human decision.",
+      "What is ours is the coupling: that these two well-known levers pull in opposite directions through the ZLD chain, that the trade-off is therefore a constrained optimisation rather than a best practice, and that it has to be solved at scheduling time to be worth anything."
+    ],
+    "so_what": "The person who decides this is a planner choosing what order to run today's dye lots in, and they are choosing hours before anyone can see the consequence. The evaporator's fuel bill arrives weeks later, on someone else's cost centre, with no way to trace it back to the decision that caused it. ChangeLoop closes that loop: it prices the downstream thermal consequence into the upstream scheduling choice, at the moment the choice is being made."
+  },
+  "optimality": "PROVEN_GLOBAL_OPTIMUM",
+  "options": {
+    "OPTION_A": {
+      "breaches": 0,
+      "co2": 3062.78,
+      "cost": 33897.36,
+      "feasible": true,
+      "fresh": 11906.8,
+      "late": 0.0,
+      "mee": 2239.437,
+      "salt": 714.41,
+      "strategy": "CONVENTIONAL",
+      "title": "No intervention - ERP arrival order, current practice"
+    },
+    "OPTION_B": {
+      "breaches": 0,
+      "co2": 2304.59,
+      "cost": 26037.66,
+      "feasible": true,
+      "fresh": 11186.8,
+      "late": 0.0,
+      "mee": 2104.02,
+      "salt": 671.21,
+      "strategy": "COUNTER_CURRENT",
+      "title": "ChangeLoop recommendation - constrained optimum"
+    },
+    "OPTION_C": {
+      "breaches": 1,
+      "co2": 2194.15,
+      "cost": 32781.17,
+      "feasible": false,
+      "fresh": 5888.8,
+      "late": 2.6,
+      "mee": 1107.572,
+      "salt": 353.33,
+      "strategy": "LOW_SALT",
+      "title": "Freshwater minimum - refused"
+    }
+  },
+  "posture": {
+    "measured_count": 0,
+    "next_step_to_promote": "One site visit. Two instrument readings - steam flow to the evaporator and reject conductivity - promote the two coefficients that carry the most weight in the result from published to measured, and the evidence screen would say so without a line of code changing.",
+    "sourced_frac_pct": 84.0,
+    "statement": "25 coefficients drive this system. 17 are taken from published sources - CPCB, the Central Electricity Authority, TNERC tariff orders, Tamil Nadu pollution board plant data, the EU BAT reference document, steam tables. 4 are derived from those by stated arithmetic that a test re-checks. 4 remain openly labelled assumptions, and they stay that way because they are commercial prices and premiums that public literature cannot settle. None is MEASURED. We did not relabel what we could not source.",
+    "summary": {
+      "ASSUMED": 4,
+      "DERIVED": 4,
+      "PUBLISHED": 17
+    },
+    "total": 25
+  },
+  "validation": {
+    "band_pct": [
+      20.0,
+      30.0
+    ],
+    "band_source": "RO reject reported at 20-30% of inlet volume by Indian textile ZLD operators; inlet TDS of 18,340 mg/L measured by CPCB at an assessed Tirupur dyeing unit.",
+    "enforced_by": "tests/test_published_validation.py",
+    "headline": "Fed the TDS that CPCB measured at a real Tirupur unit, the model predicts a reject fraction of 30.6% - inside the 20-30% that Indian ZLD operators independently report.",
+    "is": "Cross-validation against published operating data. Our outputs land where real plants sit, using inputs the engine never reads back.",
+    "is_not": "Measurement. No instrument on any real asset has fed this system. Zero coefficients are classed MEASURED and a test enforces it. A pilot is still required before any figure here describes a specific site.",
+    "points": [
+      {
+        "note": "lower end of observed CETP inlet strength",
+        "pct": 20.0,
+        "tds": 12000.0
+      },
+      {
+        "note": "midpoint of observed CETP inlet strength",
+        "pct": 25.0,
+        "tds": 15000.0
+      },
+      {
+        "note": "TDS measured by CPCB entering evaporation at an assessed Tirupur unit",
+        "pct": 30.6,
+        "tds": 18340.0
+      }
+    ]
+  }
 }

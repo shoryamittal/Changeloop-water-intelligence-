@@ -207,12 +207,30 @@ pres.addSection({ title: 'Opening' });
   });
   s.addText('SANKALP 2026  ·  STUDENTS TRACK  ·  CLIMATE AND WATER',
     { placeholder: 'eyebrow' });
-  s.addText('A scheduling choice this morning sets how much coal the evaporator burns tonight',
-    { placeholder: 'title' });
+  /* The hook, verbatim from core/narrative.py. One sentence, no jargon,
+     repeatable from memory by someone who has never seen a dyehouse.
+     A reviewer with forty submissions and ten minutes each does not
+     reward rigour they cannot parse, so the finding goes first and the
+     thermodynamics waits its turn. */
+  /* The hook runs to three lines at the master's 42pt, which would push
+     it into the body. Overriding the geometry here rather than shrinking
+     the master, because every other dark title is a single line and
+     should keep its scale. */
+  /* Deliberately NOT the 'title' placeholder. A placeholder's own options
+     win over anything passed at the call site, so the master's 42pt and
+     1.9in box cannot be overridden - and the hook runs to three lines,
+     which would push it straight through the body text below. Every
+     other dark title is one line and keeps the master's scale; this one
+     gets its own box. */
+  s.addText(F.narrative.hook, {
+    isTextBox: true, x: M, y: 2.16, w: W - 2 * M, h: 2.56, margin: 0,
+    fontSize: 36, bold: true, color: 'FFFFFF', fontFace: 'Cambria',
+    align: 'left', valign: 'top', lineSpacing: 44,
+    objectName: 'title-hook' });
   s.addText([
-    { text: 'Resource decision intelligence for water-stressed industry. ', options: { bold: true, color: 'FFFFFF' } },
+    { text: 'A scheduling choice this morning sets how much coal the evaporator burns tonight. ', options: { bold: true, color: 'FFFFFF' } },
     { text: 'India already recycles its industrial water under Zero Liquid Discharge. Nobody has costed the energy it takes to keep doing so — and that cost is decided upstream, by a planner who never sees the evaporator.' }
-  ], { placeholder: 'body' });
+  ], { placeholder: 'body', y: 4.78, h: 1.3 });
 
   /* the three figures that frame the whole pitch */
   stat(s, { x: M, y: 5.75, w: 3.5, dark: true, size: 30, color: '6EC4D6',
@@ -222,7 +240,7 @@ pres.addSection({ title: 'Opening' });
     value: '+25 to 30%', label: 'what that compliance costs', key: 'b' });
   stat(s, { x: M + 7.8, y: 5.75, w: 4, dark: true, size: 30, color: 'EF8373',
     value: '100,000 jobs', label: 'lost when units could not comply', key: 'c' });
-  s.addNotes('Open on the hook. Tirupur recycles 130 million litres a day under a court-mandated zero-discharge regime. It worked. It also raised costs 25 to 30 percent, and when units could not comply the courts closed them: about 11 billion rupees of exports and 100,000 jobs, by the industry association\'s own account. Nobody has costed the coal.');
+  s.addNotes('Say the title sentence out loud, then pause. Tirupur recycles 130 million litres a day under a court-mandated zero-discharge regime. It worked. It also raised costs 25 to 30 percent, and when units could not comply the courts closed them: about 11 billion rupees of exports and 100,000 jobs, by the industry association\'s own account. Nobody has costed the coal.');
 }
 
 /* ==========================================================================
@@ -241,7 +259,7 @@ pres.addSection({ title: 'Summary' });
   const blocks = [
     { k: 'PROBLEM',
       h: 'Compliance is solved. Its energy bill is not.',
-      b: 'Zero Liquid Discharge recycles the cluster\u2019s water and raised unit operating costs 25 to 30 percent. Recycled water runs \u20B9120 to 150 per kilolitre against \u20B930 to 60 for fresh.',
+      b: 'ZLD recycles the cluster\u2019s water and raised operating costs 25 to 30 percent. Pollution-board data puts the charge at \u20B9150\u2013220 per kilolitre against \u20B945 for river water \u2014 and \u20B9375\u2013450 at under-used plants.',
       c: 'B23A2B' },
     { k: 'INSIGHT',
       h: 'In a closed loop, salt is water.',
@@ -258,15 +276,19 @@ pres.addSection({ title: 'Summary' });
       b: 'Counter-current rinsing cuts water but not salt. Low-electrolyte chemistry cuts salt but not water. A water-only tool picks the wrong one with full confidence.',
       c: 'B98A2E' },
     { k: 'IMPACT',
-      h: 'The water lever alone is not enough.',
-      b: 'Against a real machine-shift allocation: doing nothing runs at ' + n1(E.baseline.util) +
-         ' percent and the water lever still breaches at ' + n1(E.water_lever.util) +
-         ' percent. Only buying the salt lever gets inside, at ' + n1(E.salt_lever.util) + ' percent.',
+      h: 'The water lever moves the envelope by nothing.',
+      b: 'Doing nothing runs at ' + n1(E.baseline.util) +
+         ' percent of a real machine-shift allowance. Counter-current rinsing runs at ' + n1(E.water_lever.util) +
+         ' percent too \u2014 identical. Only the salt lever gets inside, at ' +
+         n1(E.salt_lever.util) + ' percent.',
       c: '0D7A57' },
     { k: 'EVIDENCE',
-      h: 'Modelled, and labelled as such.',
-      b: '95 engine tests, ' + I.invariants + ' accounting invariants on every read, a tamper-evident ledger, and ' +
-         F.evidence.ASSUMED + ' assumed against zero measured coefficients \u2014 enforced by a test.',
+      h: 'Checked against published plant data.',
+      b: 'Fed the ' + n0(F.validation.points[2].tds) + ' mg/L inlet CPCB measured at a Tirupur unit, the model predicts ' +
+         F.validation.points[2].pct + ' percent reject \u2014 inside the ' + F.validation.band_pct[0] + '\u2013' +
+         F.validation.band_pct[1] + ' operators report. ' +
+         (F.evidence.PUBLISHED + F.evidence.DERIVED) + ' of ' + F.posture.total +
+         ' coefficients sourced, zero measured.',
       c: '5B5470' }
   ];
 
@@ -290,10 +312,10 @@ pres.addSection({ title: 'Summary' });
 
   s.addText([
     { text: 'The ask:  ', options: { bold: true, color: 'B98A2E' } },
-    { text: 'one dyeing unit or common effluent plant willing to share two measured numbers \u2014 steam cost per cubic metre of reject, and the reject TDS ceiling. Our own sensitivity sweep says those two decide the answer.' }
+    { text: 'one dyeing unit or effluent plant willing to share two instrument readings \u2014 steam flow to the evaporator, and reject conductivity. Everything else is already sourced from CPCB, the CEA, TNERC and pollution-board data. Those two are all that separate a validated model from a measured one.' }
   ], {
-    isTextBox: true, x: M, y: 6.66, w: 11.8, h: 0.34, margin: 0,
-    fontSize: 11.5, color: '44555A', objectName: 'op-ask' });
+    isTextBox: true, x: M, y: 6.64, w: 11.8, h: 0.44, margin: 0,
+    fontSize: 10.5, color: '44555A', valign: 'top', objectName: 'op-ask' });
   s.addNotes('If a judge reads only one slide, this is it. Problem, insight, solution, innovation, impact and evidence, each in three lines, with the ask at the foot. Everything that follows is corroboration.');
 }
 
@@ -989,9 +1011,9 @@ pres.addSection({ title: 'Path' });
     x: M, y: 4.2, w: 11.8, h: 0, line: { color: 'DCE7E9', width: 1 },
     objectName: 'rule-run' });
 
-  stat(s, { x: M, y: 4.42, w: 2.2, size: 32, value: '95', key: 'r1',
-    label: 'engine tests', note: 'plus golden-path, safety,\ndeterminism and tamper suites' });
-  stat(s, { x: M + 2.45, y: 4.42, w: 2.2, size: 32, value: '25', key: 'r2',
+  stat(s, { x: M, y: 4.42, w: 2.2, size: 32, value: n0(F.counts.tests), key: 'r1',
+    label: 'automated tests', note: 'engine, published-data validation,\nconcurrency, safety and tamper' });
+  stat(s, { x: M + 2.45, y: 4.42, w: 2.2, size: 32, value: n0(F.counts.endpoints), key: 'r2',
     label: 'API endpoints', note: 'every figure on screen is\nserver-computed and traceable' });
   stat(s, { x: M + 4.9, y: 4.42, w: 2.2, size: 32, value: '8', key: 'r3',
     label: 'operating screens', note: 'command, forecast, decisions,\nwater, impact, evidence, audit' });
@@ -1006,6 +1028,90 @@ pres.addSection({ title: 'Path' });
     isTextBox: true, x: M, y: 6.32, w: 11.8, h: 0.5, margin: 0,
     fontSize: 12, color: '44555A', valign: 'top', objectName: 'attack' });
   s.addNotes('This slide kills the doubt that the deck is the whole project. It runs, it is tested, and it is built to be attacked on camera. Zero measured coefficients is deliberate and test-enforced: better to show a zero than imply data we do not have.');
+}
+
+/* ==========================================================================
+   SLIDE 13 - EXTERNAL VALIDATION
+   The answer to the hardest honest objection: no measured data. Our
+   OUTPUTS are checked against operating envelopes other people published,
+   using inputs the engine never reads back.
+   ========================================================================== */
+{
+  const s = pres.addSlide({ masterName: 'CONTENT', sectionTitle: 'Path' });
+  s.addText('HOW WE CHECKED A MODEL WITH NO METERS', { placeholder: 'eyebrow' });
+  s.addText('Fed real plant data, it predicts what real plants report', { placeholder: 'title' });
+  s.addText('We have measured nothing, and we say so on every screen. But a model with no measurements can still be falsified — by asking whether its OUTPUTS land where real plants actually sit.',
+    { placeholder: 'body' });
+
+  const V = F.validation;
+
+  /* the two independent published facts that make this a real test */
+  card(s, { x: M, y: 2.46, w: 5.72, h: 1.16, key: 'v-a' });
+  s.addText('FACT ONE · MEASURED BY CPCB', {
+    isTextBox: true, x: M + 0.22, y: 2.6, w: 5.28, h: 0.22, margin: 0,
+    fontSize: 9.5, bold: true, charSpacing: 1.4, color: '14525F',
+    objectName: 'v-ak' });
+  s.addText(n0(V.points[2].tds) + ' mg/L of dissolved solids entering the evaporator at an assessed Tirupur dyeing unit.', {
+    isTextBox: true, x: M + 0.22, y: 2.85, w: 5.28, h: 0.68, margin: 0,
+    fontSize: 12, color: '33474C', valign: 'top', objectName: 'v-ab' });
+
+  card(s, { x: M + 6.08, y: 2.46, w: 5.72, h: 1.16, key: 'v-b' });
+  s.addText('FACT TWO · REPORTED BY OPERATORS', {
+    isTextBox: true, x: M + 6.3, y: 2.6, w: 5.28, h: 0.22, margin: 0,
+    fontSize: 9.5, bold: true, charSpacing: 1.4, color: '14525F',
+    objectName: 'v-bk' });
+  s.addText('RO reject runs at ' + V.band_pct[0] + ' to ' + V.band_pct[1] + ' percent of inlet volume across Indian textile ZLD plants.', {
+    isTextBox: true, x: M + 6.3, y: 2.85, w: 5.28, h: 0.68, margin: 0,
+    fontSize: 12, color: '33474C', valign: 'top', objectName: 'v-bb' });
+
+  s.addText('Different sources. Neither one is an input to our engine. So we feed it the first and check whether it predicts the second.', {
+    isTextBox: true, x: M, y: 3.74, w: 11.8, h: 0.3, margin: 0,
+    fontSize: 12.5, bold: true, color: '0E2127', fontFace: 'Cambria',
+    objectName: 'v-bridge' });
+
+  table(s, {
+    x: M, y: 4.12, w: 11.8, colW: [2.1, 5.5, 2.1, 2.1], key: 'v-table',
+    head: [{ t: 'INLET TDS FED IN' }, { t: 'WHAT THAT NUMBER IS' },
+           { t: 'MODEL PREDICTS', a: 'right' }, { t: 'VERDICT', a: 'right' }],
+    rows: V.points.map((p, i) => ({
+      keyFirst: true,
+      big: i === 2,
+      bold: i === 2,
+      fill: i === 2 ? 'F2F7F3' : 'FFFFFF',
+      cells: [
+        n0(p.tds) + ' mg/L',
+        p.note.charAt(0).toUpperCase() + p.note.slice(1),
+        p.pct + '%',
+        'inside ' + V.band_pct[0] + '–' + V.band_pct[1] + '%'
+      ]
+    }))
+  });
+
+  s.addShape(pres.ShapeType.line, {
+    x: M, y: 5.72, w: 11.8, h: 0, line: { color: 'DCE7E9', width: 1 },
+    objectName: 'rule-val' });
+
+  s.addText([
+    { text: 'Nothing is tuned to make this work. ', options: { bold: true, color: '0E2127' } },
+    { text: 'The only inputs are conservation of salt mass and the ' + n0(60000) +
+            ' mg/L concentration ceiling. The published band is reproduced from floor to ceiling, and a test fails the build if it stops being.' }
+  ], {
+    isTextBox: true, x: M, y: 5.88, w: 7.5, h: 0.62, margin: 0,
+    fontSize: 12, color: '44555A', valign: 'top', objectName: 'v-note' });
+
+  stat(s, { x: M + 8.0, y: 5.46, w: 1.9, size: 29,
+    value: (F.evidence.PUBLISHED + F.evidence.DERIVED) + '/' + F.posture.total,
+    key: 'v-s1', label: 'coefficients sourced',
+    note: 'CPCB, CEA, TNERC,\npollution board, EU BAT' });
+  stat(s, { x: M + 9.95, y: 5.46, w: 1.9, size: 29, value: '0',
+    color: 'B98A2E', key: 'v-s2', label: 'measured',
+    note: 'and we will not pretend\notherwise to win a prize' });
+
+  s.addText('This is cross-validation against published operating data. It is not measurement, and we never call it that.', {
+    isTextBox: true, x: M, y: 6.6, w: 7.5, h: 0.3, margin: 0,
+    fontSize: 11, italic: true, color: '7B8E93', objectName: 'v-foot' });
+
+  s.addNotes('This is the slide that answers the hardest fair objection: you have no data. Correct. But watch what happens when we feed the model a number CPCB measured at a real unit and compare its output to what operators independently report. Twelve thousand gives exactly twenty percent, the floor of the band. Eighteen thousand three hundred and forty, CPCB\'s own measured inlet, gives thirty point six, the ceiling. The band is reproduced end to end and nothing was tuned to do it. Then be the first to say the limit out loud: this is validation, not measurement, and the ask on slide two is the two readings that would change that.');
 }
 
 /* ==========================================================================

@@ -27,21 +27,27 @@ from typing import Dict, Any, List, Optional
 import copy
 import threading
 
-# sensitivity() and ablation() work by temporarily replacing entries
-# in the GLOBAL core.factors registry. Two of these running at once -
-# which the threading HTTP server allows - would interleave their
-# patches and read each other's coefficients. Every study that
-# patches the registry takes this lock, so a concurrent caller waits
-# instead of seeing a half-patched registry. Re-entrant because
-# ablation() calls _with_factor() while already holding it.
-_REGISTRY_LOCK = threading.RLock()
-
 from . import factors, zld
 from .process import reference_lots, arrival_order, evaluate_sequence
 from .optimizer import (
     optimise, ObjectiveWeights, HardConstraints, evaluate_candidate,
 )
 from .basin import get_basin, DEFAULT_SITE
+
+
+# sensitivity() and ablation() work by temporarily replacing entries in the
+# GLOBAL core.factors registry. Two of these running at once - which the
+# threading HTTP server allows - would interleave their patches and read
+# each other's coefficients.
+#
+# The lock that prevents this lives with the registry it guards, in
+# core/factors.py, because READERS have to take it too. A second lock
+# declared here would serialise the writers against each other while
+# leaving every reader free to observe a torn registry - a request served
+# alongside a study would quietly return numbers computed against a
+# coefficient the caller never asked for. Re-entrant, because ablation()
+# calls _with_factor() and factors.get() while already holding it.
+_REGISTRY_LOCK = factors.REGISTRY_LOCK
 
 
 # ---------------------------------------------------------------------------
