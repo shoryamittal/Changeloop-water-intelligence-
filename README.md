@@ -269,7 +269,85 @@ node tests/test_frontend_render.js                         # all 8 views
 
 Keyboard: `1`–`8` jump between sections.
 
-## 12. Architecture
+## 12. Deploy it
+
+The repository carries a Render Blueprint, so the service deploys without
+anything being typed into a form:
+
+> **New -> Blueprint -> select this repository -> Apply**
+
+That is the whole procedure. `render.yaml` declares the runtime, the build
+and start commands, the health check path, the region and the environment.
+A build takes roughly a second because there is nothing to install.
+
+### What makes it deployable
+
+Each of these is a way a deploy fails silently, so each is pinned rather
+than left to chance:
+
+| Concern | How it is handled |
+|---|---|
+| Platform detects a Python service | `requirements.txt` is present and declares no packages. Its absence fails the build before the app starts. |
+| Listen address | `HOST` defaults to `0.0.0.0`. Binding loopback inside a container is indistinguishable from a crashed app. |
+| Assigned port | `PORT` is read from the environment. A hardcoded port is simply never routed to. |
+| Health check | `/api/health` returns the engine version, calculation version and ledger integrity, so green means the engine initialised, not merely that a socket opened. |
+| Python version | `.python-version` and `render.yaml` both pin 3.12.4, and CI asserts they agree. |
+| Line endings | `.gitattributes` forces LF. A CRLF shebang produces "no such file or directory" naming an interpreter that plainly exists. |
+| Container health check | Reads `PORT` rather than assuming 8000, which would mark a perfectly healthy container unhealthy. |
+| Image contents | `.dockerignore` keeps `node_modules`, git history and any local ledger out of the image. |
+
+`deploy-readiness` in CI exercises all of it on every push: it builds with
+the real Render build command, asserts zero packages were installed, starts
+with an injected `PORT` and checks the bind address in the log, deletes
+`data/` and confirms the ledger is created from nothing, and builds the
+container and checks it answers on an injected port.
+
+### Two things to know about the hosted instance
+
+**It sleeps.** Render's free plan spins a service down after about fifteen
+minutes idle, and the next request pays a cold start of roughly fifty
+seconds. If you are sending the link to a reviewer, open it yourself a
+minute beforehand. For a judged demo, run it locally - the engine starts in
+about a second and the recording is identical.
+
+**The ledger is ephemeral.** Free plans cannot mount a persistent disk, so
+each deploy and each wake from spin-down starts a fresh chain from its
+genesis record. This is disclosed rather than hidden: the ledger's claim is
+that no record was altered within a session, and that remains exactly true.
+It never claimed durability nobody provisioned. To make the chain survive,
+attach a disk on a paid plan and point `CHANGELOOP_DATA_DIR` at its mount
+path - `render.yaml` contains the block, commented, with the one other value
+that has to change alongside it.
+
+**One further caveat, stated plainly.** The session is a single process-wide
+object, so a public URL serves one shared session to everyone on it. Two
+people driving the demo simultaneously will see each other's decisions. That
+is correct for a single-operator shop-floor tool and wrong for a public
+demo, and it is on the list below rather than papered over. For a reviewed
+walkthrough, use the local server.
+
+### Environment
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `PORT` | `8000` | Injected by the platform. |
+| `HOST` | `0.0.0.0` | Set to `127.0.0.1` to restrict to loopback locally. |
+| `CHANGELOOP_DATA_DIR` | `./data` | Where the decision ledger is written. |
+| `CHANGELOOP_LEDGER_KEY` | published demo constant | Real MAC key. Unset, the Evidence screen reports the key as a built-in demonstration constant, which is the truth. |
+
+### Docker, if you prefer
+
+```bash
+docker build -t changeloop .
+docker run -p 8000:8000 -e PORT=8000 changeloop
+```
+
+The image is the Python base plus this repository: no dependency layer,
+non-root at uid 10001, and a health check that reads `PORT`.
+
+---
+
+## 13. Architecture
 
 ```
 core/factors.py     every coefficient, with unit, derivation, evidence class
@@ -291,7 +369,7 @@ Every figure the interface shows comes from the server. Nothing is computed
 in the browser and nothing is hardcoded. `/api/trace?metric=...` returns the
 formula, upstream chain and coefficients behind any headline number.
 
-## 13. Documents
+## 14. Documents
 
 - [`docs/strategy.md`](docs/strategy.md) — hero use-case decision, white
   space, moat, what we deliberately did not build
@@ -304,7 +382,7 @@ formula, upstream chain and coefficients behind any headline number.
 - [`docs/archive/loreal_edition.md`](docs/archive/loreal_edition.md) — the
   superseded cosmetics variant, how to restore it, and the defects it carries
 
-## 14. Scale
+## 15. Scale
 
 A cluster projection — clearly labelled **PROJECTED**, not a result — for 400
 units at 900 lots each: ~399 ML/yr freshwater, ~4,500 t/yr salt, ~13,400
@@ -319,7 +397,7 @@ far less to onboard than the first. The CETP is the natural channel: it
 already has a commercial relationship with every unit, and it directly
 benefits from a lower, steadier inlet salt load.
 
-## 15. What would change our conclusions
+## 16. What would change our conclusions
 
 Our own sensitivity sweep flags the coefficients that matter. The lot
 **order** never changes across the whole sweep; what flips is the process
