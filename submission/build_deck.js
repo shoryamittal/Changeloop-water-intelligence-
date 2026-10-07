@@ -1179,7 +1179,7 @@ pres.addSection({ title: 'Team' });
 
   s.addText([
     { text: 'What we are asking for:  ', options: { bold: true, color: 'E0B45A' } },
-    { text: 'one Tirupur dyeing unit or CETP willing to share two measured numbers: steam cost per cubic metre of reject, and the reject TDS ceiling. Our own sensitivity sweep says those two decide the answer, and they are the first thing Phase 1 measures.' }
+    { text: 'one Tirupur dyeing unit or CETP willing to share two instrument readings: steam flow to the evaporator, and reject conductivity. Everything else is already sourced from CPCB, the CEA, TNERC and pollution-board data \u2014 those two are all that separate a validated model from a measured one.' }
   ], {
     isTextBox: true, x: M, y: 6.08, w: 11.8, h: 0.5, margin: 0,
     fontSize: 12, color: 'B7CBD0', valign: 'top', objectName: 'ask'
