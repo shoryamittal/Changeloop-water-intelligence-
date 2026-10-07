@@ -1144,3 +1144,170 @@ dl.defs dd { margin: 0; font-size: var(--t-small); line-height: 1.5; }
   color: var(--graphite);
 }
 .rung-a { margin-left: auto; }
+
+/* ==========================================================================
+   EXECUTIVE GUIDED TOUR (30-SECOND FLOW: QUEUE -> MODES -> CASCADE -> LEDGER)
+   ========================================================================== */
+.tour-dock {
+  position: fixed;
+  bottom: 24px;
+  right: 28px;
+  width: min(440px, calc(100vw - 32px));
+  background: var(--surface);
+  border: 1px solid var(--hair-2);
+  border-radius: var(--r-lg);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28), 0 2px 8px rgba(0, 0, 0, 0.12);
+  z-index: 85;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: tourSlideIn var(--m-norm) var(--ease);
+}
+@keyframes tourSlideIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.tour-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--aquifer);
+  border-bottom: 1px solid var(--hair);
+}
+.tour-hd-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tour-tag {
+  font-size: var(--t-micro);
+  font-weight: 600;
+  color: var(--water);
+  background: var(--water-wash);
+  border: 1px solid var(--water-pale);
+  padding: 1px 5px;
+  border-radius: var(--r);
+}
+.tour-step-k {
+  font-size: var(--t-micro);
+  font-weight: 600;
+  color: var(--slate);
+  letter-spacing: 0.06em;
+}
+.tour-view-tag {
+  font-size: var(--t-micro);
+  color: var(--emerald);
+  background: var(--emerald-wash);
+  border: 1px solid var(--emerald-pale);
+  padding: 1px 5px;
+  border-radius: var(--r);
+}
+.tour-close-btn {
+  background: none;
+  border: 0;
+  font-size: var(--t-micro);
+  font-family: var(--mono);
+  color: var(--slate);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--r);
+}
+.tour-close-btn:hover {
+  color: var(--graphite);
+  background: var(--pearl);
+}
+.tour-stepper {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  padding: 6px 14px 0;
+  background: var(--surface);
+}
+.tour-step-bar {
+  height: 3px;
+  background: var(--hair);
+  border-radius: 1px;
+  transition: background var(--m-norm) var(--ease);
+}
+.tour-step-bar.done {
+  background: var(--emerald);
+}
+.tour-step-bar.active {
+  background: var(--water);
+}
+.tour-bd {
+  padding: 14px 16px 12px;
+}
+.tour-title {
+  margin: 0 0 8px;
+  font-size: var(--t-body);
+  font-weight: 650;
+  color: var(--graphite);
+  line-height: 1.35;
+}
+.tour-desc {
+  margin: 0 0 10px;
+  font-size: var(--t-small);
+  color: var(--slate);
+  line-height: 1.5;
+}
+.tour-takeaway {
+  padding: 8px 10px;
+  background: var(--aquifer);
+  border-left: 2px solid var(--water);
+  font-size: var(--t-micro);
+  font-family: var(--mono);
+  color: var(--slate-2);
+  line-height: 1.45;
+  border-radius: 0 var(--r) var(--r) 0;
+}
+.tour-takeaway b {
+  color: var(--graphite);
+}
+.tour-ft {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--pearl);
+  border-top: 1px solid var(--hair);
+}
+.tour-dots {
+  display: flex;
+  gap: 5px;
+}
+.tour-dot {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--t-micro);
+  font-family: var(--mono);
+  font-weight: 500;
+  color: var(--slate);
+  border: 1px solid var(--hair);
+  border-radius: var(--r);
+  background: var(--surface);
+  cursor: pointer;
+}
+.tour-dot:hover {
+  border-color: var(--water);
+  color: var(--water);
+}
+.tour-dot.active {
+  background: var(--water);
+  border-color: var(--water);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+.tour-highlight {
+  outline: 2px solid var(--water) !important;
+  outline-offset: 4px !important;
+  animation: tourPulse 1.8s ease-in-out infinite;
+}
+@keyframes tourPulse {
+  0%, 100% { outline-color: var(--water); }
+  50% { outline-color: var(--water-lift); }
+}

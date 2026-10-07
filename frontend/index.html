@@ -88,6 +88,8 @@
       </div>
       <div class="ctx-spacer"></div>
       <div class="ctx-actions">
+        <button class="btn btn-sm btn-pri" id="tourBtn"
+                aria-label="Launch Executive Guided Tour" title="Launch 30-Second Executive Walkthrough (Key: T)">Guided Tour [T]</button>
         <button class="btn btn-sm btn-q" id="themeBtn"
                 aria-label="Toggle colour theme">
           <span id="themeLbl">Dark</span>
@@ -134,6 +136,29 @@
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ============ executive guided tour dock ============ -->
+<div class="tour-dock" id="tourDock" role="region" aria-label="Executive Guided Tour" style="display:none">
+  <div class="tour-hd">
+    <div class="tour-hd-left">
+      <span class="tour-tag mono">[TOUR]</span>
+      <span class="tour-step-k mono" id="tourStepK">STEP 1 OF 4</span>
+      <span class="tour-view-tag mono" id="tourViewTag">QUEUE</span>
+    </div>
+    <button class="tour-close-btn" id="tourCloseBtn" aria-label="Close Tour" title="Exit Tour (Esc)">Close</button>
+  </div>
+  <div class="tour-stepper" id="tourStepper"></div>
+  <div class="tour-bd">
+    <h3 class="tour-title" id="tourTitle">Unscheduled Input Queue &amp; Carry-Over Penalty</h3>
+    <p class="tour-desc" id="tourDesc"></p>
+    <div class="tour-takeaway" id="tourTakeaway"></div>
+  </div>
+  <div class="tour-ft">
+    <button class="btn btn-sm btn-q" id="tourPrevBtn">&larr; Prev</button>
+    <div class="tour-dots" id="tourDots"></div>
+    <button class="btn btn-sm btn-pri" id="tourNextBtn">Next Step &rarr;</button>
+  </div>
+</div>
 
 <script src="/frontend/app.js"></script>
 </body>

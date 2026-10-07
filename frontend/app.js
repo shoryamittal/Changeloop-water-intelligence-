@@ -291,6 +291,9 @@ function renderChrome() {
     });
   };
   document.getElementById('cmdBtn').onclick = openPalette;
+  var tourBtn = document.getElementById('tourBtn');
+  if (tourBtn) tourBtn.onclick = startTour;
+  wireTourControls();
   wireTheme();
 
   updateCtx();
@@ -2464,13 +2467,192 @@ function openTrace(metric) {
 }
 
 /* ==========================================================================
+   EXECUTIVE GUIDED TOUR (30-SECOND FLOW: QUEUE -> MODES -> CASCADE -> LEDGER)
+   ========================================================================== */
+var tourActive = false;
+var tourStep = 0;
+
+var TOUR_STEPS = [
+  {
+    view: 'forecast',
+    tag: 'INPUT QUEUE',
+    title: '1. Unscheduled Input Queue & Carry-Over Penalty',
+    desc: 'Production lots arrive from dyehouse planning in arbitrary order. Switching from deep navy (L-4412, 4.60% owf) directly to pale bleach (L-4413, 0.35% owf) forces an extreme 4.25% carry-over gap, requiring 2 blind boil-out baths, 4,800 L of water, and 44 minutes of idle delay per changeover.',
+    takeaway: 'Scheduling blind to carry-over inflates plant freshwater draw by up to 38.8% before a single bath is run.',
+    selector: '#view .sec:first-of-type'
+  },
+  {
+    view: 'decisions',
+    tag: 'MODE MATRIX',
+    title: '2. Multi-Objective Mode Matrix & 2-Opt Optimization',
+    desc: 'ChangeLoop dynamically evaluates 4 operating regimes (NORMAL, DROUGHT with a 10x scarcity premium, SHIPMENT CRUNCH with strict lateness caps, and CARBON PRIORITY). Our 2-Opt solver re-sequences lots by shade affinity without breaching shipment deadlines, pricing downstream evaporation energy into the upstream choice.',
+    takeaway: 'Prices downstream evaporator steam into upstream scheduling, saving 1,284 L and 44 kg salt per shift.',
+    selector: '#view .sec:first-of-type',
+    autoAct: 'optimise'
+  },
+  {
+    view: 'water',
+    tag: 'CASCADE',
+    title: '3. Circular Water Cascade & Segregated Routing',
+    desc: 'Instead of dumping all wash water into high-energy Zero Liquid Discharge (ZLD) evaporators, ChangeLoop segregates effluent into 3 streams: high-COD first-flush to biogas, chemical wash to recovery loops, and clean final permeate counter-currently cascaded for reuse without auto-approving unverified water.',
+    takeaway: 'Stroke width strictly represents volume moving through constrained pipes—a physical mass-balance grammar.',
+    selector: '#view .sec:first-of-type'
+  },
+  {
+    view: 'audit',
+    tag: 'SEALED LEDGER',
+    title: '4. Human-Authorized Sealed Ledger (HMAC-SHA256)',
+    desc: 'ChangeLoop operates strictly as an advisory intelligence layer: no automated setpoint is issued without a named human decision. Every authorized schedule is cryptographically sealed in an append-only HMAC-SHA256 hash chain, guaranteeing non-repudiable ISO 14046 / ESG audit compliance.',
+    takeaway: 'Cryptographic non-repudiation: every hash link is recomputed and verified live against tampering.',
+    selector: '#view .sec:first-of-type',
+    autoAct: 'verify'
+  }
+];
+
+function startTour() {
+  tourActive = true;
+  tourStep = 0;
+  var dock = document.getElementById('tourDock');
+  if (dock) dock.style.display = 'flex';
+  renderTourStep();
+}
+
+function closeTour() {
+  tourActive = false;
+  var dock = document.getElementById('tourDock');
+  if (dock) dock.style.display = 'none';
+  clearTourHighlights();
+}
+
+function nextTourStep() {
+  if (tourStep < TOUR_STEPS.length - 1) {
+    tourStep++;
+    renderTourStep();
+  } else {
+    closeTour();
+    toast('Executive tour complete. Explore live telemetry.');
+  }
+}
+
+function prevTourStep() {
+  if (tourStep > 0) {
+    tourStep--;
+    renderTourStep();
+  }
+}
+
+function jumpTourStep(idx) {
+  if (idx >= 0 && idx < TOUR_STEPS.length) {
+    tourStep = idx;
+    renderTourStep();
+  }
+}
+
+function clearTourHighlights() {
+  var prev = document.querySelectorAll('.tour-highlight');
+  Array.prototype.forEach.call(prev, function (el) { el.classList.remove('tour-highlight'); });
+}
+
+function renderTourStep() {
+  var step = TOUR_STEPS[tourStep];
+  if (!step) return;
+
+  if (S.view !== step.view) {
+    go(step.view);
+  }
+
+  if (step.autoAct === 'optimise' && (!S.state || !S.state.optimisation)) {
+    act('optimise');
+  } else if (step.autoAct === 'verify') {
+    act('verify');
+  }
+
+  var kEl = document.getElementById('tourStepK');
+  if (kEl) kEl.textContent = 'STEP ' + (tourStep + 1) + ' OF ' + TOUR_STEPS.length;
+
+  var tagEl = document.getElementById('tourViewTag');
+  if (tagEl) tagEl.textContent = step.tag;
+
+  var tEl = document.getElementById('tourTitle');
+  if (tEl) tEl.textContent = step.title;
+
+  var dEl = document.getElementById('tourDesc');
+  if (dEl) dEl.textContent = step.desc;
+
+  var tkEl = document.getElementById('tourTakeaway');
+  if (tkEl) tkEl.innerHTML = '<b>CORE PRINCIPLE:</b> ' + esc(step.takeaway);
+
+  var sEl = document.getElementById('tourStepper');
+  if (sEl) {
+    var sHtml = '';
+    for (var i = 0; i < TOUR_STEPS.length; i++) {
+      var cls = i === tourStep ? 'active' : (i < tourStep ? 'done' : '');
+      sHtml += '<div class="tour-step-bar ' + cls + '"></div>';
+    }
+    sEl.innerHTML = sHtml;
+  }
+
+  var prevBtn = document.getElementById('tourPrevBtn');
+  if (prevBtn) {
+    prevBtn.disabled = tourStep === 0;
+    prevBtn.style.opacity = tourStep === 0 ? '0.4' : '1';
+  }
+
+  var nextBtn = document.getElementById('tourNextBtn');
+  if (nextBtn) {
+    nextBtn.textContent = tourStep === TOUR_STEPS.length - 1 ? 'Finish Tour \u2713' : 'Next Step \u2192';
+  }
+
+  var dotsEl = document.getElementById('tourDots');
+  if (dotsEl) {
+    var dHtml = '';
+    for (var j = 0; j < TOUR_STEPS.length; j++) {
+      dHtml += '<button class="tour-dot' + (j === tourStep ? ' active' : '') + '" data-step="' + j + '">' + (j + 1) + '</button>';
+    }
+    dotsEl.innerHTML = dHtml;
+  }
+
+  clearTourHighlights();
+  setTimeout(function () {
+    try {
+      var target = document.querySelector(step.selector);
+      if (target) {
+        target.classList.add('tour-highlight');
+      }
+    } catch (e) {}
+  }, 120);
+}
+
+function wireTourControls() {
+  var bClose = document.getElementById('tourCloseBtn');
+  if (bClose) bClose.onclick = closeTour;
+
+  var bNext = document.getElementById('tourNextBtn');
+  if (bNext) bNext.onclick = nextTourStep;
+
+  var bPrev = document.getElementById('tourPrevBtn');
+  if (bPrev) bPrev.onclick = prevTourStep;
+
+  var dots = document.getElementById('tourDots');
+  if (dots) {
+    dots.onclick = function (e) {
+      var btn = e.target.closest ? e.target.closest('[data-step]') : null;
+      if (btn) jumpTourStep(parseInt(btn.dataset.step, 10));
+    };
+  }
+}
+
+/* ==========================================================================
    COMMAND PALETTE
    ========================================================================== */
 var CMDS = [];
 function buildCmds() {
-  CMDS = VIEWS.map(function (v) {
+  CMDS = [
+    { lbl: 'Start Executive Guided Tour (30s Walkthrough)', grp: 'Tour', ico: 'command',
+      run: function () { startTour(); } }
+  ].concat(VIEWS.map(function (v) {
     return { lbl: v.label, grp: 'Go to', ico: v.ico, run: function () { go(v.id); } };
-  }).concat([
+  })).concat([
     { lbl: 'Run optimiser', grp: 'Action', ico: 'command',
       run: function () { act('optimise'); } },
     { lbl: 'Accept recommendation', grp: 'Action', ico: 'check',
@@ -2713,8 +2895,23 @@ document.addEventListener('keydown', function (e) {
     }
     return;
   }
-  if (e.key === 'Escape') { closeSheet(); return; }
+  if (e.key === 'Escape') {
+    if (tourActive) { closeTour(); return; }
+    closeSheet();
+    return;
+  }
   if (e.target.matches && e.target.matches('input, select, textarea')) return;
+
+  if (tourActive) {
+    if (e.key === 'ArrowRight' || e.key === 'Enter') { e.preventDefault(); nextTourStep(); return; }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prevTourStep(); return; }
+  }
+
+  if (e.key.toLowerCase() === 't') {
+    e.preventDefault();
+    tourActive ? closeTour() : startTour();
+    return;
+  }
 
   var n = parseInt(e.key, 10);
   if (n >= 1 && n <= VIEWS.length) go(VIEWS[n - 1].id);
