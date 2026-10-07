@@ -46,8 +46,18 @@ function makeEl(id) {
     showModal() { this.open = true; },
     close() { this.open = false; },
     matches() { return false; },
+    closest() { return null; },
     click() {},
     appendChild() {},
+    focus() {},
+    addEventListener() {},
+    scrollIntoView() {},
+    classList: {
+      _s: {},
+      add(c) { this._s[c] = true; },
+      remove(c) { delete this._s[c]; },
+      contains(c) { return !!this._s[c]; }
+    },
   };
   return el;
 }
@@ -57,6 +67,12 @@ function getEl(id) {
   if (!els[id]) els[id] = makeEl(id);
   return els[id];
 }
+
+/* the new shell queries these by id at load */
+['brandCtx','siteSel','modeSel','ctxAsset','ctxResource','ctxData',
+ 'ctxSystem','cmdBtn','resetBtn','nav','view','sheet','sheetBd','sheetKind',
+ 'sheetTitle','sheetBody','sheetClose','cp','cpBd','cpInput','cpList','toast']
+  .forEach(function (id) { getEl(id); });
 
 const documentStub = {
   documentElement: {
@@ -95,11 +111,12 @@ async function main() {
   await postJson('/api/washoff/release', { approve: true });
 
   const [state, sites, modes, insight, ablation, sens, modeCmp, evidence,
-         pilot, cluster] = await Promise.all([
+         pilot, cluster, forecast, matrix] = await Promise.all([
     get('/api/state'), get('/api/sites'), get('/api/modes'),
     get('/api/insight/salt-is-water'), get('/api/ablation'),
     get('/api/sensitivity'), get('/api/modes/compare'), get('/api/evidence'),
     get('/api/pilot'), get('/api/cluster-projection'),
+    get('/api/forecast'), get('/api/changeover-matrix'),
   ]);
   const businessCase = await postJson('/api/business-case', {
     lots_per_year: 9000,
@@ -128,7 +145,8 @@ async function main() {
     // overwriting them with empty objects. Make the sandbox fetch reject so
     // boot() bails out immediately and leaves our injected state alone.
     fetch: () => Promise.reject(new Error('sandboxed: no network')),
-    setTimeout, clearTimeout, Promise, Blob: function () {}, URL: {
+    setTimeout, clearTimeout, setInterval: function () { return 0; },
+    Promise, Blob: function () {}, URL: {
       createObjectURL() { return 'blob:x'; }, revokeObjectURL() {},
     },
     console,
@@ -152,6 +170,8 @@ async function main() {
   S.pilot = pilot;
   S.cluster = cluster;
   S.businessCase = businessCase;
+  S.forecast = forecast;
+  S.matrix = matrix.matrix;
 
   const VIEWS = vm.runInContext('VIEWS', ctx);
 
@@ -196,11 +216,11 @@ async function main() {
   await postJson('/api/decision/sequence', { approve: true });
   await postJson('/api/washoff/run', { fault_mode: 'sensor_drift' });
   S.state = await get('/api/state');
-  S.view = 'washoff';
+  S.view = 'water';
   let err = null;
   try { vm.runInContext('render()', ctx); } catch (e) { err = e; }
   const lockHtml = getEl('view').innerHTML;
-  check('locked-out washoff renders', !err, err ? err.message : '');
+  check('locked-out water view renders', !err, err ? err.message : '');
   check('locked-out shows LOCKED OUT',
     lockHtml.indexOf('LOCKED OUT') !== -1 ||
     lockHtml.indexOf('locked out') !== -1);
