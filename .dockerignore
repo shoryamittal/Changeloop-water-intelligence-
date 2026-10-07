@@ -1,0 +1,47 @@
+# The Dockerfile does COPY . ., so everything not excluded here is baked
+# into the image. Without this file the build ships node_modules, the git
+# history and a stale ledger - tens of megabytes of things the running
+# service never reads, on every deploy.
+
+# Version control
+.git
+.gitignore
+.gitattributes
+.github
+
+# Node: build-time tooling for the pitch deck only. The running service
+# is Python standard library and never imports any of this.
+node_modules
+package.json
+package-lock.json
+
+# Python caches
+__pycache__
+**/__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.mypy_cache
+
+# Runtime state. The ledger must be created fresh by the container, not
+# inherited from whoever built the image - baking in a developer's chain
+# would hand every deployment someone else's decision history.
+data
+*.db
+*.db-journal
+*.db-wal
+server.log
+server.err
+
+# Deck rendering output
+submission/render
+
+# Local environment
+.env
+.venv
+venv
+
+# Editor
+.vscode
+.idea
+.DS_Store
