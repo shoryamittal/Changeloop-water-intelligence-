@@ -87,22 +87,37 @@ salt, always win" would be wrong there. See
 
 Latent heat of vaporisation at 100 °C, 1 atm is 2257 kJ/kg (standard steam
 tables) = 0.62694 kWh/kg. A 4-effect forced-circulation evaporator has a
-steam economy — kg of water evaporated per kg of live steam — which we assume
-at 3.5, conservatively; optimised trains with thermocompression and
-condensate flashing reach 5–6.
+steam economy — kg of water evaporated per kg of live steam. This is no
+longer an assumption. Specific steam consumption for multiple-effect
+evaporators on textile RO reject is reported at **0.25–0.35 kg steam per kg
+of water evaporated** (CPCB's Tirupur ZLD assessment; Indian MEE vendor
+design data). Steam economy is the reciprocal of that figure, so the
+published band is 1/0.35 = 2.86 to 1/0.25 = 4.00. We take the **midpoint of
+the published specific-steam range**, 0.30 kg/kg:
 
 ```
+steam_economy    = 1 / 0.30
+                 = 3.333 kg water evaporated per kg steam
+
 specific_thermal = h_vap x 1000 / steam_economy
-                 = 0.62694 x 1000 / 3.5
-                 = 179.13 kWh_th per m3 evaporated
+                 = 0.62694 x 1000 / 3.333
+                 = 188.08 kWh_th per m3 evaporated
 ```
 
-This sits inside the 150–250 kWh_th/m³ band commonly quoted for the
-evaporator section of textile ZLD plants. We deliberately under-claim the
-steam economy so the energy saving we report is not inflated.
+This sits inside the 150–250 kWh_th/m³ band quoted for the evaporator
+section of textile ZLD plants — which is an independent check rather than a
+restatement: latent heat comes from steam tables and steam economy from
+Indian plant data, two unrelated sources that do not cite each other, and
+their product lands inside a third separately published band.
+
+We deliberately do **not** use the 5–6 kg/kg reachable by optimised trains
+with thermocompression and condensate flashing. A better evaporator would
+make the steam saved per kg of salt avoided look *smaller*, so assuming a
+poor one would inflate our claim. 3.333 is the published middle, not a
+flattering end.
 
 ```
-MEE_thermal_kWh = (V_reject / 1000) x 179.13
+MEE_thermal_kWh = (V_reject / 1000) x 188.08
 ```
 
 ### 3.3 Emissions

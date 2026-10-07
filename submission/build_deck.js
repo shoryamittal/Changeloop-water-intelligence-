@@ -1155,8 +1155,8 @@ pres.addSection({ title: 'Team' });
   });
   s.addText([
     { text: 'A working engine and interface, dependency-free. ' },
-    { text: '95 engine tests', options: { bold: true, color: '4ECF9E' } },
-    { text: ', a golden-path suite, safety-interlock tests across five fault modes, a ten-run determinism check, and a tamper test that breaks the ledger chain on purpose to prove it detects it.\n\n' },
+    { text: n0(F.counts.tests) + ' automated tests', options: { bold: true, color: '4ECF9E' } },
+    { text: ' across ' + F.counts.test_files + ' suites: the engine, cross-validation against published plant data, registry concurrency, safety interlocks over five fault modes, a determinism check, and a tamper test that breaks the ledger chain on purpose to prove it detects it.\n\n' },
     { text: 'Evidence discipline: ', options: { bold: true } },
     { text: F.evidence.PUBLISHED + ' published, ' + F.evidence.DERIVED + ' derived, ' +
       F.evidence.ASSUMED + ' assumed and ' },
