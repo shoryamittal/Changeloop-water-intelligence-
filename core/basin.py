@@ -52,6 +52,16 @@ class Basin:
     abstraction_pressure: float           # 1.0 .. 2.0
     zld_mandated: bool
     context: str
+    # Daily freshwater abstraction the site is permitted or practically able
+    # to draw. This is what turns a demand projection into a RISK: a
+    # trajectory is only alarming relative to an envelope.
+    daily_abstraction_allowance_l: float = 80000.0
+    # Scope of the site, used to allocate that allowance down to the unit
+    # ChangeLoop actually models - one machine on one shift. Comparing a
+    # machine-shift against a whole-site daily figure would make every
+    # projection look comfortable and the forecast useless.
+    machines_in_scope: int = 4
+    shifts_per_day: int = 2
     evidence: str = "ASSUMED"
 
     @property
@@ -65,6 +75,17 @@ class Basin:
         # Normalise so a well-supplied perennial basin lands at ~1.0 rather
         # than near zero, keeping the multiplier interpretable.
         return round(1.0 + raw * 4.0, 2)
+
+    @property
+    def machine_shift_allocation_l(self) -> float:
+        """The allowance apportioned to one machine on one shift.
+
+        Derived, not asserted: daily allowance divided by the number of
+        machine-shifts the site runs. This is the envelope a single-machine
+        projection must actually be judged against.
+        """
+        denom = max(1, self.machines_in_scope) * max(1, self.shifts_per_day)
+        return round(self.daily_abstraction_allowance_l / denom, 1)
 
     def stress_equivalent_litres(self, litres: float) -> float:
         """Convert physical litres into stress-equivalent litres (L-eq)."""
@@ -86,6 +107,7 @@ class Basin:
         d = asdict(self)
         d["stress_weight"] = self.stress_weight
         d["band"] = self.band()
+        d["machine_shift_allocation_l"] = self.machine_shift_allocation_l
         return d
 
 
@@ -102,6 +124,7 @@ BASINS: Dict[str, Basin] = {
         seasonality_penalty=1.9,
         abstraction_pressure=1.7,
         zld_mandated=True,
+        daily_abstraction_allowance_l=72000.0,
         context="The Noyyal is a seasonal river with no assured dry-weather "
                 "dilution flow, which is the reason discharge of treated "
                 "effluent was ruled out and Zero Liquid Discharge was "
@@ -121,6 +144,7 @@ BASINS: Dict[str, Basin] = {
         seasonality_penalty=1.5,
         abstraction_pressure=1.5,
         zld_mandated=True,
+        daily_abstraction_allowance_l=110000.0,
         context="Closer to a perennial main stem than Tirupur, so the same "
                 "litre carries a lower scarcity consequence. Useful as the "
                 "internal contrast case: identical process decisions produce "
@@ -138,6 +162,7 @@ BASINS: Dict[str, Basin] = {
         seasonality_penalty=2.0,
         abstraction_pressure=1.9,
         zld_mandated=True,
+        daily_abstraction_allowance_l=48000.0,
         context="Arid, ephemeral drainage with heavy groundwater dependence. "
                 "The highest stress weighting in the reference set: here the "
                 "water term dominates the objective and the optimiser "
@@ -154,6 +179,7 @@ BASINS: Dict[str, Basin] = {
         seasonality_penalty=1.3,
         abstraction_pressure=1.4,
         zld_mandated=False,
+        daily_abstraction_allowance_l=130000.0,
         context="Not yet under a full ZLD obligation, which is why it is "
                 "included: it lets the system show the avoided-compliance "
                 "value of cutting salt load before a mandate arrives.",

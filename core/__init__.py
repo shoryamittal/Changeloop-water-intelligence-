@@ -31,6 +31,7 @@ Module map
   ledger      resource decision event and mass-balance impact ledger
   provenance  tamper-evident HMAC hash-chained decision ledger
   economics   site business case and cluster projection
+  forecast    causal projection of the committed queue vs the abstraction envelope
   scenarios   constraint modes, sensitivity sweep, ablation study
   session     golden-path orchestrator and single source of truth
 """
@@ -44,6 +45,7 @@ from . import telemetry
 from . import ledger
 from . import provenance
 from . import economics
+from . import forecast
 from . import scenarios
 from . import session
 
@@ -73,6 +75,7 @@ from .ledger import (
 from .economics import (
     business_case, cluster_projection, REQUIRED_INPUTS, INPUT_HELP,
 )
+from .forecast import project, compare_plans, ambient_temp_c
 from .scenarios import (
     constraint_modes, run_mode, compare_modes, sensitivity, ablation,
 )
@@ -98,6 +101,7 @@ __all__ = [
     "ResourceDecisionEvent", "new_decision_event", "ImpactLedger",
     "build_ledger", "trace",
     "business_case", "cluster_projection", "REQUIRED_INPUTS", "INPUT_HELP",
+    "forecast", "project", "compare_plans", "ambient_temp_c",
     "constraint_modes", "run_mode", "compare_modes", "sensitivity",
     "ablation",
     "Session", "get_session", "Stage",

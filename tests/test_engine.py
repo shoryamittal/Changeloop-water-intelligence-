@@ -835,3 +835,121 @@ class TestTrace(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+# ---------------------------------------------------------------------------
+# forecast and abstraction envelope
+# ---------------------------------------------------------------------------
+
+class TestForecast(unittest.TestCase):
+
+    def setUp(self):
+        from core import forecast as fc
+        self.fc = fc
+        self.lots = process.reference_lots()
+        self.arrival = process.arrival_order()
+
+    def test_projection_covers_the_horizon_and_sums_correctly(self):
+        f = self.fc.project(self.lots, self.arrival, "IN-TN-TIRUPUR-01")
+        self.assertEqual(len(f["steps"]), f["horizon_h"])
+        # cumulative must be monotonic and end at the reported draw
+        cum = [s["cumulative_freshwater_l"] for s in f["steps"]]
+        self.assertEqual(cum, sorted(cum))
+        self.assertAlmostEqual(cum[-1], f["envelope"]["projected_draw_l"],
+                               delta=1.0)
+
+    def test_hourly_draw_sums_to_the_total(self):
+        f = self.fc.project(self.lots, self.arrival, "IN-TN-TIRUPUR-01")
+        total = sum(s["freshwater_l"] for s in f["steps"])
+        self.assertAlmostEqual(total, f["envelope"]["projected_draw_l"],
+                               delta=1.5)
+
+    def test_envelope_is_the_machine_shift_allocation_not_the_site_total(self):
+        b = basin.get_basin("IN-TN-TIRUPUR-01")
+        f = self.fc.project(self.lots, self.arrival, "IN-TN-TIRUPUR-01")
+        self.assertAlmostEqual(f["envelope"]["allocation_l"],
+                               b.machine_shift_allocation_l, places=1)
+        self.assertLess(f["envelope"]["allocation_l"],
+                        b.daily_abstraction_allowance_l,
+                        "a machine-shift must be judged against its share")
+
+    def test_allocation_derivation_is_stated(self):
+        f = self.fc.project(self.lots, self.arrival, "IN-TN-TIRUPUR-01")
+        basis = f["envelope"]["allocation_basis"]
+        self.assertIn("machines", basis)
+        self.assertIn("shifts", basis)
+
+    def test_uncertainty_band_widens_with_horizon(self):
+        self.assertLess(self.fc.band_fraction(0), self.fc.band_fraction(12))
+        self.assertLess(self.fc.band_fraction(12), self.fc.band_fraction(24))
+
+    def test_band_brackets_the_central_projection(self):
+        f = self.fc.project(self.lots, self.arrival, "IN-TN-TIRUPUR-01")
+        for s in f["steps"]:
+            self.assertLessEqual(s["band_low_l"], s["cumulative_freshwater_l"] + 0.5)
+            self.assertGreaterEqual(s["band_high_l"],
+                                    s["cumulative_freshwater_l"] - 0.5)
+
+    def test_method_refuses_to_claim_a_confidence_interval(self):
+        f = self.fc.project(self.lots, self.arrival, "IN-TN-TIRUPUR-01")
+        m = f["method"]
+        self.assertIn("not a statistical forecast",
+                      m["what_this_is_not"].lower())
+        self.assertIn("no confidence interval", m["what_this_is_not"].lower())
+        self.assertIn("assumed", m["band"].lower())
+
+    def test_salt_lever_gets_inside_the_envelope_where_water_lever_does_not(self):
+        """The operational conclusion the forecast exists to deliver."""
+        order = ["L-4416", "L-4412", "L-4413", "L-4414", "L-4415"]
+        water_lever = self.fc.project(self.lots, order, "IN-TN-TIRUPUR-01",
+                                      "COUNTER_CURRENT")
+        salt_lever = self.fc.project(self.lots, order, "IN-TN-TIRUPUR-01",
+                                     "COMBINED")
+        self.assertEqual(water_lever["envelope"]["risk"], "BREACH_PROJECTED")
+        self.assertEqual(salt_lever["envelope"]["risk"], "WITHIN_ALLOWANCE")
+
+    def test_ambient_profile_is_diurnal_and_bounded(self):
+        temps = [self.fc.ambient_temp_c(h) for h in range(24)]
+        self.assertGreaterEqual(min(temps), 23.0)
+        self.assertLessEqual(max(temps), 37.0)
+        self.assertNotEqual(min(temps), max(temps))
+
+    def test_every_driver_declares_its_evidence_class(self):
+        f = self.fc.project(self.lots, self.arrival, "IN-TN-TIRUPUR-01")
+        self.assertTrue(f["drivers"])
+        for d in f["drivers"]:
+            self.assertIn(d["evidence"],
+                          {"MEASURED", "DERIVED", "PUBLISHED", "ASSUMED",
+                           "SIMULATED", "MODELLED"})
+            self.assertTrue(d["detail"])
+
+    def test_comparison_reports_the_decision_consequence(self):
+        c = self.fc.compare_plans(
+            self.lots, self.arrival,
+            ["L-4416", "L-4412", "L-4413", "L-4414", "L-4415"],
+            "IN-TN-TIRUPUR-01", "COMBINED")
+        self.assertGreater(c["delta"]["projected_draw_l"], 0)
+        self.assertGreater(c["delta"]["headroom_gained_l"], 0)
+        self.assertTrue(c["delta"]["risk_improved"])
+
+    def test_unknown_lot_rejected(self):
+        with self.assertRaises(KeyError):
+            self.fc.project(self.lots, ["NOPE"], "IN-TN-TIRUPUR-01")
+
+    def test_session_forecast_follows_the_selected_plan(self):
+        s = core.Session()
+        s.run_optimisation()
+        before = s.forecast()["plan"]["strategy_id"]
+        s.decide_sequence(True)
+        after = s.forecast()
+        self.assertEqual(after["plan"]["strategy_id"], s.selected_strategy)
+        self.assertEqual(after["plan"]["order"], s.current_order)
+        self.assertEqual(before, process.DEFAULT_STRATEGY)
+
+    def test_every_site_projects(self):
+        for site_id in basin.BASINS:
+            f = self.fc.project(self.lots, self.arrival, site_id)
+            self.assertGreater(f["envelope"]["allocation_l"], 0)
+            self.assertIn(f["envelope"]["risk"],
+                          {"WITHIN_ALLOWANCE", "TIGHT", "AT_RISK",
+                           "BREACH_PROJECTED"})

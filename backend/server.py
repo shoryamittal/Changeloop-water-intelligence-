@@ -29,7 +29,7 @@ sys.path.insert(0, str(ROOT))
 import core
 from core import (
     factors, basin, process, zld, telemetry, provenance, economics,
-    scenarios, ledger,
+    scenarios, ledger, forecast,
 )
 from core.session import get_session
 
@@ -550,6 +550,9 @@ class App(SimpleHTTPRequestHandler):
                         {"valid": sorted(scenarios.constraint_modes())})
                 return self.send_json(
                     scenarios.ablation(one("site", s.site_id), mode_id))
+
+            if route == "/api/forecast":
+                return self.send_json(s.forecast())
 
             if route == "/api/impact":
                 return self.send_json(s.impact())

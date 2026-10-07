@@ -20,7 +20,7 @@ import json
 import hashlib
 import uuid
 
-from . import factors, provenance, zld, telemetry
+from . import factors, provenance, zld, telemetry, forecast
 from .basin import get_basin, all_basins, methodology, DEFAULT_SITE
 from .process import (
     reference_lots, arrival_order, evaluate_sequence, changeover_matrix,
@@ -427,6 +427,26 @@ class Session:
         out["achieved_scenario"] = {
             k: v for k, v in achieved.items() if not k.startswith("_")}
         return out
+
+    # ------------------------------------------------------------------
+    # forecast
+    # ------------------------------------------------------------------
+
+    def forecast(self) -> Dict[str, Any]:
+        """Project the committed queue under the plan currently selected.
+
+        Driven by self.current_order and self.selected_strategy, so the
+        trajectory is the shadow of the decision actually taken. Approve a
+        different plan and the curve moves - which is the whole point of
+        presenting it as a forecast rather than a report.
+        """
+        return forecast.compare_plans(
+            lots=self.lots,
+            baseline_order=self.arrival,
+            plan_order=self.current_order,
+            site_id=self.site_id,
+            plan_strategy_id=self.selected_strategy,
+        )
 
     # ------------------------------------------------------------------
     # state + export
