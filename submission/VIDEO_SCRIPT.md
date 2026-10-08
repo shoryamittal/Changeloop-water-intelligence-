@@ -2,55 +2,50 @@
 
 **What you do:** screen-record the running website and read this out.
 
-There are **two complete versions** below. Pick one *before* you record:
+Two complete versions, for two different moments:
 
-| Version | Runs | Use it when |
+| Version | Runs | Use it for |
 |---|---|---|
-| **A — Full** | **~6:12** | the limit allows 6 minutes |
-| **B — Short** | **~3:27** | the limit is 3:30 or less |
+| **B — Video** | **~3:24** | **the submission video. Record this one.** |
+| **A — Live pitch** | **~8:30** | if you are shortlisted and present live to the jury — the full story, with every reason spelled out |
 
-Both tell the same story in the same order. B is A with shorter sentences —
-you never have to cut anything yourself mid-recording.
+B tells the same story as A, in the same order, with the same clicks — just
+shorter. Learn B for the video now. Read A before any live round: it is the
+version you will be speaking from when a judge says "tell us more".
+
 
 Everything in a **grey box is what you say.** Everything in **bold outside a
 box is what you click.** Lines starting **Need:** are not spoken — they remind
-you *why* each step exists, so you can answer if a judge asks.
+you why each step exists, so you can answer if a judge asks.
 
 ---
 
-## What the jury must leave knowing
+## What the jury must think, in order
 
-| They must understand | Where it lands |
+By the end of each part, the jury should be thinking one sentence:
+
+| Part | What the jury should be thinking |
 |---|---|
-| **Why this matters** — real people, real harm | Section 1: the river |
-| **Where the cost really comes from** | Section 2: filters → salty leftover → boiling → coal |
-| **Who has the pain, and why nobody fixes it** | Section 3: decided in one place, paid in another |
-| **What is new** | Section 4: the coal is set by salt, not water |
-| **That it works, step by step** | Sections 6–10: each step names the pain it removes |
-| **That you are honest** | Section 10: zero measured, said by you first |
+| The river | *"Real people were harmed by this."* |
+| Today | *"This is a big problem — and it is still getting worse."* |
+| One morning | *"I can see exactly how it happens, every single day."* |
+| Why nobody fixes it | *"Nobody is even looking in the right place."* |
+| Why it cannot wait | *"This has to be solved."* |
+| The insight | *"I did not know that. Nobody told me that."* |
+| Steps 1–5 | *"He has actually solved it — and I can see how."* |
+| The ending | *"This is the right answer."* |
 
----
-
-## The thread that holds it together
-
-**Salt is in every part of this video.** If you understand this chain, the
-script will feel natural instead of memorised:
+**Salt is the thread through all of it:**
 
 ```
-salt poisoned the farmers' groundwater
-   |   so the court said: release nothing
-filters clean most of the water — but they cannot get rid of salt
-   |   they only squeeze it into less and less water
-a small amount of extremely salty water is left, and cannot be poured away
-   |   so it is boiled until only dry salt remains
-boiling needs steam, and steam comes from a coal boiler
-   |
-the salt that once poisoned the river now burns coal
-   |
-every dyehouse pays for that coal — but the amount is decided each morning,
-by a planner who never sees the bill
-   |
-ChangeLoop puts the bill in front of the planner, before the choice is made
+salt poisoned the farmers' wells
+   → the court said: release nothing
+filters clean the water — but cannot get rid of salt
+   → so it is boiled out, and boiling burns coal
+and then the salt is still there — over a lakh tonnes, in sheds, with nowhere to go
+   → everyone is trying to get rid of it at the end
+but the amount is decided at the start — at six in the morning, by one planner
+   → ChangeLoop works at that desk
 ```
 
 ---
@@ -80,18 +75,20 @@ moving when you click **Accept**.
 ---
 ---
 
-# VERSION A — FULL  (~6:12)
+# VERSION A — LIVE PITCH  (~8:30)
 
 ---
 
-## A1. The river  (0:00 – 0:48)
+## A1. The river
+
 *On screen: the Command page. Do not touch the mouse. Let them look.*
 
 > In 2003, farmers in Tamil Nadu took an industry to court.
 >
 > Not an NGO. Farmers.
 >
-> Their river is the Noyyal. Upstream is Tirupur — India's knitwear capital.
+> Their river is the Noyyal. Upstream is Tirupur — the town that makes more
+> than half of India's knitwear exports.
 >
 > To dye cotton you need two things: colour, and a lot of salt. The salt
 > pushes the dye into the fibre. For years, both went into that river.
@@ -102,144 +99,193 @@ moving when you click **Accept**.
 >
 > The groundwater turned salty. Wells that had fed that land for generations
 > became useless.
-
-*(pause)*
-
-> In 2006 the court ordered zero discharge. Release nothing.
 >
-> The industry did not. So in 2011, the court shut down seven hundred dyeing
-> units.
+> In 2011, the court shut down seven hundred dyeing units, and gave one order.
+> Release nothing.
 
 ---
 
-## A2. What "release nothing" really costs  (0:48 – 1:39)
-> Tirupur rebuilt. Today it recycles about a hundred and thirty million litres
-> of water every day. It worked.
->
-> But what does "release nothing" really mean?
+## A2. Today — the coal, and the mountain
 
-*(slow down — this is the step everything rests on)*
-
-> The dirty water goes through filters. Most of it comes out clean and goes
-> back into the factory. That part is easy.
+> Tirupur rebuilt. Four hundred and fifty dyeing units spent over a thousand
+> crore rupees on shared treatment plants. Today they recycle a hundred and
+> thirty million litres of water every day.
 >
+> It worked. The river is cleaner.
+
+*(pause — slow down, this is the step everything rests on)*
+
 > But filters do not get rid of salt. They only squeeze it into less and less
-> water.
+> water — until you are holding a small amount of extremely salty water that
+> you are not allowed to pour anywhere.
 >
-> So at the end you are holding a small amount of extremely salty water — and
-> you are not allowed to pour it anywhere.
+> So you boil it, until only dry salt is left. Boiling needs steam. Steam
+> comes from a coal boiler.
 >
-> So you boil it, until only dry salt is left.
->
-> Boiling needs steam. Steam comes from a coal boiler.
-
-*(pause — the hinge of the whole video)*
-
 > The salt that once poisoned the river now burns coal.
 
+*(pause)*
+
+> And when the boiling is done — the salt is still there.
+>
+> Last year, the Dyers Association of Tiruppur said more than one lakh tonnes
+> of it is sitting in sheds at the treatment plants. Three years earlier, it
+> was fifty thousand. It has doubled.
+>
+> In their own words: "We don't have the technology for this salt, so we pile
+> up huge amounts of salt."
+>
+> So every dyehouse pays for its salt twice. Once to buy it. And once to boil
+> it back out. And then nobody knows where to put it.
+
 ---
 
-## A3. Who pays — and why nobody has fixed it  (1:39 – 2:23)
-> Who pays for that coal? Every dyehouse.
+## A3. One morning in one dyehouse
+
+*Still on Command.*
+
+> Here is how that happens, on an ordinary morning.
 >
-> The treatment plant charges them about a hundred and eighty-five rupees for
-> every kilolitre. River water costs forty-five. Recycled water costs four
-> times as much as fresh.
+> It is six o'clock. Five orders came in overnight. Deep indigo. Pale mint.
+> Dusty rose. Carbon black. And natural ecru — almost white.
+>
+> The planner runs them in the order they arrived.
+>
+> So after the carbon black, the machine has to be scrubbed clean before the
+> ecru goes in — or the white cloth comes out grey. That one clean-out uses
+> over seven thousand litres of water, and every litre carries salt to the
+> treatment plant.
+>
+> The washing runs on a fixed timer, to be safe — even after the cloth is
+> already clean.
+>
+> And by two in the afternoon, this one machine has used up its share of the
+> factory's water allowance.
 
 *(pause)*
 
-> So why has nobody fixed it?
+> Nobody did anything wrong. They followed the system they were given.
 >
-> Because the cost is decided in one place and paid in another.
->
-> Every morning, a planner chooses which batches to run, and how to dye them.
-> That choice decides how much salt goes into the water.
->
-> But the bill arrives weeks later, at the treatment plant. Nobody connects
-> the two.
->
-> And the tools that exist today measure water. So every project tries to
-> save water.
+> And this happens every morning, in every one of those four hundred and
+> fifty units.
 
 ---
 
-## A4. The thing everyone gets backwards  (2:23 – 2:48)
+## A4. Why nobody has fixed it
+
+> So why has nobody solved this? Three reasons.
+>
+> First — everyone is working at the end of the pipe. Better filters. Better
+> boilers. Some way to get rid of the salt. The Dyers Association says that
+> technology is "yet to evolve." Nobody is working on the start — on how much
+> salt goes in.
+>
+> Second — the person who decides that is the planner, at six in the morning.
+> And the planner never sees the bill. It arrives weeks later, at a shared
+> plant, split across four hundred and fifty factories.
+>
+> Third — the tools that exist count water. And that is exactly what almost
+> everyone gets backwards.
+
+---
+
+## A5. Why it cannot wait
+
+> And this cannot wait.
+>
+> That salt cannot be released. There is nowhere to send it. And it grows by
+> up to seventy tonnes, every single day.
+>
+> And the same rule — release nothing — now applies across India. To
+> tanneries. To distilleries. To paper mills. Every one of them will meet the
+> same salt, and the same coal.
+
+---
+
+## A6. The insight
+
 *Move the mouse to the band at the top. Read the big sentence:*
 
+> Here is what I found.
+>
 > In a zero discharge dyehouse, the coal bill is set by how much salt goes
 > into the dye bath. Not by how much water comes out.
 
 *Explain:*
 
 > The filters can only make that leftover water so salty before they clog. So
-> the amount you have to boil depends on the salt.
->
-> Use more water with the same salt — and you still boil the same amount.
+> how much you boil depends on the salt. Use more water with the same salt —
+> and you still boil the same amount.
 
----
-
-## A5. The proof  (2:48 – 3:01)
 *Point at the four numbers on the right of the band.*
 
-> Cut the water by twenty percent. The energy changes by zero point zero
+> Cut the water by twenty percent: the energy changes by zero point zero
 > percent.
 >
-> Cut the salt by twenty percent. It drops by twenty.
+> Cut the salt by twenty percent: it drops by twenty.
 >
-> Water is only the carrier. Salt is the load.
+> Water is the carrier. Salt is the load. And this is ChangeLoop — the system
+> I built to act on it. Let me show you, step by step, the same morning —
+> fixed.
 
 ---
 
-## A6. Step one — a better plan, every morning  (3:01 – 3:36)
-**Need:** the planner makes the salt decision, so the tool must work at the planner's desk.
+## A7. Step one — the six o'clock plan
+
+**Need:** the salt is decided at the planner's desk, so the solution has to work there.
 
 **Click Run optimiser.** Then **Decisions**.
 
-> So ChangeLoop works where the decision is actually made — the planner's
-> morning. The order of the batches, and how each is dyed, decide the salt.
+> Step one. ChangeLoop starts where the problem starts — the planner's desk,
+> at six in the morning.
 >
-> It checks four hundred and eighty possible plans, and recommends Option B.
+> It takes those same five orders and checks four hundred and eighty ways to
+> run them.
+>
+> Its answer: run the ecru first, while the machine is still clean. That one
+> change removes the seven thousand litre clean-out.
+>
+> It cannot simply sort them light to dark — the indigo is due by ten. So it
+> finds the order that saves the most and still keeps every deadline.
 
 *Move the mouse to Option C. Slow down.*
 
-> Now look at Option C. It saves almost half the fresh water — the best water
-> number on the screen.
+> And look at Option C. It would save almost half the fresh water.
 >
-> And ChangeLoop refuses it. Because it misses a customer's delivery date by
-> two point six hours.
->
-> No factory will use a tool that loses it a customer.
+> ChangeLoop refuses it. It makes one order two point six hours late — and no
+> factory will use a tool that loses it a customer.
 
 ---
 
-## A7. Step two — a person decides  (3:36 – 3:47)
-**Need:** no factory will hand control to software.
+## A8. Step two — the planner decides
+
+**Need:** no factory will hand control of its machines to software.
 
 **Click Accept.** *The flow picture starts moving — point at it.*
 
-> No factory hands control to software. So a named person approves, and it
-> is recorded.
+> Step two. Nothing happens until a person says yes. The planner approves, and
+> it is recorded under their name.
 >
-> Reject it, and the saving counts as zero.
+> Reject it — and the saving counts as zero.
 
 ---
 
-## A8. Step three — knowing when washing is finished  (3:47 – 4:24)
-**Need:** fixed-time washing wastes water, steam and salt — but stopping early ruins the batch.
+## A9. Step three — stop washing when it is actually clean
+
+**Need:** a fixed timer wastes water and salt — but stopping too early ruins the batch.
 
 **Click Water.** Scroll to **Inject a fault**.
 
-> Most dyehouses wash for a fixed time, to be safe. Every wash after the cloth
-> is already clean wastes water, steam and salt.
+> Step three — the washing. Instead of a fixed timer, ChangeLoop watches the
+> sensors and tells the operator when the cloth is truly clean.
 >
-> But stop too early, and the colour bleeds and the batch is ruined.
->
-> So ChangeLoop reads the sensors, and tells you when it is safe to stop.
+> But stop too early and the colour bleeds, and the whole batch is washed
+> again. So the rule is strict.
 
 **Click Calibration drift.** **Click Attempt release.**
 
-> And when a sensor cannot be trusted — refused. At the gate, and again at the
-> server. It can never release by itself.
+> When a sensor cannot be trusted — refused. At the gate, and again at the
+> server. It never releases a batch on its own.
 
 *Stay silent for two seconds.*
 
@@ -247,77 +293,79 @@ moving when you click **Accept**.
 
 ---
 
-## A9. Step four — a warning before the limit  (4:24 – 4:51)
-**Need:** every factory has a daily water allowance and needs to know *before* it breaks it.
+## A10. Step four — no more surprise at two o'clock
+
+**Need:** a factory must know it will break its water allowance *before* it happens.
 
 **Click Forecast.**
 
-> Every factory has a daily water allowance. It needs a warning before it
-> crosses it — not after.
+> Step four — the two o'clock problem. ChangeLoop shows it at six in the
+> morning, while there is still time to act.
 >
 > Doing nothing: a hundred and thirty-two percent of the allowance.
 >
-> Reusing the rinse water — the obvious fix, the one everyone pays for: a
-> hundred and thirty-two percent.
+> Reusing the rinse water — the fix everyone pays for: still a hundred and
+> thirty-two.
 
 *(pause)*
 
-> The same. Only the low salt chemistry brings it inside, at eighty-two.
+> The same. Only cutting the salt brings it inside — at eighty-two.
 
 ---
 
-## A10. Step five — numbers that stand up  (4:51 – 5:22)
+## A11. Step five — numbers that hold up
+
 **Need:** under a court order, every number must survive an audit.
 
 **Click Evidence.**
 
-> Under a court order, every number has to stand up. So I will say this
-> first: nothing here is measured.
+> Step five. Under a court order, every number has to stand up. So I will say
+> this first: nothing here is measured yet.
 >
-> Seventeen numbers are published, four calculated, four assumed, zero
-> measured.
+> Seventeen numbers come from published sources. Four are calculated. Four
+> are assumed.
 >
-> But the model can still be tested. The Pollution Control Board measured
-> eighteen thousand three hundred and forty milligrams per litre at a real
-> Tirupur unit. My model predicts thirty point six percent reject — inside the
-> twenty to thirty percent that real plants report.
+> But the model can be tested. The Pollution Control Board measured the salt
+> in a real Tirupur unit's water. Fed that number, my model predicts thirty
+> point six percent — inside the twenty to thirty percent real plants report.
 
 ---
 
-## A11. What it means — and the close  (5:22 – 6:12)
+## A12. The ending
+
 **Click Impact.**
 
-> On one machine, in one shift, the model shows about ten thousand rupees of
-> cost avoided — with every delivery still on time.
+> On one machine, in one shift: sixty kilos less salt sent to the treatment
+> plant. About ten thousand rupees. Every delivery on time.
 >
 > And a dyehouse runs many machines. Every shift. Every day.
 
 *(pause)*
 
-> Right now, every dyehouse pays for its salt twice. Once to buy it. And once
-> to boil it back out.
-
-*(pause — slow down for the last four lines)*
-
-> The farmers of the Noyyal proved that salt has a cost. The court made the
-> industry pay it.
+> Remember that shed. More than a lakh tonnes of salt — and the industry is
+> still searching for a way to get rid of it.
 >
-> But nobody ever showed the industry where that cost is decided.
+> But every kilo in that shed started in a dye bath. Decided at six in the
+> morning, by a planner who never saw the bill.
+
+*(pause — slow down for the last three lines)*
+
+> Getting rid of the salt is one answer.
 >
-> It is decided every morning, by a planner choosing what to run first.
+> Not putting it in is a better one.
 >
 > That is the choice we change.
 
-*Stop. Hold still for three seconds. Then end the recording.*
+*Hold still for three seconds. Then end the recording.*
 
 ---
 ---
 
-# VERSION B — SHORT  (~3:27)
+# VERSION B — VIDEO  (~3:24)
 
-Same order, same clicks, shorter sentences. Read this one straight through if
-your limit is 3:30. It runs about 3:27 at a calm pace — so speak at your normal
-speed between the marked pauses, and do not stretch them.
+**This is the one to record.** Same story, same order, same clicks as A —
+shorter sentences. Read it straight through, at your normal pace between the
+marked pauses. It leaves you about six seconds under 3:30.
 
 ---
 
@@ -325,85 +373,84 @@ speed between the marked pauses, and do not stretch them.
 
 > In 2003, farmers in Tamil Nadu took an industry to court.
 >
-> Their river, the Noyyal, runs below Tirupur — India's knitwear capital.
-> Dyeing cotton needs colour and a lot of salt, and for years both went into
-> that river. The groundwater turned salty. The wells died.
+> Upstream of their river sits Tirupur, which makes more than half of India's
+> knitwear exports. Dyeing cotton needs colour and a lot of salt — and for
+> years both went into that river. The wells turned salty.
 >
-> In 2011 the court shut down seven hundred dyeing units, and ordered zero
-> discharge: release nothing.
+> In 2011 the court shut down seven hundred dyeing units, and ordered: release
+> nothing.
 
-**B2. The real cost**
+**B2. Today**
 
 > Tirupur rebuilt, and now recycles a hundred and thirty million litres a day.
 >
-> But filters do not get rid of salt. They squeeze it into less and less
-> water, until you hold a small amount of very salty water you cannot pour
-> away. So you boil it dry. Boiling needs steam. Steam comes from coal.
+> But filters do not get rid of salt. They squeeze it into less water, until
+> it has to be boiled dry — with steam, from coal.
 >
-> The salt that poisoned the river now burns coal.
+> And then the salt is still there. The Dyers Association says more than one
+> lakh tonnes now sits in sheds — double what it was three years ago. In their
+> words: "We don't have the technology for this salt."
 
-**B3. The pain**
+**B3. One morning**
 
-> Every dyehouse pays for that coal — a hundred and eighty-five rupees a
-> kilolitre, four times the price of fresh water.
+> On an ordinary morning, five orders arrive — from deep indigo to almost-white
+> ecru. Run in the order they came, the machine must be scrubbed after carbon
+> black before the ecru: seven thousand litres of cleaning. Washing runs on a
+> fixed timer. By two in the afternoon, the machine is over its water limit —
+> in every one of four hundred and fifty units.
+
+**B4. Why nobody fixes it — and why it cannot wait**
+
+> Nobody fixes this because everyone works at the end of the pipe. The planner
+> who decides the salt never sees the bill. And today's tools count water.
 >
-> And nobody fixes it, because the cost is decided each morning by a planner
-> choosing which batches to run — but the bill arrives weeks later, somewhere
-> else.
+> And it cannot wait: the salt grows by seventy tonnes a day, and the same rule
+> now covers tanneries, distilleries and paper mills across India.
 
-**B4. The insight** — *read the big sentence*
+**B5. The insight** — *read the big sentence, then point at the numbers*
 
-> In a zero discharge dyehouse, the coal bill is set by how much salt goes into
-> the dye bath. Not by how much water comes out.
-
-**B5. The proof** — *point at the numbers*
-
-> Cut water twenty percent: energy changes zero point zero. Cut salt twenty
-> percent: it drops twenty. Water is the carrier. Salt is the load.
+> Here is what I found. In a zero discharge dyehouse, the coal bill is set by
+> how much salt goes into the dye bath. Not by how much water comes out.
+>
+> Cut water twenty percent: energy moves zero point zero. Cut salt twenty
+> percent: it drops twenty. This is ChangeLoop. Step by step:
 
 **B6. Step one** — **Run optimiser → Decisions**
 
-> So ChangeLoop works at the planner's desk. Four hundred and eighty plans
-> checked. Option C saves the most water — and it is refused, because it
-> misses a delivery by two point six hours. No factory uses a tool that loses
-> it a customer.
+> One: at the planner's desk, it checks four hundred and eighty plans — run the
+> ecru first, while the machine is clean, and keep every deadline. Option C
+> saves more water but makes an order late, so it is refused.
 
 **B7. Step two** — **Accept**
 
-> A named person approves, and it is recorded.
+> Two: a person approves, and it is recorded.
 
 **B8. Step three** — **Water → Calibration drift → Attempt release**
 
-> Washing for a fixed time wastes water; stopping early ruins the batch. So it
-> reads the sensors — and when a sensor cannot be trusted, release is refused.
-> It never releases by itself.
+> Three: washing stops when the sensors say the cloth is clean — and when a
+> sensor cannot be trusted, release is refused.
 
 **No fault → Grant release.**
 
 **B9. Step four** — **Forecast**
 
-> Against the daily water limit: doing nothing, a hundred and thirty-two
-> percent. Reusing rinse water, the obvious fix — a hundred and thirty-two.
-> The same. Only low salt chemistry brings it under, at eighty-two.
+> Four: the two o'clock problem is visible at six. Reusing rinse water: still
+> a hundred and thirty-two percent. Only cutting salt brings it inside.
 
 **B10. Step five** — **Evidence**
 
-> Nothing here is measured — I say that first. But the Pollution Control Board
-> measured a real Tirupur unit, and my model predicts what real plants report.
+> Five: nothing here is measured yet — I say that first. But fed real plant
+> data, the model predicts what real plants report.
 
-**B11. Close** — **Impact**
+**B11. The ending** — **Impact**
 
-> On one machine, in one shift, the model shows about ten thousand rupees
-> avoided — every delivery still on time. And a dyehouse runs many machines,
-> every shift, every day.
+> One machine, one shift: sixty kilos less salt, about ten thousand rupees,
+> every delivery on time.
 >
-> Right now every dyehouse pays for its salt twice — once to buy it, and once
-> to boil it back out.
+> Every kilo in that shed started in a dye bath — decided at six in the
+> morning, by a planner who never saw the bill.
 >
-> The farmers of the Noyyal proved that salt has a cost. But nobody showed the
-> industry where that cost is decided.
->
-> It is decided every morning, by a planner choosing what to run first.
+> Getting rid of the salt is one answer. Not putting it in is a better one.
 >
 > That is the choice we change.
 
@@ -414,72 +461,72 @@ speed between the marked pauses, and do not stretch them.
 
 ## Numbers to get right
 
-Keep this open in another window. Every one is checked against the running
-engine.
+Keep this open in another window.
 
-| Where | Number |
-|---|---|
-| Units shut in 2011 | **700** |
-| Recycled today | **130 million litres a day** |
-| Treatment charge | **₹185 per kilolitre** |
-| River water | **₹45 per kilolitre** |
-| Recycled vs fresh | **about 4×** |
-| Cut water 20% → energy | **0.0%** |
-| Cut salt 20% → energy | **−20.0%** |
-| Plans checked | **480** |
-| Option C late by | **2.6 hours** |
-| Do nothing | **132.3%** |
-| Reuse rinse water | **132.3%** |
-| Low salt chemistry | **82.1%** |
-| Evidence | **17 / 4 / 4 / 0** |
-| CPCB measured | **18,340 mg/L** |
-| Model predicts | **30.6%** |
-| Published band | **20–30%** |
-| Cost avoided, one machine, one shift | **about ₹10,000** (screen shows ₹10,171) |
+| Where | Number | Source |
+|---|---|---|
+| Units shut in 2011 | **700** | Down To Earth; Economic Times |
+| Tirupur's share of India's knitwear exports | **more than half** (54%) | Economic Times, June 2025 |
+| Dyeing units / shared plants | **450 / 18** | Economic Times, June 2025 |
+| Spent on treatment plants | **over ₹1,000 crore** (₹1,013 cr) | Economic Times, June 2025 |
+| Recycled today | **130 million litres a day** | Economic Times, June 2025 |
+| Salt piled in sheds, 2022 | **~50,000 tonnes** | DT Next, Oct 2022 |
+| Salt piled in sheds, 2025 | **over 1 lakh tonnes** | Dyers Association, via Economic Times, June 2025 |
+| Salt added per day | **up to 70 tonnes** | DT Next, Oct 2022 |
+| Clean-out after carbon black | **over 7,000 L** (7,200 L) | the engine |
+| Indigo due | **by 10 am** | the engine |
+| Cut water 20% → energy | **0.0%** | the engine |
+| Cut salt 20% → energy | **−20.0%** | the engine |
+| Plans checked | **480** | the engine |
+| Option C late by | **2.6 hours** | the engine |
+| Do nothing / reuse rinse / low salt | **132.3% / 132.3% / 82.1%** | the engine |
+| Model predicts at CPCB inlet | **30.6%** vs published **20–30%** | the engine; CPCB |
+| Salt avoided, one machine, one shift | **about 60 kg** (62.6 kg) | the engine |
+| Cost avoided, same | **about ₹10,000** (₹10,171) | the engine |
 
 **If the screen shows something different, the screen is correct.**
 
 ---
 
-## If a judge asks about the market
+## If a judge asks
 
-Short answers, in your own words. All of these are true and sourced.
+**Is the one lakh tonnes real?**
+Yes. The Dyers Association of Tiruppur told the Economic Times in June 2025
+that accumulated mixed waste salt at the treatment plants exceeds 100,000
+tonnes, stored in sheds because no disposal method has been found. DT Next
+reported nearly 50,000 tonnes in October 2022, growing by up to 70 tonnes a
+day.
+
+**Is the six o'clock morning a real factory?**
+It is the exact queue the engine runs — five real-shaped orders with real
+shade depths and delivery times. Every number in that story is what the
+screen shows. It is a worked example, not a named customer, and I would say
+so.
 
 **Who is the customer?**
-The dyehouse owner. They pay the treatment plant for every kilolitre of
-effluent, and that charge is driven by the salt they send.
+The dyehouse owner. They buy the salt, and they pay the treatment plant to
+boil it out.
 
 **Who would sell it?**
-The common effluent treatment plant. Every kilo of salt its members do not
-send is steam it does not have to buy. Its incentive already points the same
-way as ours.
+The shared treatment plant. Every kilo of salt its members do not send is
+steam it does not buy and salt it does not have to store. Its incentive
+already points the same way as ours.
 
-**How big is it?**
-Tirupur alone has hundreds of dyeing units under the same court order. CPCB
-guidance extends zero discharge to textiles, tanneries, distilleries, and pulp
-and paper across India.
-
-**Why will they pay?**
-Because the saving lands on a bill they already receive every month. We are
-not asking anyone to care about the environment — we are lowering the cost of
-a rule they already have to follow.
-
-**"Pays for its salt twice" — is that true?**
-Yes. The dyehouse buys electrolyte by the kilo for the dye bath, and then pays
-the treatment plant to boil that same salt back out of the water. Both costs
-are in the model on separate lines, and the model never adds them together
+**"Pays for its salt twice" — true?**
+Yes. Once to buy it for the dye bath, once through the treatment charge to
+boil it out. Both are separate costs in the model and never added together
 into the water figure.
 
-**Why say "many machines" instead of a bigger number?**
-Because a total for the whole cluster would be a projection from one modelled
-machine, and the system labels it as one. Saying "many machines, every shift,
-every day" is true without claiming a figure we have not measured.
+**Why "many machines" rather than a bigger number?**
+Because a cluster-wide total would be a projection from one modelled machine.
+"Many machines, every shift, every day" is true without claiming a figure we
+have not measured.
 
 **What is the weakness?**
-We have not yet measured a real site. One visit, two instrument readings —
-steam flow to the evaporator and the saltiness of the leftover water — turns
-this from a checked model into a measured one. That is the first thing we
-would do with support.
+We have not measured a real site yet. One visit and two instrument readings —
+steam flow to the evaporator and the saltiness of the leftover water — would
+turn this from a checked model into a measured one. That is the first thing
+we would do with support.
 
 ---
 
@@ -491,7 +538,8 @@ would do with support.
 | "blockchain" | "a tamper-evident record" |
 | "we saved", "our result" | "the model shows" |
 | "we measured" | "we checked it against published plant data" |
-| any jobs figure for 2011 | "tens of thousands" — estimates differ tenfold |
+| any jobs figure for 2011 | "tens of thousands" |
+| "a factory we worked with" | "a typical morning" — it is a worked example |
 
 ---
 
@@ -507,42 +555,21 @@ would do with support.
 
 ## The five moments that must survive
 
-Whichever version you use, never lose these. Without them there is no
-argument:
+Whichever version you use, never lose these:
 
-1. **"The salt that once poisoned the river now burns coal."** The hinge.
-2. **"Zero point zero percent."** The insight.
-3. **Option C refused, and why.** The proof you are not chasing one number.
-4. **The gate refusing your own release.** A system that says no to its
-   operator — on camera.
-5. **"Pays for its salt twice — once to buy it, once to boil it out."** The
-   line the jury will repeat afterwards.
-
----
-
-## Sources, if a judge asks
-
-| Claim | From |
-|---|---|
-| Farmers went to court, 2003 | Down To Earth |
-| Court ordered ZLD, 2006 | Madras High Court |
-| ~700 units shut, 2011 | Down To Earth; Ecotextile |
-| Supreme Court upheld Polluter Pays | *Tirupur Dyeing Factory Owners Assn v. Noyyal River Ayacutdars Protection Assn*, 2009 |
-| 130 million L/day today | The Better India; CETP operator data |
-| ₹150–220/kL treatment charge (we use ₹185) | Tamil Nadu Pollution Control Board plant data |
-| ₹45/kL river water | Down To Earth, Bhavani supply to Tirupur |
-| 18,340 mg/L inlet; reject 20–30% of inlet | CPCB Tirupur ZLD assessment |
-
-Full register: [`docs/data_sources.md`](../docs/data_sources.md)
+1. **"The salt that once poisoned the river now burns coal."**
+2. **The shed — over a lakh tonnes, doubled in three years.** The real, current problem.
+3. **"Zero point zero percent."** The insight.
+4. **Option C refused, and the gate refusing your own release.** The proof it can be trusted.
+5. **"Getting rid of the salt is one answer. Not putting it in is a better one."**
 
 ---
 
 ## One last thing
 
-The jury will see hundreds of projects that say "we save water." Yours is the
-one that explains why saving water does not save the money — and then shows,
-step by step, who pays, why nobody has fixed it, and how the fix fits into a
-planner's morning without ever risking a delivery.
+Every other team will say "we save water." You are the one who will show the
+jury a shed with a lakh tonnes of salt in it, explain why saving water does not
+shrink it, and then show the exact desk, at the exact hour, where it can be
+shrunk — without ever missing a delivery.
 
-Do not rush the first two minutes to reach the software. The story is what
-makes the software matter.
+Do not rush the first two minutes. The story is what makes the software matter.
