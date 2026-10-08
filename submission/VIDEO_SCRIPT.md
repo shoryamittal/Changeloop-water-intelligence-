@@ -6,8 +6,8 @@ There are **two complete versions** below. Pick one *before* you record:
 
 | Version | Runs | Use it when |
 |---|---|---|
-| **A — Full** | **~5:51** | the limit allows 6 minutes |
-| **B — Short** | **~3:15** | the limit is 3:30 or less |
+| **A — Full** | **~6:12** | the limit allows 6 minutes |
+| **B — Short** | **~3:27** | the limit is 3:30 or less |
 
 Both tell the same story in the same order. B is A with shorter sentences —
 you never have to cut anything yourself mid-recording.
@@ -80,7 +80,7 @@ moving when you click **Accept**.
 ---
 ---
 
-# VERSION A — FULL  (~5:51)
+# VERSION A — FULL  (~6:12)
 
 ---
 
@@ -284,31 +284,40 @@ moving when you click **Accept**.
 
 ---
 
-## A11. What it means — and the close  (5:22 – 5:51)
+## A11. What it means — and the close  (5:22 – 6:12)
 **Click Impact.**
 
 > On one machine, in one shift, the model shows about ten thousand rupees of
-> cost avoided — with every delivery on time.
+> cost avoided — with every delivery still on time.
+>
+> And a dyehouse runs many machines. Every shift. Every day.
 
 *(pause)*
 
-> Those farmers got their river back.
+> Right now, every dyehouse pays for its salt twice. Once to buy it. And once
+> to boil it back out.
+
+*(pause — slow down for the last four lines)*
+
+> The farmers of the Noyyal proved that salt has a cost. The court made the
+> industry pay it.
 >
-> The salt is out of the water now. It is in the coal.
+> But nobody ever showed the industry where that cost is decided.
 >
-> And it is decided every morning, by a planner choosing what to run first.
+> It is decided every morning, by a planner choosing what to run first.
 >
 > That is the choice we change.
 
-*Stop. Say nothing more.*
+*Stop. Hold still for three seconds. Then end the recording.*
 
 ---
 ---
 
-# VERSION B — SHORT  (~3:15)
+# VERSION B — SHORT  (~3:27)
 
 Same order, same clicks, shorter sentences. Read this one straight through if
-your limit is 3:30 — it leaves you about fifteen seconds of breathing room.
+your limit is 3:30. It runs about 3:27 at a calm pace — so speak at your normal
+speed between the marked pauses, and do not stretch them.
 
 ---
 
@@ -340,7 +349,7 @@ your limit is 3:30 — it leaves you about fifteen seconds of breathing room.
 >
 > And nobody fixes it, because the cost is decided each morning by a planner
 > choosing which batches to run — but the bill arrives weeks later, somewhere
-> else. Today's tools only measure water.
+> else.
 
 **B4. The insight** — *read the big sentence*
 
@@ -361,7 +370,7 @@ your limit is 3:30 — it leaves you about fifteen seconds of breathing room.
 
 **B7. Step two** — **Accept**
 
-> A named person approves. Reject it, and the saving is zero.
+> A named person approves, and it is recorded.
 
 **B8. Step three** — **Water → Calibration drift → Attempt release**
 
@@ -385,13 +394,20 @@ your limit is 3:30 — it leaves you about fifteen seconds of breathing room.
 **B11. Close** — **Impact**
 
 > On one machine, in one shift, the model shows about ten thousand rupees
-> avoided — with every delivery on time.
+> avoided — every delivery still on time. And a dyehouse runs many machines,
+> every shift, every day.
 >
-> Those farmers got their river back. The salt is out of the water now. It is
-> in the coal — and it is decided every morning, by a planner choosing what to
-> run first.
+> Right now every dyehouse pays for its salt twice — once to buy it, and once
+> to boil it back out.
+>
+> The farmers of the Noyyal proved that salt has a cost. But nobody showed the
+> industry where that cost is decided.
+>
+> It is decided every morning, by a planner choosing what to run first.
 >
 > That is the choice we change.
+
+*Hold still for three seconds. Then end the recording.*
 
 ---
 ---
@@ -448,6 +464,17 @@ Because the saving lands on a bill they already receive every month. We are
 not asking anyone to care about the environment — we are lowering the cost of
 a rule they already have to follow.
 
+**"Pays for its salt twice" — is that true?**
+Yes. The dyehouse buys electrolyte by the kilo for the dye bath, and then pays
+the treatment plant to boil that same salt back out of the water. Both costs
+are in the model on separate lines, and the model never adds them together
+into the water figure.
+
+**Why say "many machines" instead of a bigger number?**
+Because a total for the whole cluster would be a projection from one modelled
+machine, and the system labels it as one. Saying "many machines, every shift,
+every day" is true without claiming a figure we have not measured.
+
 **What is the weakness?**
 We have not yet measured a real site. One visit, two instrument readings —
 steam flow to the evaporator and the saltiness of the leftover water — turns
@@ -478,7 +505,7 @@ would do with support.
 
 ---
 
-## The four moments that must survive
+## The five moments that must survive
 
 Whichever version you use, never lose these. Without them there is no
 argument:
@@ -488,6 +515,8 @@ argument:
 3. **Option C refused, and why.** The proof you are not chasing one number.
 4. **The gate refusing your own release.** A system that says no to its
    operator — on camera.
+5. **"Pays for its salt twice — once to buy it, once to boil it out."** The
+   line the jury will repeat afterwards.
 
 ---
 
