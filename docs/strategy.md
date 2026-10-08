@@ -113,9 +113,15 @@ This is not an abstract efficiency story.
   River Ayacutdars Protection Association** — a farmers' body. The
   Orathupalayam dam, built to irrigate about **20,000 ha**, became a
   repository of polluted water.
-- When the units failed to comply, the court ordered closure. The industry
-  association's representation reported around **₹11 billion in lost exports
-  and about 100,000 jobs lost**.
+- When the units failed to comply, the court ordered closure. The
+  Madras High Court shut around **700 dyeing units** in February 2011, on a
+  contempt petition by the Noyyal River Ayacutdars Protection Association.
+  Exports fell by roughly **₹1,000 crore in a single quarter**, and fewer
+  than half the units had reopened a year later. Job-loss estimates vary by
+  an order of magnitude depending on the source - about 15,000 per the
+  Tirupur Exporters' Association, 45,000-50,000 in contemporaneous
+  reporting, up to 200,000 in Down To Earth - so we quote the unit count,
+  which is consistent across sources, and never a single jobs number.
 - The cluster is **MSME-dominated**. These units cannot afford consultants or
   enterprise software, and they carry the compliance cost that threatens their
   survival.

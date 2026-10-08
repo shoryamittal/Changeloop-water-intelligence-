@@ -239,8 +239,8 @@ pres.addSection({ title: 'Opening' });
   stat(s, { x: M + 3.9, y: 5.75, w: 3.5, dark: true, size: 30, color: 'E0B45A',
     value: '+25 to 30%', label: 'what that compliance costs', key: 'b' });
   stat(s, { x: M + 7.8, y: 5.75, w: 4, dark: true, size: 30, color: 'EF8373',
-    value: '100,000 jobs', label: 'lost when units could not comply', key: 'c' });
-  s.addNotes('Say the title sentence out loud, then pause. Tirupur recycles 130 million litres a day under a court-mandated zero-discharge regime. It worked. It also raised costs 25 to 30 percent, and when units could not comply the courts closed them: about 11 billion rupees of exports and 100,000 jobs, by the industry association\'s own account. Nobody has costed the coal.');
+    value: '700 units', label: 'shut by court order in 2011', key: 'c' });
+  s.addNotes('Say the title sentence out loud, then pause. In February 2011 the Madras High Court shut around 700 dyeing units in Tirupur, on a contempt petition from the farmers whose river they had been discharging into. Exports fell about a thousand crore in a quarter. The cluster rebuilt and now recycles 130 million litres a day, which worked, and raised operating costs 25 to 30 percent. Nobody has costed the coal. Job-loss estimates for 2011 range from 15,000 by the exporters association to 200,000 in press reporting, so do not quote a single figure - say tens of thousands if asked.');
 }
 
 /* ==========================================================================

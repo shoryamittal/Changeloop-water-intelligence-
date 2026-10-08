@@ -42,7 +42,7 @@ ship date.
 **The problem.** The Noyyal is a seasonal river. It had no flow to dilute
 dyeing effluent, farmers downstream lost their land and their irrigation
 reservoir, and the courts ordered zero liquid discharge. When the units could
-not comply they were closed — around ₹11 billion in exports and 100,000 jobs,
+not comply, around 700 units were closed in February 2011 — exports fell roughly ₹1,000 crore in a quarter,
 by the industry's own account.
 
 **What's solved and what isn't.** The cluster now recovers most of its water.
