@@ -18,6 +18,8 @@
 # Adding a package here changes that property. If you need one, say why in
 # the commit message.
 #
-# The deck generator (submission/build_deck.js) does use npm packages, but
-# it is a build-time authoring tool, not part of the running service, and
-# is never installed on the server.
+# The deck generator (submission/build_deck.js) does use npm packages, and
+# the video-script PDF generator (submission/build_script_pdf.py) needs
+# reportlab - see submission/requirements-tooling.txt. Both are build-time
+# authoring tools, not part of the running service, and neither is
+# installed on the server.

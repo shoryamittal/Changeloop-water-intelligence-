@@ -1,0 +1,11 @@
+# Dependencies for the submission authoring scripts in this folder -
+# build_script_pdf.py in particular. These are build-time tools used to
+# produce submission deliverables (the PDF script, the figures.json that
+# feeds the deck). None of this is installed on the deployed service: the
+# root requirements.txt stays empty, which is the project's actual
+# dependency manifest. See the note there for why that distinction matters.
+#
+#   pip install -r submission/requirements-tooling.txt
+#   python submission/build_script_pdf.py
+
+reportlab>=4.0
