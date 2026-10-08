@@ -361,15 +361,24 @@ moving when you click **Accept**.
 ---
 ---
 
-# VERSION B — VIDEO  (~3:24)
+# VERSION B — VIDEO  (~3:43)
 
 **This is the one to record.** Same story, same order, same clicks as A —
 shorter sentences. Read it straight through, at your normal pace between the
-marked pauses. It leaves you about six seconds under 3:30.
+marked pauses. The greeting adds about twenty seconds versus the old 3:24
+cut — if your limit is a hard 3:30, drop B0 and start straight at B1.
 
 ---
 
-**B1. The river** — *Command page, mouse still*
+**B0. The greeting** — *Command page, mouse still, before anything else*
+
+> Good morning everyone. My name is Shorya Mittal, and I am going to show
+> you something that surprised me while I was building this project.
+>
+> Before I explain how my system works, let me tell you why it needed to
+> exist in the first place.
+
+**B1. The river** — *same screen, continue*
 
 > In 2003, farmers in Tamil Nadu took an industry to court.
 >
