@@ -472,7 +472,11 @@ def banner(text, first=False, subtitle=None):
     if first:
         flow = [
             Paragraph(eye.upper(), S_EYEBROW),
-            Paragraph(title.title(), S_TITLE),
+            # Title-case only a heading the author wrote in lower case.
+            # A blind .title() turns "ChangeLoop" into "Changeloop" and
+            # would flatten any other internal capital the same way.
+            Paragraph(title if any(c.isupper() for c in title)
+                      else title.title(), S_TITLE),
             Paragraph(subtitle or DEFAULT_SUBTITLE, S_SUBTITLE),
             HRFlowable(width="100%", thickness=1.4, color=WATER,
                        spaceBefore=6, spaceAfter=14),
