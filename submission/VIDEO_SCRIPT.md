@@ -6,7 +6,7 @@
 about **4:10** with the pauses marked in the script.
 
 **If your limit is a hard 3:30**, use the cut list near the end of this file —
-it removes 95 words and lands you at 3:28. Decide before you record, not
+it removes 99 words and lands you at about 3:32. Decide before you record, not
 halfway through.
 
 Everything in a **grey box is what you say.** Read it exactly — it is already
