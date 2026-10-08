@@ -111,13 +111,19 @@ async function main() {
   await postJson('/api/washoff/release', { approve: true });
 
   const [state, sites, modes, insight, ablation, sens, modeCmp, evidence,
-         pilot, cluster, forecast, matrix, narrative] = await Promise.all([
+         pilot, cluster, forecast, matrix, narrative, plantNormal,
+         plantDrought] = await Promise.all([
     get('/api/state'), get('/api/sites'), get('/api/modes'),
     get('/api/insight/salt-is-water'), get('/api/ablation'),
     get('/api/sensitivity'), get('/api/modes/compare'), get('/api/evidence'),
     get('/api/pilot'), get('/api/cluster-projection'),
     get('/api/forecast'), get('/api/changeover-matrix'),
     get('/api/narrative'),
+    // the plant view draws both: today's plan, and the same plant with
+    // scarcity priced. Without the second one its headline section is
+    // skipped and the test would pass over the markup it most needs to
+    // check.
+    get('/api/plant?mode=NORMAL'), get('/api/plant?mode=DROUGHT'),
   ]);
   const businessCase = await postJson('/api/business-case', {
     lots_per_year: 9000,
@@ -174,6 +180,8 @@ async function main() {
   S.forecast = forecast;
   S.matrix = matrix.matrix;
   S.narrative = narrative;
+  S.plant = plantNormal;
+  S.plantDrought = plantDrought;
 
   const VIEWS = vm.runInContext('VIEWS', ctx);
 

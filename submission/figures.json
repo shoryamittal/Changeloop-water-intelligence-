@@ -48,9 +48,9 @@
     "units": 400
   },
   "counts": {
-    "endpoints": 32,
-    "test_files": 4,
-    "tests": 143
+    "endpoints": 33,
+    "test_files": 5,
+    "tests": 163
   },
   "envelope_note": "All three projections are the same queue, same order, same pre-decision state; only the process strategy differs. The water lever (counter-current rinsing) moves the abstraction envelope by exactly nothing, because in a closed loop freshwater makeup equals evaporative loss, which equals RO reject volume, which is set by salt mass. Only the salt lever moves it. This is the same finding as the salt-vs-water sensitivity, arriving independently through the forecast.",
   "envelopes": {

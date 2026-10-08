@@ -56,12 +56,18 @@ and further salt reduction buys nothing. The engine reports which constraint
 binds on every stream, and there is a test for the crossover. A product that
 claimed "cut salt, always win" would be wrong.
 
-**7. Your 179 kWh/m³ evaporator figure — where is it from?**
-Derived, not looked up: latent heat 0.627 kWh/kg × 1000 kg/m³ ÷ an assumed
-4-effect steam economy of 3.5. We chose 3.5 deliberately conservatively;
-optimised trains reach 5–6, which would *reduce* the saving we claim. The
-result sits inside the 150–250 kWh_th/m³ band commonly quoted for textile
-ZLD evaporator sections. Both inputs are shown wherever the figure appears.
+**7. Your 188 kWh/m³ evaporator figure — where is it from?**
+Derived, not looked up, and both inputs are published. Latent heat of
+0.62694 kWh/kg comes from standard steam tables. Steam economy of 3.33 kg of
+water evaporated per kg of live steam is the reciprocal of the 0.25–0.35 kg
+steam per kg evaporated reported for multiple-effect evaporators on textile RO
+reject, taken at its midpoint. 0.62694 × 1000 ÷ 3.33 = 188.08 kWh_th/m³.
+
+The check worth noting is that the answer lands inside the 150–250 kWh_th/m³
+band independently quoted for the evaporator section of textile ZLD plants.
+Two unrelated published figures, multiplied, fall inside a third published
+band that was never used in the calculation. Both inputs are shown wherever
+the figure appears, and a test re-does the arithmetic.
 
 **8. Where is the AI?**
 There is none, and we do not claim any. The decision space is 480 discrete
