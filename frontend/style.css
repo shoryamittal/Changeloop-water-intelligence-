@@ -1311,3 +1311,76 @@ dl.defs dd { margin: 0; font-size: var(--t-small); line-height: 1.5; }
   0%, 100% { outline-color: var(--water); }
   50% { outline-color: var(--water-lift); }
 }
+
+/* ==========================================================================
+   PLANT - shared treatment coordination
+   One capacity line, two plans. The upper bar is allowed to cross it;
+   that crossing is the finding, so it is the only place on the page that
+   uses the fault colour.
+   ========================================================================== */
+
+/* a lead paragraph: the one sentence a reader is meant to leave with */
+.lede {
+  font-size: var(--t-body);
+  line-height: 1.62;
+  color: var(--graphite);
+  margin: 0;
+}
+
+/* captions under a figure, in the same register as .small */
+.viz figcaption {
+  font-size: var(--t-small);
+  line-height: 1.5;
+  color: var(--slate-2);
+  margin-top: var(--s3);
+  max-width: var(--measure);
+}
+
+.ul { margin: 0; padding-left: 1.1em; }
+.ul li { margin-bottom: .45em; }
+.ul li:last-child { margin-bottom: 0; }
+
+.plantviz svg { min-width: 680px; }
+
+/* the capacity line - hard, physical, not negotiable */
+.pb-cap {
+  stroke: var(--graphite);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+.pb-cap-t {
+  font: 500 9.5px/1 var(--mono);
+  letter-spacing: .07em;
+  fill: var(--graphite);
+}
+
+.pb-lab {
+  font: 650 10px/1 var(--sans);
+  letter-spacing: .09em;
+  fill: var(--graphite);
+}
+.pb-lab-2 {
+  font: 400 10px/1 var(--sans);
+  letter-spacing: .01em;
+  fill: var(--slate-2);
+}
+
+/* a plan that fits, and a plan that does not */
+.pb-fit  { fill: var(--water); }
+.pb-over { fill: var(--salt); }
+.pb-seg rect { stroke: var(--surface); stroke-width: 1; }
+.pb-seg-t {
+  font: 500 10px/1 var(--mono);
+  fill: var(--on-accent);
+  letter-spacing: .04em;
+}
+
+.pb-val {
+  font: 500 12px/1 var(--mono);
+  fill: var(--graphite);
+}
+.pb-val-bad { fill: var(--coral); font-weight: 600; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .pb-seg rect { transition: fill var(--m-norm, 220ms) var(--ease, ease); }
+}

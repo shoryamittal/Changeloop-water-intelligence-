@@ -20,7 +20,7 @@ var S = {
   view: 'command',
   forecast: null, insight: null, evidence: null, ablation: null,
   sensitivity: null, modeCompare: null, cluster: null, pilot: null,
-  governance: null, matrix: null, businessCase: null,
+  governance: null, matrix: null, businessCase: null, plant: null, plantDrought: null,
   selectedStream: null,
   busy: false, loadedAt: null
 };
@@ -30,6 +30,7 @@ var VIEWS = [
   { id: 'forecast',  label: 'Forecast',  group: 'Operations', ico: 'forecast' },
   { id: 'decisions', label: 'Decisions', group: 'Operations', ico: 'decisions' },
   { id: 'water',     label: 'Water',     group: 'Operations', ico: 'water' },
+  { id: 'plant',     label: 'Plant',     group: 'Operations', ico: 'plant' },
   { id: 'impact',    label: 'Impact',    group: 'Evidence',   ico: 'impact' },
   { id: 'evidence',  label: 'Evidence',  group: 'Evidence',   ico: 'evidence' },
   { id: 'audit',     label: 'Audit',     group: 'Evidence',   ico: 'audit' },
@@ -48,6 +49,7 @@ var ICON = {
   evidence:  'M4 2h5l3 3v9H4zM9 2v3h3',
   audit:     'M8 2 3 4v4.5c0 3 2.1 5.1 5 6 2.9-.9 5-3 5-6V4zM6 8l1.6 1.6L10.5 6.7',
   scenarios: 'M3 3h10M5 3v4.2L3 13h10l-2-5.8V3',
+  plant:     'M2 14h12M3.6 14V7l3 2V7l3 2V5.6L12.6 3v11',
   reset:     'M13 8a5 5 0 1 1-1.8-3.8M13 2v3h-3',
   export:    'M8 2v8M5 7l3 3 3-3M3 13h10',
   check:     'M3 8.4 6.2 11.6 13 4.8',
@@ -251,6 +253,7 @@ function renderChrome() {
         .then(function (x) {
           S.state = x;
           S.ablation = S.sensitivity = S.modeCompare = S.forecast = null;
+          S.plant = S.plantDrought = null;
           return api('/api/forecast').then(function (f) { S.forecast = f; });
         })
         .then(function () {
@@ -267,7 +270,7 @@ function renderChrome() {
   }).join('');
   modeSel.onchange = function () {
     S.mode = modeSel.value;
-    S.ablation = S.sensitivity = null;
+    S.ablation = S.sensitivity = S.plant = null;
     guard(function () {
       return post('/api/optimise', { mode: S.mode })
         .then(function (x) { S.state = x; return api('/api/forecast'); })
@@ -398,7 +401,7 @@ var LAST = {};
 function render() {
   var map = {
     command: vCommand, forecast: vForecast, decisions: vDecisions,
-    water: vWater, impact: vImpact, evidence: vEvidence,
+    water: vWater, plant: vPlant, impact: vImpact, evidence: vEvidence,
     audit: vAudit, scenarios: vScenarios
   };
   document.getElementById('view').innerHTML = (map[S.view] || vCommand)();
@@ -2932,3 +2935,263 @@ api('/api/changeover-matrix').then(function (d) {
 });
 
 boot();
+
+/* ==========================================================================
+   SIGNATURE VISUAL 3 - PLANT LOAD BAR
+   Two plans against one capacity line. The whole argument of this view is
+   that the first bar is made of four individually CORRECT decisions and
+   still crosses the line, so the bar is segmented by machine rather than
+   drawn as one block. You have to be able to see that no single segment is
+   the culprit.
+   ========================================================================== */
+function plantBar(p) {
+  var W = 940, barH = 46, gap = 64, padL = 112, padR = 96;
+  var inner = W - padL - padR;
+  var cap = p.evaporator_capacity_m3_per_day;
+  if (!cap) return '';
+
+  var sel = p.selfish, co = p.coordinated || null;
+  var top = Math.max(sel.utilisation_pct, 100) * 1.08;
+  var x = function (pc) { return padL + (pc / top) * inner; };
+  var capX = x(100);
+  var yA = 34, yB = yA + gap + barH;
+  var H = (co ? yB + barH : yA + barH) + 26;
+
+  var ids = Object.keys(sel.choice).sort();
+
+  function segs(plan, y, tone) {
+    var acc = 0, out = '';
+    ids.forEach(function (mid) {
+      var opt = p.machine_options[mid][plan.choice[mid]];
+      var m3 = opt.reject_l * p.shifts_per_day / 1000.0;
+      var w = (m3 / cap * 100 / top) * inner;
+      out += '<g class="pb-seg">' +
+        '<rect x="' + (padL + acc).toFixed(1) + '" y="' + y + '" ' +
+          'width="' + Math.max(0, w - 2).toFixed(1) + '" height="' + barH + '" ' +
+          'rx="2" class="' + tone + '">' +
+          '<title>' + esc(mid) + ' — ' + esc(opt.strategy_name) +
+          ' — ' + num(m3, 1) + ' m3/day</title></rect>' +
+        (w > 56 ? '<text x="' + (padL + acc + 9).toFixed(1) + '" y="' +
+          (y + barH / 2 + 4) + '" class="pb-seg-t">' + esc(mid) + '</text>' : '') +
+        '</g>';
+      acc += w;
+    });
+    return out;
+  }
+
+  return '<figure class="viz plantviz"><svg viewBox="0 0 ' + W + ' ' + H +
+    '" width="100%" role="img" aria-label="Shared evaporator load, each ' +
+    'machine on its own best plan versus the coordinated plan">' +
+
+    /* the capacity line: the only hard thing on this chart */
+    '<line x1="' + capX.toFixed(1) + '" y1="14" x2="' + capX.toFixed(1) +
+      '" y2="' + (H - 14) + '" class="pb-cap"/>' +
+    '<text x="' + (capX + 7).toFixed(1) + '" y="11" class="pb-cap-t">' +
+      'EVAPORATOR CAPACITY &#183; ' + num(cap, 0) + ' m&#179;/day</text>' +
+
+    /* plan A - everyone optimises for themselves */
+    '<text x="0" y="' + (yA + 17) + '" class="pb-lab">EACH MACHINE</text>' +
+    '<text x="0" y="' + (yA + 33) + '" class="pb-lab pb-lab-2">optimises alone</text>' +
+    segs(sel, yA, sel.utilisation_pct > 100 ? 'pb-over' : 'pb-fit') +
+    '<text x="' + (x(sel.utilisation_pct) + 10).toFixed(1) + '" y="' +
+      (yA + barH / 2 + 5) + '" class="pb-val' +
+      (sel.utilisation_pct > 100 ? ' pb-val-bad' : '') + '">' +
+      num(sel.reject_m3_per_day, 1) + ' m&#179; &#183; ' +
+      pct(sel.utilisation_pct, 1) + '</text>' +
+
+    /* plan B - the cheapest combination that fits */
+    (co ? '<text x="0" y="' + (yB + 17) + '" class="pb-lab">COORDINATED</text>' +
+      '<text x="0" y="' + (yB + 33) + '" class="pb-lab pb-lab-2">cheapest that fits</text>' +
+      segs(co, yB, 'pb-fit') +
+      '<text x="' + (x(co.utilisation_pct) + 10).toFixed(1) + '" y="' +
+        (yB + barH / 2 + 5) + '" class="pb-val">' +
+        num(co.reject_m3_per_day, 1) + ' m&#179; &#183; ' +
+        pct(co.utilisation_pct, 1) + '</text>' : '') +
+
+    '</svg><figcaption>Width is the volume the shared evaporator has to boil ' +
+    'in a day. Each block is one machine. Every block in the upper bar is ' +
+    'that machine&rsquo;s own lowest-cost plan.</figcaption></figure>';
+}
+
+/* ==========================================================================
+   VIEW - PLANT
+   The only view that looks at more than one machine, and so the only one
+   that can show a failure no individual planner is able to see.
+   ========================================================================== */
+function vPlant() {
+  if (!S.plant) {
+    api('/api/plant?mode=' + encodeURIComponent(S.mode))
+      .then(function (d) { S.plant = d; soft('plant'); });
+  }
+  /* The same plant under priced scarcity. Fetched alongside rather than
+     described, because the claim it supports - that this breach is a
+     pricing failure and not a scheduling failure - is the strongest
+     thing this view has to say, and a reader should be able to check it. */
+  if (!S.plantDrought) {
+    api('/api/plant?mode=DROUGHT')
+      .then(function (d) { S.plantDrought = d; soft('plant'); });
+  }
+  var p = S.plant, dr = S.plantDrought;
+
+  if (!p) {
+    return phead('Plant', 'Shared treatment coordination', '') +
+      '<div class="sec">' + loading('Searching plant combinations') + '</div>';
+  }
+
+  if (p.status === 'NO_FEASIBLE_PLAN') {
+    return phead('Plant', 'Shared treatment coordination', esc(p.reason)) +
+      '<div class="sec"><p class="lede">' + esc(p.reason) + '</p></div>';
+  }
+
+  var sel = p.selfish, co = p.coordinated, ids = Object.keys(sel.choice).sort();
+  var breach = p.status === 'COORDINATION_REQUIRED';
+
+  return phead('Plant', 'Shared treatment coordination',
+    'Every other view optimises one machine. This one asks whether those ' +
+    'answers still hold when ' + p.machines + ' machines share a single ' +
+    'evaporator.',
+    ev('MODELLED')) +
+
+  /* --- the finding ---------------------------------------------------- */
+  '<div class="sec">' + srule(
+    breach ? p.machines + ' correct decisions, one breach'
+           : 'Within capacity',
+    breach ? 'nobody chose badly' : 'no coordination needed today') +
+    plantBar(p) +
+    '<p class="lede" style="max-width:var(--measure);margin-top:18px">' +
+      esc(p.reading) + '</p>' +
+  '</div>' +
+
+  /* --- the numbers ---------------------------------------------------- */
+  '<div class="sec">' + srule('What coordination costs',
+    'per day, across the site') +
+    '<div class="grid g-4">' +
+      readout({ label: 'Evaporator capacity', k: 'pl_cap',
+        value: p.evaporator_capacity_m3_per_day, unit: 'm&#179;/day', dp: 1,
+        size: 'sm', tone: 'water',
+        foot: 'derived, not assumed &mdash; basis below' }) +
+      readout({ label: 'Each machine alone', k: 'pl_sel',
+        raw: pct(sel.utilisation_pct, 1), value: sel.utilisation_pct,
+        size: 'xl', tone: breach ? 'salt' : '',
+        foot: num(sel.reject_m3_per_day, 1) + ' m&#179;/day to boil' }) +
+      readout({ label: 'Coordinated', k: 'pl_co',
+        raw: co ? pct(co.utilisation_pct, 1) : '&mdash;',
+        value: co ? co.utilisation_pct : null, size: 'xl', tone: 'water',
+        foot: co ? num(co.reject_m3_per_day, 1) + ' m&#179;/day to boil'
+                 : 'no combination fits' }) +
+      readout({ label: 'Coordination premium', k: 'pl_prem',
+        raw: co ? inr(co.coordination_premium_inr_per_day) : '&mdash;',
+        value: co ? co.coordination_premium_inr_per_day : null,
+        unit: co ? '/day' : '', size: 'sm', tone: 'salt',
+        foot: breach
+          ? 'what the site pays so the sum fits. No machine sees it.'
+          : 'nothing. Every machine can take its own best plan.' }) +
+    '</div>' +
+  '</div>' +
+
+  /* --- per machine ---------------------------------------------------- */
+  '<div class="sec">' + srule('Who gives way, and what it costs them',
+    'per machine, per shift') +
+    '<div class="tw"><table class="t"><thead><tr><th>Machine</th>' +
+      '<th>Own best plan</th><th>Plant plan</th>' +
+      '<th class="n">Reject, own</th><th class="n">Reject, plant</th>' +
+      '<th class="n">Cost to this machine</th></tr></thead><tbody>' +
+      ids.map(function (mid) {
+        var a = p.machine_options[mid][sel.choice[mid]];
+        var b = co ? p.machine_options[mid][co.choice[mid]] : null;
+        var moved = !!co && co.machines_that_move.indexOf(mid) >= 0;
+        var d = b ? b.objective_inr - a.objective_inr : null;
+        return '<tr' + (moved ? ' class="rec"' : '') + '>' +
+          '<td><span class="t-k">' + esc(mid) + '</span>' +
+          '<div class="t-s">' + (moved ? 'gives way' : 'unaffected') +
+          '</div></td>' +
+          '<td>' + esc(a.strategy_name) + '</td>' +
+          '<td>' + (b ? esc(b.strategy_name) : '&mdash;') + '</td>' +
+          '<td class="n">' + num(a.reject_l, 0) + ' L</td>' +
+          '<td class="n">' + (b ? num(b.reject_l, 0) + ' L' : '&mdash;') + '</td>' +
+          '<td class="n">' + (d == null ? '&mdash;'
+            : Math.abs(d) < 0.5 ? '<span class="delta flat">no change</span>'
+            : '<span class="delta up">+' + num(d, 0) + '</span>') +
+          '</td></tr>';
+      }).join('') + '</tbody></table></div>' +
+    '<p class="small" style="margin-top:12px;max-width:var(--measure)">' +
+      (breach
+        ? 'The machines that give way are not the worst performers. They are ' +
+          'the ones whose next-best plan sheds the most salt for the least ' +
+          'money. That is a plant-level property, and it is not visible from ' +
+          'the machine.'
+        : 'No machine has to give way today. That changes with the order ' +
+          'book, which is why this is a daily question and not a one-off ' +
+          'setting.') + '</p>' +
+  '</div>' +
+
+  /* --- the pricing finding -------------------------------------------- */
+  (dr && dr.status === 'WITHIN_CAPACITY' && breach
+    ? '<div class="sec">' + srule('The breach is a pricing failure',
+        'the same plant, the same order book, scarcity priced') +
+      '<div class="grid g-7-5"><div>' +
+      '<p class="lede" style="max-width:var(--measure)">Under ' +
+        esc(p.mode_name || 'normal operation') + ', freshwater is cheap ' +
+        'enough that every machine privately prefers the water-saving ' +
+        'plan, and their sum breaks the evaporator. Price scarcity the way ' +
+        esc(dr.mode_name) + ' does, and all ' + p.machines + ' machines ' +
+        'choose the low-salt plan on their own account. The plant then ' +
+        'fits at ' + pct(dr.selfish.utilisation_pct, 1) + ', nobody is ' +
+        'made worse off, and the coordination premium is zero.</p>' +
+      '<p class="small" style="max-width:var(--measure);margin-top:14px">' +
+        'Nothing was rescheduled to get there. The plan the site has to ' +
+        'force on two machines under today&rsquo;s tariffs is the plan ' +
+        'every machine would pick for itself if water cost what it is ' +
+        'worth. That is the argument for pricing, and it is the strongest ' +
+        'claim in this system that does not need a single new ' +
+        'assumption &mdash; switch the binding constraint in the bar above ' +
+        'and the numbers on this page recompute.</p></div>' +
+      '<div class="stack">' +
+        readout({ label: 'Premium under ' + esc(p.mode_name || 'normal'),
+          k: 'pl_pn', raw: inr(co.coordination_premium_inr_per_day),
+          value: co.coordination_premium_inr_per_day, unit: '/day',
+          size: 'sm', tone: 'salt',
+          foot: co.machines_that_move.length + ' of ' + p.machines +
+            ' machines forced off their own optimum' }) +
+        readout({ label: 'Premium under ' + esc(dr.mode_name),
+          k: 'pl_pd', raw: inr(0), value: 0, unit: '/day',
+          size: 'sm', tone: 'water',
+          foot: 'no machine gives way. The lever buys itself.' }) +
+      '</div></div></div>'
+    : '') +
+
+  /* --- why this is not a new assumption ------------------------------- */
+  '<div class="sec">' + srule('Where the capacity number comes from',
+    'the part worth checking') +
+    '<div class="grid g-7-5">' +
+      '<div><p class="small" style="max-width:var(--measure)">' +
+        esc(p.capacity_basis) + '</p>' +
+      '<p class="small" style="max-width:var(--measure);margin-top:12px">' +
+        'This matters because the easiest way to make a coordination demo ' +
+        'look impressive is to pick a capacity figure that guarantees a ' +
+        'breach. That number is not chosen here. It is the same abstraction ' +
+        'allowance the rest of the system already runs on, read a second ' +
+        'way.</p></div>' +
+      '<div class="stack">' +
+        disc('What this does not do', '<ul class="ul">' +
+          '<li>It chooses which plan each machine runs, not when it runs. ' +
+            'There is no scheduling against each other in time.</li>' +
+          '<li>It does not model surge storage or queueing at the membrane ' +
+            'train, which in a real plant buys back some of this.</li>' +
+          '<li>It handles machines inside one unit. A common effluent plant ' +
+            'with hundreds of members is the same shape of problem and a ' +
+            'far larger one.</li>' +
+          '<li>No plant has run this. Like everything else here it is ' +
+            'MODELLED, and the order book behind it is simulated.</li>' +
+        '</ul>') +
+        disc('Why the answer is proven, not estimated', '<p class="small">' +
+          'Each machine&rsquo;s queue is optimised separately within every ' +
+          'strategy, then all ' + Math.pow(4, p.machines) + ' combinations ' +
+          'are checked against capacity and the cheapest feasible one is ' +
+          'returned. Nothing is sampled. At cluster scale that stops being ' +
+          'possible and the method has to change, which is a real limit ' +
+          'rather than a detail.</p>') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
