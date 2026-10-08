@@ -120,6 +120,9 @@ S_H2_APPENDIX_EYE = ps("h2apx", fontName="Body-Bold", fontSize=9.5, leading=12,
 S_H2_APPENDIX = ps("h2apxt", fontName="Head-Bold", fontSize=16, leading=20,
                     textColor=GRAPHITE, spaceAfter=2)
 
+S_H3 = ps("h3", fontName="Body-Bold", fontSize=11.2, leading=15,
+          textColor=WATER_INK, spaceBefore=12, spaceAfter=4)
+
 S_MINIHEAD = ps("minihead", fontName="Body-Bold", fontSize=11, leading=15,
                  textColor=WATER_INK, spaceBefore=11, spaceAfter=4)
 
@@ -130,10 +133,10 @@ S_NEED      = ps("need", fontSize=9.3, leading=13, textColor=AMBER,
                   spaceBefore=1, spaceAfter=5)
 S_CLICK     = ps("click", fontName="Body-Bold", fontSize=10.3, leading=14.5,
                   textColor=WATER_INK, spaceBefore=1, spaceAfter=6)
-S_BULLET    = ps("bullet", fontSize=10, leading=14, spaceAfter=3,
-                  leftIndent=14)
+S_BULLET    = ps("bullet", fontSize=10, leading=14, spaceAfter=4,
+                  leftIndent=18, bulletIndent=4)
 S_NUM       = ps("num", fontSize=10, leading=14.5, spaceAfter=6,
-                  leftIndent=16)
+                  leftIndent=22, bulletIndent=4)
 
 S_QUOTE = ps("quote", fontSize=11, leading=16.5, spaceAfter=0)
 S_QUOTE_LABEL = ps("quotelabel", fontName="Body-Bold", fontSize=8.3,
@@ -187,6 +190,10 @@ def parse_blocks(lines):
             blocks.append(("h1", s[2:].strip()))
             i += 1
             continue
+        if s.startswith("### "):
+            blocks.append(("h3", s[4:].strip()))
+            i += 1
+            continue
         if s.startswith("## "):
             blocks.append(("h2", s[3:].strip()))
             i += 1
@@ -226,18 +233,36 @@ def parse_blocks(lines):
             blocks.append(("quote", paras))
             continue
         if s.startswith("- "):
+            # A wrapped list item continues on following lines that are
+            # indented. Those continuation lines belong to the item - if
+            # they are left to fall through they become separate
+            # paragraphs at the body margin, which reads as a broken
+            # hanging indent.
             items = []
             while i < n and lines[i].strip().startswith("- "):
-                items.append(lines[i].strip()[2:].strip())
+                item = [lines[i].strip()[2:].strip()]
                 i += 1
+                while (i < n and lines[i].strip()
+                       and (lines[i][:1] in (" ", "	"))
+                       and not lines[i].strip().startswith("- ")):
+                    item.append(lines[i].strip())
+                    i += 1
+                items.append(" ".join(item))
             blocks.append(("bullets", items))
             continue
         if re.match(r"^\d+\.\s", s):
             items = []
             while i < n and re.match(r"^\d+\.\s", lines[i].strip()):
                 m = re.match(r"^(\d+)\.\s(.*)$", lines[i].strip())
-                items.append((m.group(1), m.group(2)))
+                num, first = m.group(1), m.group(2)
+                body = [first]
                 i += 1
+                while (i < n and lines[i].strip()
+                       and (lines[i][:1] in (" ", "	"))
+                       and not re.match(r"^\d+\.\s", lines[i].strip())):
+                    body.append(lines[i].strip())
+                    i += 1
+                items.append((num, " ".join(body)))
             blocks.append(("numbered", items))
             continue
         stop_prefixes = ("#", "|", ">", "```", "- ")
@@ -393,7 +418,13 @@ def classify_para(text):
 
 
 # ------------------------------------------------------------- build doc --
-def banner(text, first=False):
+DEFAULT_SUBTITLE = (
+    "A screen-recording narration for the SANKALP 2026 submission "
+    "&mdash; the problem, why it has not been solved, and how ChangeLoop "
+    "solves it, step by step.")
+
+
+def banner(text, first=False, subtitle=None):
     if " — " in text:
         eye, title = text.split(" — ", 1)
     else:
@@ -402,11 +433,7 @@ def banner(text, first=False):
         flow = [
             Paragraph(eye.upper(), S_EYEBROW),
             Paragraph(title.title(), S_TITLE),
-            Paragraph(
-                "A screen-recording narration for the SANKALP 2026 "
-                "submission &mdash; the problem, why it has not been "
-                "solved, and how ChangeLoop solves it, step by step.",
-                S_SUBTITLE),
+            Paragraph(subtitle or DEFAULT_SUBTITLE, S_SUBTITLE),
             HRFlowable(width="100%", thickness=1.4, color=WATER,
                        spaceBefore=6, spaceAfter=14),
         ]
@@ -426,8 +453,8 @@ def banner(text, first=False):
     return [t, Spacer(1, 14)]
 
 
-def h2_flow(text):
-    if text.strip() == "Numbers to get right":
+def h2_flow(text, appendix=None):
+    if appendix and text.strip() == appendix:
         return [
             Paragraph("REFERENCE", S_H2_APPENDIX_EYE),
             Paragraph(text, S_H2_APPENDIX),
@@ -441,14 +468,26 @@ def h2_flow(text):
     ]
 
 
-def main():
-    lines = io.open(SRC, encoding="utf-8").read().splitlines()
+def render(src=None, out=None, title=None, subject=None,
+           subtitle=None, footer_text=None, appendix_heading=None):
+    """Render one markdown file to a PDF in the house style.
+
+    appendix_heading - the H2 that starts a reference section and gets a
+    page break plus a REFERENCE eyebrow. Defaults to the video script's
+    "Numbers to get right"; pass another heading for other documents, or
+    None to disable.
+    """
+    src = src or SRC
+    out = out or OUT
+    appendix = ("Numbers to get right" if appendix_heading is None
+                else appendix_heading)
+    lines = io.open(src, encoding="utf-8").read().splitlines()
     blocks = parse_blocks(lines)
 
     PAGEBREAK_BEFORE_H1 = {"ChangeLoop — video script": False}  # cover: no break
     seen_first_h1 = [False]
 
-    out = []            # final flowables
+    flow_out = []       # final flowables
     buf = []            # current KeepTogether buffer
     grouping = [False]  # are we accumulating a group right now
     # KeepTogether is only worth its blank-space cost inside the
@@ -463,7 +502,7 @@ def main():
 
     def flush():
         if buf:
-            out.append(KeepTogether(list(buf)))
+            flow_out.append(KeepTogether(list(buf)))
             buf.clear()
 
     def emit(flowables):
@@ -480,7 +519,7 @@ def main():
         if grouping[0]:
             buf.extend(unit)
         else:
-            out.extend(unit)
+            flow_out.extend(unit)
 
     for b in blocks:
         kind = b[0]
@@ -494,30 +533,35 @@ def main():
             grouping[0] = False
             if not seen_first_h1[0]:
                 seen_first_h1[0] = True
-                out.extend(banner(text, first=True))
+                flow_out.extend(banner(text, first=True, subtitle=subtitle))
                 in_version[0] = False
             else:
-                out.append(PageBreak())
-                out.extend(banner(text, first=False))
+                flow_out.append(PageBreak())
+                flow_out.extend(banner(text, first=False))
                 in_version[0] = text.strip().startswith("VERSION")
             continue
 
         if kind == "h2":
             text = b[1]
-            if text.strip() == "Numbers to get right":
+            if appendix and text.strip() == appendix:
                 flush()
                 grouping[0] = False
                 in_version[0] = False
-                out.append(PageBreak())
-                out.extend(h2_flow(text))
+                flow_out.append(PageBreak())
+                flow_out.extend(h2_flow(text, appendix))
                 continue
             flush()
             if in_version[0]:
-                buf.extend(h2_flow(text))
+                buf.extend(h2_flow(text, appendix))
                 grouping[0] = True
             else:
-                out.extend(h2_flow(text))
+                flow_out.extend(h2_flow(text, appendix))
                 grouping[0] = False
+            continue
+
+        if kind == "h3":
+            flowables = [P(b[1], S_H3)]
+            emit(flowables)
             continue
 
         # ---- content blocks ----
@@ -538,7 +582,8 @@ def main():
                 flowables.append(P("\u2022  " + item, S_BULLET))
         elif kind == "numbered":
             for num, item in b[1]:
-                flowables.append(P("%s.  %s" % (num, item), S_NUM))
+                flowables.append(Paragraph(inline(item), S_NUM,
+                                           bulletText="%s." % num))
         elif kind == "para":
             text = b[1]
             cls = classify_para(text)
@@ -568,10 +613,11 @@ def main():
     flush()
 
     doc = SimpleDocTemplate(
-        OUT, pagesize=A4,
+        out, pagesize=A4,
         leftMargin=M_L, rightMargin=M_R, topMargin=M_T, bottomMargin=M_B,
-        title="ChangeLoop \u2014 Video Script", author="Shorya Mittal",
-        subject="SANKALP 2026 submission narration script")
+        title=title or "ChangeLoop \u2014 Video Script",
+        author="Shorya Mittal",
+        subject=subject or "SANKALP 2026 submission narration script")
 
     def footer(c, d):
         c.saveState()
@@ -580,13 +626,18 @@ def main():
         c.line(M_L, 15 * mm, PAGE_W - M_R, 15 * mm)
         c.setFont("Body", 8)
         c.setFillColor(SLATE2)
-        c.drawString(M_L, 11.3 * mm,
-                     "ChangeLoop  \u00b7  SANKALP 2026 Students Track  \u00b7  Video Script")
+        c.drawString(M_L, 11.3 * mm, footer_text or
+                     "ChangeLoop  \u00b7  SANKALP 2026 Students Track  "
+                     "\u00b7  Video Script")
         c.drawRightString(PAGE_W - M_R, 11.3 * mm, "Page %d" % d.page)
         c.restoreState()
 
-    doc.build(out, onFirstPage=footer, onLaterPages=footer)
-    print("wrote", OUT)
+    doc.build(flow_out, onFirstPage=footer, onLaterPages=footer)
+    print("wrote", out)
+
+
+def main():
+    render()
 
 
 if __name__ == "__main__":
