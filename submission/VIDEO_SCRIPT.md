@@ -2,48 +2,56 @@
 
 **What you do:** screen-record the running website and read this out.
 
-**Length: 695 spoken words.** With the marked pauses and the clicking, the
-full version runs about **5:00**.
+There are **two complete versions** below. Pick one *before* you record:
 
-| Version | Runs |
-|---|---|
-| Full script | **~5:00** |
-| Minus the five cut-list blocks | **~4:20** |
-| Minus those *and* section 9 | **~3:50** |
+| Version | Runs | Use it when |
+|---|---|---|
+| **A — Full** | **~5:51** | the limit allows 6 minutes |
+| **B — Short** | **~3:15** | the limit is 3:30 or less |
 
-The cut list is at the end of this file. It also names the four moments that
-must survive whatever else goes — read that part before you decide anything.
+Both tell the same story in the same order. B is A with shorter sentences —
+you never have to cut anything yourself mid-recording.
 
-**Check the SANKALP limit first, then pick a version.** Do not start recording
-and find out halfway.
-
-Everything in a **grey box is what you say.** Read it as written.
-Everything in **bold outside a box is what you click.**
+Everything in a **grey box is what you say.** Everything in **bold outside a
+box is what you click.** Lines starting **Need:** are not spoken — they remind
+you *why* each step exists, so you can answer if a judge asks.
 
 ---
 
-## The one idea holding this together
+## What the jury must leave knowing
 
-Read this before you record. If you understand it, the whole script will feel
-inevitable instead of memorised.
+| They must understand | Where it lands |
+|---|---|
+| **Why this matters** — real people, real harm | Section 1: the river |
+| **Where the cost really comes from** | Section 2: filters → salty leftover → boiling → coal |
+| **Who has the pain, and why nobody fixes it** | Section 3: decided in one place, paid in another |
+| **What is new** | Section 4: the coal is set by salt, not water |
+| **That it works, step by step** | Sections 6–10: each step names the pain it removes |
+| **That you are honest** | Section 10: zero measured, said by you first |
 
-**Salt is the thread.** It is the same substance in every part of the video:
+---
+
+## The thread that holds it together
+
+**Salt is in every part of this video.** If you understand this chain, the
+script will feel natural instead of memorised:
 
 ```
 salt poisoned the farmers' groundwater
    |   so the court said: release nothing
-salt now stays inside the factory
-   |   and the only way to remove it is to boil the water off it
+filters clean most of the water — but they cannot get rid of salt
+   |   they only squeeze it into less and less water
+a small amount of extremely salty water is left, and cannot be poured away
+   |   so it is boiled until only dry salt remains
 boiling needs steam, and steam comes from a coal boiler
    |
-the salt that once poisoned the river now burns coal instead
+the salt that once poisoned the river now burns coal
    |
-and the coal is set by the salt — not by the water
+every dyehouse pays for that coal — but the amount is decided each morning,
+by a planner who never sees the bill
+   |
+ChangeLoop puts the bill in front of the planner, before the choice is made
 ```
-
-That last line is the project. Everything before it is the reason it matters.
-Never let the audience wonder where coal came from — you will have walked them
-there, one step at a time.
 
 ---
 
@@ -58,105 +66,123 @@ Open `http://localhost:8000`
 
 - Click **Reset**
 - **Binding constraint** → **Normal operation**
-- Full screen, zoom 100%, close all other tabs
+- Full screen (F11), zoom 100%, close every other tab
+- Put this script on a second screen or your phone
 
 **Record on your own computer, not the Render link.** Render sleeps and takes
 50 seconds to wake.
 
 **The flow picture does not move at the start.** That is correct. It starts
-when you click **Accept** in section 6.
+moving when you click **Accept**.
 
 **Speak slowly.** The pauses are doing work.
 
 ---
+---
 
-# 1. The river  (0:00 – 0:55)
+# VERSION A — FULL  (~5:51)
+
+---
+
+## A1. The river  (0:00 – 0:48)
 *On screen: the Command page. Do not touch the mouse. Let them look.*
 
 > In 2003, farmers in Tamil Nadu took an industry to court.
 >
 > Not an NGO. Farmers.
 >
-> Their river is the Noyyal. Most of the year it is dry — nothing flows in it
-> to carry anything away.
+> Their river is the Noyyal. Upstream is Tirupur — India's knitwear capital.
 >
-> Upstream sits Tirupur, which makes most of India's knitted clothing.
->
-> To dye cloth you need two things. Colour, and a lot of salt. The salt is
-> what drives the dye into the fibre.
->
-> Both went into that river.
+> To dye cotton you need two things: colour, and a lot of salt. The salt
+> pushes the dye into the fibre. For years, both went into that river.
 
 *(pause)*
 
-> You could see the colour. You could not see the salt. And salt is the one
-> that stays.
+> You could see the colour. You could not see the salt — and salt stays.
 >
-> The groundwater turned salty. Wells that had watered that land for
-> generations stopped being usable.
+> The groundwater turned salty. Wells that had fed that land for generations
+> became useless.
 
 *(pause)*
 
 > In 2006 the court ordered zero discharge. Release nothing.
 >
-> The industry did not do it.
->
-> So in 2011 the court shut it down. Seven hundred dyeing units.
+> The industry did not. So in 2011, the court shut down seven hundred dyeing
+> units.
 
 ---
 
-# 2. What "release nothing" really costs  (0:55 – 1:40)
-*Still on the Command page.*
-
-> Tirupur rebuilt. Today it recycles about a hundred and thirty million
-> litres of water every day.
+## A2. What "release nothing" really costs  (0:48 – 1:39)
+> Tirupur rebuilt. Today it recycles about a hundred and thirty million litres
+> of water every day. It worked.
 >
-> It worked. The river is cleaner.
+> But what does "release nothing" really mean?
 
-*(pause)*
+*(slow down — this is the step everything rests on)*
 
-> But think about what "release nothing" actually means.
+> The dirty water goes through filters. Most of it comes out clean and goes
+> back into the factory. That part is easy.
 >
-> The salt did not disappear. It is still dissolved in that water. And the
-> only way to get clean water back out is to boil the water off and leave the
-> salt behind.
+> But filters do not get rid of salt. They only squeeze it into less and less
+> water.
+>
+> So at the end you are holding a small amount of extremely salty water — and
+> you are not allowed to pour it anywhere.
+>
+> So you boil it, until only dry salt is left.
 >
 > Boiling needs steam. Steam comes from a coal boiler.
 
-*(pause — this is the hinge of the whole video)*
+*(pause — the hinge of the whole video)*
 
-> So the salt that used to poison that river now burns coal instead.
->
-> That is why cloth from here costs twenty-five to thirty percent more than
-> it used to.
+> The salt that once poisoned the river now burns coal.
 
 ---
 
-# 3. The thing nobody noticed  (1:40 – 2:12)
-*Move the mouse to the band at the top.*
+## A3. Who pays — and why nobody has fixed it  (1:39 – 2:23)
+> Who pays for that coal? Every dyehouse.
+>
+> The treatment plant charges them about a hundred and eighty-five rupees for
+> every kilolitre. River water costs forty-five. Recycled water costs four
+> times as much as fresh.
 
-> And this is where almost everyone gets it backwards.
+*(pause)*
 
-*Read the big sentence on screen:*
+> So why has nobody fixed it?
+>
+> Because the cost is decided in one place and paid in another.
+>
+> Every morning, a planner chooses which batches to run, and how to dye them.
+> That choice decides how much salt goes into the water.
+>
+> But the bill arrives weeks later, at the treatment plant. Nobody connects
+> the two.
+>
+> And the tools that exist today measure water. So every project tries to
+> save water.
+
+---
+
+## A4. The thing everyone gets backwards  (2:23 – 2:48)
+*Move the mouse to the band at the top. Read the big sentence:*
 
 > In a zero discharge dyehouse, the coal bill is set by how much salt goes
 > into the dye bath. Not by how much water comes out.
 
 *Explain:*
 
-> Every water-saving project in this industry attacks the water. But you are
-> not boiling that water off because there is too much of it. You are boiling
-> it to get the salt out.
+> The filters can only make that leftover water so salty before they clog. So
+> the amount you have to boil depends on the salt.
 >
-> This is ChangeLoop. And it proves that, live.
+> Use more water with the same salt — and you still boil the same amount.
 
 ---
 
-# 4. The proof  (2:12 – 2:28)
+## A5. The proof  (2:48 – 3:01)
 *Point at the four numbers on the right of the band.*
 
-> Cut the water by twenty percent. The evaporator energy changes by zero
-> point zero percent.
+> Cut the water by twenty percent. The energy changes by zero point zero
+> percent.
 >
 > Cut the salt by twenty percent. It drops by twenty.
 >
@@ -164,51 +190,56 @@ when you click **Accept** in section 6.
 
 ---
 
-# 5. It refuses its own best answer  (2:28 – 3:05)
+## A6. Step one — a better plan, every morning  (3:01 – 3:36)
+**Need:** the planner makes the salt decision, so the tool must work at the planner's desk.
+
 **Click Run optimiser.** Then **Decisions**.
 
-> So we put that cost back where the decision is made — in the morning, when
-> a planner picks what order to run today's batches in.
+> So ChangeLoop works where the decision is actually made — the planner's
+> morning. The order of the batches, and how each is dyed, decide the salt.
 >
-> Four hundred and eighty plans, all of them checked. Option B is the
-> recommendation.
+> It checks four hundred and eighty possible plans, and recommends Option B.
 
 *Move the mouse to Option C. Slow down.*
 
-> But look at Option C. It saves almost half the fresh water — the best
-> water number on the screen.
+> Now look at Option C. It saves almost half the fresh water — the best water
+> number on the screen.
 >
 > And ChangeLoop refuses it. Because it misses a customer's delivery date by
 > two point six hours.
 >
-> A delivery date cannot be traded for water.
+> No factory will use a tool that loses it a customer.
 
 ---
 
-# 6. A person decides  (3:05 – 3:18)
+## A7. Step two — a person decides  (3:36 – 3:47)
+**Need:** no factory will hand control to software.
+
 **Click Accept.** *The flow picture starts moving — point at it.*
 
-> Approved, and recorded under a named person. The system only shows itself
-> as running after a human has decided something.
+> No factory hands control to software. So a named person approves, and it
+> is recorded.
 >
-> Reject it instead, and the saving is exactly zero.
+> Reject it, and the saving counts as zero.
 
 ---
 
-# 7. The gate refuses me  (3:18 – 3:45)
+## A8. Step three — knowing when washing is finished  (3:47 – 4:24)
+**Need:** fixed-time washing wastes water, steam and salt — but stopping early ruins the batch.
+
 **Click Water.** Scroll to **Inject a fault**.
 
-> Second decision. When is the washing actually finished?
+> Most dyehouses wash for a fixed time, to be safe. Every wash after the cloth
+> is already clean wastes water, steam and salt.
 >
-> Stop too early and the colour bleeds, and the batch is washed again —
-> costing more than you saved.
+> But stop too early, and the colour bleeds and the batch is ruined.
+>
+> So ChangeLoop reads the sensors, and tells you when it is safe to stop.
 
 **Click Calibration drift.** **Click Attempt release.**
 
-> Refused at the gate. Refused again at the server. Written into the record,
-> and the saving stays at zero.
->
-> It can never release by itself.
+> And when a sensor cannot be trusted — refused. At the gate, and again at the
+> server. It can never release by itself.
 
 *Stay silent for two seconds.*
 
@@ -216,63 +247,167 @@ when you click **Accept** in section 6.
 
 ---
 
-# 8. The surprise  (3:45 – 4:15)
+## A9. Step four — a warning before the limit  (4:24 – 4:51)
+**Need:** every factory has a daily water allowance and needs to know *before* it breaks it.
+
 **Click Forecast.**
 
-> Against this machine's real water allowance, doing nothing runs at a
-> hundred and thirty-two percent.
+> Every factory has a daily water allowance. It needs a warning before it
+> crosses it — not after.
 >
-> Now reuse the rinse water — the obvious answer, the one everybody funds.
-> A hundred and thirty-two percent.
+> Doing nothing: a hundred and thirty-two percent of the allowance.
+>
+> Reusing the rinse water — the obvious fix, the one everyone pays for: a
+> hundred and thirty-two percent.
 
 *(pause)*
 
-> The same. Not close — the same. Because the fresh water you take in
-> replaces the water you boiled away, and that is set by salt.
->
-> Only the low salt chemistry brings it inside, at eighty-two.
+> The same. Only the low salt chemistry brings it inside, at eighty-two.
 
 ---
 
-# 9. We measured nothing  (4:15 – 4:45)
+## A10. Step five — numbers that stand up  (4:51 – 5:22)
+**Need:** under a court order, every number must survive an audit.
+
 **Click Evidence.**
 
-> Nothing here is measured, and I will say that before anyone asks.
-> Seventeen numbers published, four calculated, four assumed, zero measured.
+> Under a court order, every number has to stand up. So I will say this
+> first: nothing here is measured.
 >
-> But a model can still be tested. The Pollution Control Board measured
+> Seventeen numbers are published, four calculated, four assumed, zero
+> measured.
+>
+> But the model can still be tested. The Pollution Control Board measured
 > eighteen thousand three hundred and forty milligrams per litre at a real
-> Tirupur unit. Plants separately report their reject at twenty to thirty
-> percent.
->
-> I give my model the first number. It predicts thirty point six. Inside the
-> band.
+> Tirupur unit. My model predicts thirty point six percent reject — inside the
+> twenty to thirty percent that real plants report.
 
 ---
 
-# 10. Ending  (4:45 – 5:03)
+## A11. What it means — and the close  (5:22 – 5:51)
+**Click Impact.**
+
+> On one machine, in one shift, the model shows about ten thousand rupees of
+> cost avoided — with every delivery on time.
+
+*(pause)*
+
 > Those farmers got their river back.
 >
 > The salt is out of the water now. It is in the coal.
 >
-> Nobody has counted it — and it is decided every morning, by a planner
-> choosing what to run first.
+> And it is decided every morning, by a planner choosing what to run first.
 >
 > That is the choice we change.
 
 *Stop. Say nothing more.*
 
 ---
+---
+
+# VERSION B — SHORT  (~3:15)
+
+Same order, same clicks, shorter sentences. Read this one straight through if
+your limit is 3:30 — it leaves you about fifteen seconds of breathing room.
+
+---
+
+**B1. The river** — *Command page, mouse still*
+
+> In 2003, farmers in Tamil Nadu took an industry to court.
+>
+> Their river, the Noyyal, runs below Tirupur — India's knitwear capital.
+> Dyeing cotton needs colour and a lot of salt, and for years both went into
+> that river. The groundwater turned salty. The wells died.
+>
+> In 2011 the court shut down seven hundred dyeing units, and ordered zero
+> discharge: release nothing.
+
+**B2. The real cost**
+
+> Tirupur rebuilt, and now recycles a hundred and thirty million litres a day.
+>
+> But filters do not get rid of salt. They squeeze it into less and less
+> water, until you hold a small amount of very salty water you cannot pour
+> away. So you boil it dry. Boiling needs steam. Steam comes from coal.
+>
+> The salt that poisoned the river now burns coal.
+
+**B3. The pain**
+
+> Every dyehouse pays for that coal — a hundred and eighty-five rupees a
+> kilolitre, four times the price of fresh water.
+>
+> And nobody fixes it, because the cost is decided each morning by a planner
+> choosing which batches to run — but the bill arrives weeks later, somewhere
+> else. Today's tools only measure water.
+
+**B4. The insight** — *read the big sentence*
+
+> In a zero discharge dyehouse, the coal bill is set by how much salt goes into
+> the dye bath. Not by how much water comes out.
+
+**B5. The proof** — *point at the numbers*
+
+> Cut water twenty percent: energy changes zero point zero. Cut salt twenty
+> percent: it drops twenty. Water is the carrier. Salt is the load.
+
+**B6. Step one** — **Run optimiser → Decisions**
+
+> So ChangeLoop works at the planner's desk. Four hundred and eighty plans
+> checked. Option C saves the most water — and it is refused, because it
+> misses a delivery by two point six hours. No factory uses a tool that loses
+> it a customer.
+
+**B7. Step two** — **Accept**
+
+> A named person approves. Reject it, and the saving is zero.
+
+**B8. Step three** — **Water → Calibration drift → Attempt release**
+
+> Washing for a fixed time wastes water; stopping early ruins the batch. So it
+> reads the sensors — and when a sensor cannot be trusted, release is refused.
+> It never releases by itself.
+
+**No fault → Grant release.**
+
+**B9. Step four** — **Forecast**
+
+> Against the daily water limit: doing nothing, a hundred and thirty-two
+> percent. Reusing rinse water, the obvious fix — a hundred and thirty-two.
+> The same. Only low salt chemistry brings it under, at eighty-two.
+
+**B10. Step five** — **Evidence**
+
+> Nothing here is measured — I say that first. But the Pollution Control Board
+> measured a real Tirupur unit, and my model predicts what real plants report.
+
+**B11. Close** — **Impact**
+
+> On one machine, in one shift, the model shows about ten thousand rupees
+> avoided — with every delivery on time.
+>
+> Those farmers got their river back. The salt is out of the water now. It is
+> in the coal — and it is decided every morning, by a planner choosing what to
+> run first.
+>
+> That is the choice we change.
+
+---
+---
 
 ## Numbers to get right
 
-Keep this open in another window.
+Keep this open in another window. Every one is checked against the running
+engine.
 
 | Where | Number |
 |---|---|
 | Units shut in 2011 | **700** |
 | Recycled today | **130 million litres a day** |
-| ZLD cost increase | **25–30%** |
+| Treatment charge | **₹185 per kilolitre** |
+| River water | **₹45 per kilolitre** |
+| Recycled vs fresh | **about 4×** |
 | Cut water 20% → energy | **0.0%** |
 | Cut salt 20% → energy | **−20.0%** |
 | Plans checked | **480** |
@@ -284,8 +419,40 @@ Keep this open in another window.
 | CPCB measured | **18,340 mg/L** |
 | Model predicts | **30.6%** |
 | Published band | **20–30%** |
+| Cost avoided, one machine, one shift | **about ₹10,000** (screen shows ₹10,171) |
 
 **If the screen shows something different, the screen is correct.**
+
+---
+
+## If a judge asks about the market
+
+Short answers, in your own words. All of these are true and sourced.
+
+**Who is the customer?**
+The dyehouse owner. They pay the treatment plant for every kilolitre of
+effluent, and that charge is driven by the salt they send.
+
+**Who would sell it?**
+The common effluent treatment plant. Every kilo of salt its members do not
+send is steam it does not have to buy. Its incentive already points the same
+way as ours.
+
+**How big is it?**
+Tirupur alone has hundreds of dyeing units under the same court order. CPCB
+guidance extends zero discharge to textiles, tanneries, distilleries, and pulp
+and paper across India.
+
+**Why will they pay?**
+Because the saving lands on a bill they already receive every month. We are
+not asking anyone to care about the environment — we are lowering the cost of
+a rule they already have to follow.
+
+**What is the weakness?**
+We have not yet measured a real site. One visit, two instrument readings —
+steam flow to the evaporator and the saltiness of the leftover water — turns
+this from a checked model into a measured one. That is the first thing we
+would do with support.
 
 ---
 
@@ -306,47 +473,21 @@ Keep this open in another window.
 - Small mistake — keep going. Calm recovery beats a visible cut.
 - Wrong page — go back and say "let me show you that properly".
 - Wrong state — click **Reset**, restart from Command.
-- Flow not moving — correct before section 6.
+- Flow not moving — correct before **Accept**.
 - A number looks odd — say what is on screen.
 
 ---
 
-## Cut list — 5:03 down to 4:20
+## The four moments that must survive
 
-Five blocks, **114 words**, about **43 seconds**. Mark them in your copy
-before you start — deciding mid-take is how people lose their place.
+Whichever version you use, never lose these. Without them there is no
+argument:
 
-| Cut | Words | Section |
-|---|---|---|
-| "Most of the year it is dry — nothing flows in it to carry anything away." | 16 | 1 |
-| "Every water-saving project in this industry attacks the water. But you are not boiling that water off because there is too much of it. You are boiling it to get the salt out." | 33 | 3 |
-| "So we put that cost back where the decision is made — in the morning, when a planner picks what order to run today's batches in." | 26 | 5 |
-| "Stop too early and the colour bleeds, and the batch is washed again — costing more than you saved." | 19 | 7 |
-| "Approved, and recorded under a named person. The system only shows itself as running after a human has decided something." | 20 | 6 |
-
-Losing these costs you the *reasons* but keeps every *fact*. Section 3's
-explanation, for instance, is immediately proved by the numbers in section 4 —
-so the audience still gets the point, just without being walked to it.
-
-### The four that must survive
-
-Whatever else goes, these stay. Without them the video has no argument:
-
-1. **"The salt that used to poison that river now burns coal instead."**
-   The hinge. Cut this and the second half of your video is about a different
-   subject from the first half.
-2. **"Zero point zero percent."** The insight itself.
-3. **Option C being refused — and the reason why.** This is what separates
-   you from every submission that only shows its best number.
-4. **The gate refusing your own release attempt.** A system that says no to
-   its operator on camera is something a jury has not seen before.
-
-### If you are still over
-
-Drop section 9 entirely (72 words, 27 seconds) and say the one sentence
-"nothing here is measured, and a test enforces that" while the Evidence screen
-is visible. You lose the CPCB validation, which is painful — but it is the
-only remaining block that can go without breaking the argument.
+1. **"The salt that once poisoned the river now burns coal."** The hinge.
+2. **"Zero point zero percent."** The insight.
+3. **Option C refused, and why.** The proof you are not chasing one number.
+4. **The gate refusing your own release.** A system that says no to its
+   operator — on camera.
 
 ---
 
@@ -356,34 +497,23 @@ only remaining block that can go without breaking the argument.
 |---|---|
 | Farmers went to court, 2003 | Down To Earth |
 | Court ordered ZLD, 2006 | Madras High Court |
-| ~700 units shut, Feb 2011 | Down To Earth; Ecotextile |
-| Fewer than half reopened in a year | Ecotextile |
+| ~700 units shut, 2011 | Down To Earth; Ecotextile |
 | Supreme Court upheld Polluter Pays | *Tirupur Dyeing Factory Owners Assn v. Noyyal River Ayacutdars Protection Assn*, 2009 |
 | 130 million L/day today | The Better India; CETP operator data |
-| Costs up 25–30% | Down To Earth |
-| Reject 20–30% of inlet; 18,340 mg/L inlet | CPCB Tirupur ZLD assessment |
+| ₹150–220/kL treatment charge (we use ₹185) | Tamil Nadu Pollution Control Board plant data |
+| ₹45/kL river water | Down To Earth, Bhavani supply to Tirupur |
+| 18,340 mg/L inlet; reject 20–30% of inlet | CPCB Tirupur ZLD assessment |
 
 Full register: [`docs/data_sources.md`](../docs/data_sources.md)
 
 ---
 
-## Why this version is built the way it is
+## One last thing
 
-The earlier draft told the river story, then jumped to a coal bill. The
-audience had no idea where coal came from, so the second half sounded like a
-different presentation.
+The jury will see hundreds of projects that say "we save water." Yours is the
+one that explains why saving water does not save the money — and then shows,
+step by step, who pays, why nobody has fixed it, and how the fix fits into a
+planner's morning without ever risking a delivery.
 
-The fix was not better wording. It is that **salt is the same substance in both
-halves**, and the script now says so out loud. The salt that ruined those wells
-is the salt that now has to be boiled out of the water, and boiling is where
-the coal goes. Section 2 exists entirely to walk the audience across that
-bridge, one step at a time, so that when the headline sentence arrives in
-section 3 it lands as something they had half worked out themselves.
-
-That is also the honest shape of the project. You did not start with a
-thermodynamics insight and go looking for a story. The story is the reason the
-physics is worth anything.
-
-So do not rush sections 1 and 2 to reach the software. They are not an
-introduction to the project. They *are* the project — the software is the part
-that proves it.
+Do not rush the first two minutes to reach the software. The story is what
+makes the software matter.
