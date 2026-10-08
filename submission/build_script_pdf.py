@@ -139,6 +139,12 @@ S_NUM       = ps("num", fontSize=10, leading=14.5, spaceAfter=6,
                   leftIndent=22, bulletIndent=4)
 
 S_QUOTE = ps("quote", fontSize=11, leading=16.5, spaceAfter=0)
+S_PULL = ps("pull", fontName="Head", fontSize=14.5, leading=20.5,
+            textColor=WATER_INK, spaceAfter=0)
+
+S_COVER_NUM = ps("covernum", fontName="Head-Bold", fontSize=52, leading=60,
+                 textColor=AQUIFER_DEEP, spaceAfter=10)
+
 S_QUOTE_LABEL = ps("quotelabel", fontName="Body-Bold", fontSize=8.3,
                     leading=11, textColor=WATER, spaceAfter=3)
 
@@ -372,7 +378,41 @@ def build_code(code_lines, bg=AQUIFER, border=HAIR2):
     return t
 
 
+def build_pull_quote(paras):
+    """One sentence, set large, with an accent rule down the left.
+
+    No tinted panel: a written answer reads better when the emphasis
+    comes from type size and white space than from another grey box.
+    """
+    body = []
+    for idx, ptext in enumerate(paras):
+        st = S_PULL if idx == len(paras) - 1 else ParagraphStyle(
+            "pullmid", parent=S_PULL, spaceAfter=8)
+        body.append(Paragraph(inline(ptext), st))
+    inner = Table([[body]], colWidths=[CONTENT_W - 34])
+    inner.setStyle(TableStyle([
+        ("LEFTPADDING", (0, 0), (-1, -1), 16),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+    ]))
+    outer = Table([[Paragraph("", S_BODY), inner]],
+                  colWidths=[2.5, CONTENT_W - 2.5])
+    outer.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (0, 0), WATER),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+    ]))
+    return outer
+
+
 def build_quote(paras, label="SAY THIS"):
+    if label is None:
+        return build_pull_quote(paras)
     content = []
     content.append(Paragraph(label, S_QUOTE_LABEL))
     for idx, ptext in enumerate(paras):
@@ -469,7 +509,9 @@ def h2_flow(text, appendix=None):
 
 
 def render(src=None, out=None, title=None, subject=None,
-           subtitle=None, footer_text=None, appendix_heading=None):
+           subtitle=None, footer_text=None, appendix_heading=None,
+           quote_label="SAY THIS", cover_number=None,
+           running_header=None):
     """Render one markdown file to a PDF in the house style.
 
     appendix_heading - the H2 that starts a reference section and gets a
@@ -533,6 +575,9 @@ def render(src=None, out=None, title=None, subject=None,
             grouping[0] = False
             if not seen_first_h1[0]:
                 seen_first_h1[0] = True
+                if cover_number:
+                    flow_out.append(Paragraph(cover_number,
+                                              S_COVER_NUM))
                 flow_out.extend(banner(text, first=True, subtitle=subtitle))
                 in_version[0] = False
             else:
@@ -567,7 +612,7 @@ def render(src=None, out=None, title=None, subject=None,
         # ---- content blocks ----
         flowables = []
         if kind == "quote":
-            flowables.append(build_quote(b[1]))
+            flowables.append(build_quote(b[1], quote_label))
             flowables.append(Spacer(1, 9))
         elif kind == "code":
             flowables.append(build_code(b[1]))
@@ -621,6 +666,13 @@ def render(src=None, out=None, title=None, subject=None,
 
     def footer(c, d):
         c.saveState()
+        if running_header and d.page > 1:
+            c.setFont("Body", 8)
+            c.setFillColor(SLATE2)
+            c.drawString(M_L, PAGE_H - 13 * mm, running_header)
+            c.setStrokeColor(HAIR)
+            c.setLineWidth(0.6)
+            c.line(M_L, PAGE_H - 15 * mm, PAGE_W - M_R, PAGE_H - 15 * mm)
         c.setStrokeColor(HAIR)
         c.setLineWidth(0.6)
         c.line(M_L, 15 * mm, PAGE_W - M_R, 15 * mm)

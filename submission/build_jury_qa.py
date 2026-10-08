@@ -34,27 +34,27 @@ QA_DIR = os.path.join(HERE, "jury_qa")
 # so it states the question rather than describing the document.
 DOCS = [
     ("Q1_the_problem.md", "ChangeLoop_Q1_The_Problem.pdf",
-     "Question 1 &mdash; which water challenge, where, and why current "
-     "approaches fail.",
+     "Which water challenge, where, and why the approaches that exist "
+     "today do not close it.",
      "Question 1  ·  The problem"),
 
     ("Q2_how_it_works.md", "ChangeLoop_Q2_How_It_Works.pdf",
-     "Question 2 &mdash; how the system works, and what has actually been "
-     "measured.",
+     "How the system works, what was tested, and what has not been "
+     "measured yet.",
      "Question 2  ·  How it works"),
 
     ("Q3_what_is_new.md", "ChangeLoop_Q3_What_Is_New.pdf",
-     "Question 3 &mdash; what is new, the closest existing methods, and the "
-     "difference.",
+     "What already exists, what is genuinely new here, and the difference "
+     "between them.",
      "Question 3  ·  What is new"),
 
     ("Q4_impact.md", "ChangeLoop_Q4_Impact.pdf",
-     "Question 4 &mdash; how much is saved, for whom, and what is projection "
-     "rather than result.",
+     "How much is saved, who benefits, and which figures are projections "
+     "rather than results.",
      "Question 4  ·  Impact"),
 
     ("Q5_scale.md", "ChangeLoop_Q5_Scale.pdf",
-     "Question 5 &mdash; what changes at scale, and what is not solved yet.",
+     "What changes at cluster scale, and which parts are not solved yet.",
      "Question 5  ·  Scale"),
 ]
 
@@ -66,6 +66,7 @@ def main():
         raise SystemExit("missing source files: " + ", ".join(missing))
 
     for src, out, subtitle, footer in DOCS:
+        qnum = src[1]
         render(
             src=os.path.join(QA_DIR, src),
             out=os.path.join(HERE, out),
@@ -77,6 +78,10 @@ def main():
             # these documents have no reference appendix; the supporting
             # notes are part of the body
             appendix_heading="",
+            # a blockquote here is a pull quote, not a spoken line
+            quote_label=None,
+            cover_number="0" + qnum,
+            running_header="ChangeLoop  ·  " + footer,
         )
     print("\n%d answer PDFs written to %s" % (len(DOCS), HERE))
 
