@@ -193,21 +193,35 @@ def business_case(body: Dict[str, Any]) -> Dict[str, Any]:
 
 def cluster_projection(units: int = 400,
                        lots_per_unit_per_year: int = 900,
-                       freshwater_avoided_per_lot_l: float = 1108.0,
                        salt_avoided_per_lot_kg: float = 12.5
                        ) -> Dict[str, Any]:
     """Project one modelled unit to a cluster. Clearly a projection.
 
     Defaults correspond to a Tirupur-scale cluster and are order-of-magnitude
     figures for scale discussion only.
+
+    Freshwater is NOT an independent input here. In a closed loop the
+    freshwater makeup IS the evaporative loss, which IS the reject volume,
+    which is set by salt mass over the concentration ceiling. That identity
+    is this project's entire thesis, and zld.account_for_water enforces it
+    everywhere else - the engine's own impact reports freshwater avoided and
+    reject avoided as exactly equal.
+
+    An earlier version took freshwater_avoided_per_lot_l as a separate
+    argument defaulting to 1108 L while deriving reject from salt. The two
+    then disagreed by 5.3x inside a single returned block - 398,880 m3 of
+    freshwater against 75,000 m3 of reject - which is not a rounding gap but
+    a direct contradiction of the physics the rest of the system rests on,
+    and it inflated the headline cluster water figure by the same factor.
+    Deriving both from salt removes the possibility of them ever disagreeing.
     """
     units = max(0, int(units))
     lots = units * max(0, int(lots_per_unit_per_year))
 
-    water_m3 = (lots * max(0.0, freshwater_avoided_per_lot_l)) / 1000.0
     salt_kg = lots * max(0.0, salt_avoided_per_lot_kg)
     reject_m3 = ((salt_kg * 1e6
                   / factors.get("ro_max_reject_tds_mg_l")) / 1000.0)
+    water_m3 = reject_m3
     mee_kwh = reject_m3 * factors.get("mee_specific_thermal_kwh_per_m3")
     co2e_t = (mee_kwh * factors.get("boiler_co2e_kg_per_kwh_th")) / 1000.0
 
@@ -227,7 +241,10 @@ def cluster_projection(units: int = 400,
             "resembles the modelled one, that every recommendation is "
             "approved, and that per-lot avoidance holds at scale. None of "
             "those assumptions has been tested. It is here to size the "
-            "opportunity and must never be quoted as achieved impact."
+            "opportunity and must never be quoted as achieved impact. "
+            "Freshwater avoided equals reject avoided by construction, "
+            "because in a closed loop the makeup water is the water that "
+            "was evaporated."
         ),
         "classification": "PROJECTED",
     }

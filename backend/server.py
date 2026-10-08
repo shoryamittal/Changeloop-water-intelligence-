@@ -631,7 +631,6 @@ class App(SimpleHTTPRequestHandler):
                 return self.send_json(economics.cluster_projection(
                     units=int(num("units", 400)),
                     lots_per_unit_per_year=int(num("lots", 900)),
-                    freshwater_avoided_per_lot_l=num("water_per_lot", 1108.0),
                     salt_avoided_per_lot_kg=num("salt_per_lot", 12.5),
                 ))
 

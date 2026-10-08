@@ -195,7 +195,6 @@ def build() -> dict:
         ],
         "cluster": economics.cluster_projection(
             units=400, lots_per_unit_per_year=900,
-            freshwater_avoided_per_lot_l=1108.0,
             salt_avoided_per_lot_kg=12.5),
         "evidence": ev,
         "mee_specific": factors.get("mee_specific_thermal_kwh_per_m3"),

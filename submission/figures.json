@@ -40,9 +40,9 @@
     "co2e_avoided_tonnes_per_year": 6376.0,
     "evaporator_reject_avoided_m3_per_year": 75000.0,
     "evaporator_steam_avoided_mwh_per_year": 14106.0,
-    "freshwater_avoided_m3_per_year": 398880.0,
-    "freshwater_avoided_million_litres_per_year": 398.9,
-    "honesty": "This is a PROJECTION, not a result. It assumes every unit resembles the modelled one, that every recommendation is approved, and that per-lot avoidance holds at scale. None of those assumptions has been tested. It is here to size the opportunity and must never be quoted as achieved impact.",
+    "freshwater_avoided_m3_per_year": 75000.0,
+    "freshwater_avoided_million_litres_per_year": 75.0,
+    "honesty": "This is a PROJECTION, not a result. It assumes every unit resembles the modelled one, that every recommendation is approved, and that per-lot avoidance holds at scale. None of those assumptions has been tested. It is here to size the opportunity and must never be quoted as achieved impact. Freshwater avoided equals reject avoided by construction, because in a closed loop the makeup water is the water that was evaporated.",
     "lots_per_year_total": 360000,
     "salt_avoided_tonnes_per_year": 4500.0,
     "units": 400
@@ -50,7 +50,7 @@
   "counts": {
     "endpoints": 32,
     "test_files": 4,
-    "tests": 140
+    "tests": 143
   },
   "envelope_note": "All three projections are the same queue, same order, same pre-decision state; only the process strategy differs. The water lever (counter-current rinsing) moves the abstraction envelope by exactly nothing, because in a closed loop freshwater makeup equals evaporative loss, which equals RO reject volume, which is set by salt mass. Only the salt lever moves it. This is the same finding as the salt-vs-water sensitivity, arriving independently through the forecast.",
   "envelopes": {

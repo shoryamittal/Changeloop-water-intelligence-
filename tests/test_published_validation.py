@@ -702,3 +702,61 @@ class DerivationsAreArithmeticallyTrue(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class ClusterProjectionObeysTheClosedLoop(unittest.TestCase):
+    """The cluster projection must obey the same physics as the engine.
+
+    In a closed loop, freshwater makeup IS evaporative loss IS reject
+    volume. The engine enforces this everywhere - impact reports
+    freshwater avoided and reject avoided as exactly equal.
+
+    The cluster projection once did not. It took freshwater as an
+    independent per-lot default (1108 L) while deriving reject from salt,
+    and the two disagreed by 5.3x inside a single returned block:
+    398,880 m3 of freshwater against 75,000 m3 of reject. That is not a
+    rounding gap, it is the headline cluster water figure contradicting
+    the project's own central claim, and it inflated that figure 5.3x.
+    """
+
+    def test_cluster_freshwater_equals_cluster_reject(self):
+        from core import economics
+        c = economics.cluster_projection()
+        self.assertAlmostEqual(
+            c["freshwater_avoided_m3_per_year"],
+            c["evaporator_reject_avoided_m3_per_year"], places=0,
+            msg="Cluster freshwater avoided ({}) does not equal cluster "
+                "reject avoided ({}). In a closed loop these are the same "
+                "water. If they differ, the projection is contradicting "
+                "V_reject = M_salt / C_max, which is the entire thesis."
+                .format(c["freshwater_avoided_m3_per_year"],
+                        c["evaporator_reject_avoided_m3_per_year"]))
+
+    def test_cluster_scales_linearly_with_salt_only(self):
+        """Doubling the salt avoided must double water, reject and steam
+        together - nothing may move independently of salt."""
+        from core import economics
+        a = economics.cluster_projection(salt_avoided_per_lot_kg=12.5)
+        b = economics.cluster_projection(salt_avoided_per_lot_kg=25.0)
+        for key in ("freshwater_avoided_m3_per_year",
+                    "evaporator_reject_avoided_m3_per_year",
+                    "salt_avoided_tonnes_per_year",
+                    "evaporator_steam_avoided_mwh_per_year"):
+            self.assertAlmostEqual(
+                b[key] / a[key], 2.0, places=3,
+                msg="{} did not double when salt doubled - something in the "
+                    "cluster projection is not driven by salt.".format(key))
+
+    def test_engine_itself_holds_the_same_identity(self):
+        """The guarantee the cluster projection is being held to."""
+        from core import session as session_mod
+        s = session_mod.Session()
+        s.run_optimisation()
+        s.decide_sequence(approve=True)
+        s.run_washoff()
+        s.release_washoff(approve=True)
+        imp = s.state()["impact"]
+        self.assertAlmostEqual(
+            imp["freshwater_avoided_l"], imp["reject_avoided_l"], places=3,
+            msg="Freshwater avoided and reject avoided have diverged in the "
+                "engine itself. The closed loop is broken.")
