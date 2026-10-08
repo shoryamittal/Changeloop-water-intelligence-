@@ -29,7 +29,7 @@ sys.path.insert(0, str(ROOT))
 import core
 from core import (
     factors, basin, process, zld, telemetry, provenance, economics,
-    scenarios, ledger, forecast, narrative,
+    scenarios, ledger, forecast, narrative, plant,
 )
 from core.session import get_session
 
@@ -86,8 +86,9 @@ def pilot_plan() -> Dict[str, Any]:
                 "exit_criteria": [
                     "28 days of continuous data at over 95% completeness",
                     "Measured litres and kg-salt per kg fabric per shade band",
-                    "Measured evaporator steam per m3 of reject, replacing "
-                    "our assumed 179 kWh/m3",
+                    "Measured evaporator steam per m3 of reject, which "
+                    "promotes our %.0f kWh_th/m3 from DERIVED to MEASURED"
+                    % factors.get("mee_specific_thermal_kwh_per_m3"),
                 ],
             },
             {
@@ -300,13 +301,20 @@ def claim_register() -> Dict[str, Any]:
                                 "assumption and must be stated as such.",
             },
             {
-                "claim": "Evaporating one cubic metre of reject needs about "
-                         "179 kWh of thermal energy.",
+                "claim": "Evaporating one cubic metre of reject needs "
+                         "about %.0f kWh of thermal energy."
+                         % factors.get("mee_specific_thermal_kwh_per_m3"),
                 "level": "L5",
-                "safe_wording": "Derived: latent heat 0.627 kWh/kg divided by "
-                                "an assumed 4-effect steam economy of 3.5. "
-                                "State both inputs whenever the figure is "
-                                "used.",
+                "safe_wording": "Derived from two published inputs: latent "
+                                "heat %.3f kWh/kg from steam tables, divided "
+                                "by a steam economy of %.2f kg/kg taken from "
+                                "the 0.25-0.35 kg steam per kg evaporated "
+                                "reported for textile MEE trains. The result "
+                                "lands inside the independently published "
+                                "150-250 kWh_th/m3 band. State both inputs "
+                                "whenever the figure is used."
+                                % (factors.get("h_vap_kwh_per_kg"),
+                                   factors.get("mee_steam_economy")),
             },
             {
                 "claim": "On the reference order book ChangeLoop reduces "
@@ -564,6 +572,39 @@ class App(SimpleHTTPRequestHandler):
                         {"valid": sorted(scenarios.constraint_modes())})
                 return self.send_json(
                     scenarios.ablation(one("site", s.site_id), mode_id))
+
+            # Shared treatment plant coordination. This is the only
+            # endpoint that looks at more than one machine, and the only
+            # place the system can express a failure that no individual
+            # planner is able to see.
+            if route == "/api/plant":
+                try:
+                    machines = min(6, max(1, int(one("machines", "4"))))
+                    shifts = min(3, max(1, int(one("shifts", "0") or 0)))                         if one("shifts") else None
+                except (TypeError, ValueError):
+                    return self.send_error_json(
+                        400, "BAD_PARAMETER",
+                        "machines and shifts must be whole numbers.",
+                        {"machines": "1-6", "shifts": "1-3"})
+                mode_id = one("mode", "NORMAL")
+                modes = scenarios.constraint_modes()
+                if mode_id not in modes:
+                    return self.send_error_json(
+                        400, "UNKNOWN_MODE", "Unknown constraint mode.",
+                        {"valid": sorted(modes)})
+                mode = modes[mode_id]
+                out = plant.plant_plan(
+                    site_id=s.site_id,
+                    n_machines=machines,
+                    shifts_per_day=shifts,
+                    weights=mode.weights,
+                    constraints=mode.constraints,
+                )
+                # Which constraint is binding changes what each machine
+                # wants, so it changes whether the plant fits at all.
+                out["mode_id"] = mode.mode_id
+                out["mode_name"] = mode.name
+                return self.send_json(out)
 
             if route == "/api/forecast":
                 return self.send_json(s.forecast())
