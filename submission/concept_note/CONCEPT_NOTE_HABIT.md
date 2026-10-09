@@ -230,11 +230,10 @@ factory nothing, it costs that factory nothing beyond the setup.
 
 ### Why charge this way
 
-A flat subscription was my first instinct and the arithmetic killed it. On the
-plan the optimiser recommends under today's prices, a Rs 2,40,000 annual fee
-would have taken 59% of the saving and left the factory 41%. Nobody running a
-thin-margin dyeing unit signs that, least of all for a saving that is modelled
-rather than measured.
+A flat subscription was my first instinct and I dropped it. A fixed fee charges
+the same whether the system saves a factory a lot or nothing at all, and asks a
+thin-margin dyeing unit to take that risk on a saving that is modelled rather
+than measured. No one should sign that, and I would not pitch it.
 
 The share model fits what is already built. The system computes every saving on
 the server, counts only what a named person actually approved, and writes it to
@@ -244,19 +243,44 @@ has been measured yet, so nothing is owed yet.
 
 ### What a factory actually gets
 
-For a unit running 9,000 lots a year, on the plan the tool recommends today:
+The engine reports a net saving per machine-shift against a conventional
+single-stage rinse. A unit running 9,000 lots a year at five lots a shift is
+1,800 machine-shifts, so the annual figure is that number multiplied out.
 
-| | Plan it recommends today | Low-salt plan, once the price gap closes |
+| | Plan it recommends today | Low-salt plan |
 |---|---|---|
-| Saving the system can verify | Rs 4,08,000 | Rs 52,04,000 |
-| My 25% share | Rs 1,02,000 | Rs 13,01,000 |
-| **Factory keeps** | **Rs 3,06,000** | **Rs 39,03,000** |
-| Payback on the Rs 75,000 setup | about 3 months | a few weeks |
+| Net saving per machine-shift | Rs 7,860 | Rs 3,914 |
+| Machine-shifts a year | 1,800 | 1,800 |
+| Net saving a year | **Rs 1,41,47,000** | **Rs 70,45,000** |
+| My 25% share | Rs 35,37,000 | Rs 17,61,000 |
+| Water and steam cut | 6% | 47% |
 
-I am showing both columns on purpose. The left is what a factory gets today and
-it is modest. The right is the same factory once the low-salt dye premium falls
-about 12%, which is the gap my system measured. The upside is real, but the
-left column is what I would ask anyone to sign for.
+Read that table carefully, because it is the point of the whole project.
+
+The plan the optimiser recommends today saves **more money** and almost no
+water. The low-salt plan saves **less money** and nearly half the water and
+steam. The dye premium eats most of the saving, which is exactly why a
+profit-seeking factory does not buy it and why the cluster keeps burning fuel
+it does not need to.
+
+Close the 12% gap in the dye premium and the low-salt plan becomes the cheaper
+one too. Then the factory saves more money and more water at the same time, and
+nobody has to be persuaded to choose between them.
+
+Two caveats, and the second is the one I would raise first if I were reviewing
+this.
+
+The absolute rupees are modelled, on a modelled order book of five lots. The
+direction and the ranking are what I would defend; a pilot establishes the rest.
+
+More importantly, the baseline here is a conventional single-stage rinse, and
+counter-current cascade is an established best available technique. Any unit
+already running it has already taken that 6%, and ChangeLoop will not find it
+again. For those units the value is not the rinse method at all. It is the
+sequencing decision, the salt visibility, and the 12% finding on the dye
+premium, none of which depends on the rinse baseline. The first thing a pilot
+does in week one is establish which kind of unit it is in, because that
+determines what is left to save.
 
 ### How customers are reached
 
@@ -293,7 +317,7 @@ context this belongs in.
 
 | Level | Size | Basis |
 |---|---|---|
-| Tirupur, immediate | About 360 dyeing units. At a 25% share of what the recommended plan saves today, that is roughly **Rs 3.7 crore a year**, and it grows with every unit that adopts the low-salt plan | 300 units on 18 CETPs plus 60 with their own plants. Other reports put the figure nearer 450 |
+| Tirupur, immediate | About 360 dyeing units. A 25% share of the modelled saving would be of the order of **Rs 100 crore a year** across the cluster | 300 units on 18 CETPs plus 60 with their own plants, other reports nearer 450. This rests entirely on the modelled per-shift saving holding at real sites, which no pilot has yet tested. Treat it as an order of magnitude, not a forecast |
 | Indian textile ZLD, wider | Tirupur is one of several clusters under ZLD rules. Surat, Erode, Karur, Ludhiana, Panipat and Jetpur have similar processing bases. The whole Indian ZLD equipment market across all industries is put at about **USD 1.33 billion in 2025**, growing to USD 2.52 billion by 2032 | The dollar figure is a commercial market estimate covering all ZLD, not textile software. I have not counted dyeing units outside Tirupur and will not present a number I cannot source |
 | Adjacent closed loops, later | Evaporative cooling, boiler blowdown and mine water share the same physics | Unvalidated. Listed as direction, not as market |
 
@@ -430,21 +454,30 @@ it costs is not a plan.
 |---|---|
 | Share of verified saving | 25% |
 | One-off setup | Rs 75,000 per unit |
-| Share per unit at today's recommended plan | about Rs 1,02,000 a year |
+| Share per unit at the modelled saving | of the order of Rs 35,00,000 a year |
+
+That per-unit figure is large and it rests on a modelled order book. I am
+carrying it forward because it is what my own engine says, not because I
+believe it to the rupee. The first pilot replaces it with a measured number,
+and the share model means I am paid on that measured number rather than on
+this one.
 
 ### Revenue projections
 
-These assume the pilot succeeds and the treatment plant channel works. Both are
-assumptions, and the share figures assume units stay on the plan the tool
-recommends today rather than moving to the low-salt plan. If they move, the
-numbers below are low by a wide margin.
+These assume the pilot succeeds, the treatment plant channel works, and the
+modelled per-shift saving survives contact with a real site. All three are
+assumptions, and the third is the weakest: a unit already running
+counter-current rinsing has less to gain, and I do not yet know how many of
+Tirupur's units that is. To keep the projection cautious I have priced the
+share at a fifth of the modelled figure, around Rs 7,00,000 a unit a year,
+because I would rather under-promise a number no instrument has confirmed.
 
 | | Year 1 | Year 2 | Year 3 |
 |---|---|---|---|
 | Live units | 2, pilot | 12 | 40 |
 | Setup revenue, new units only | Rs 1,50,000 | Rs 7,50,000 | Rs 21,00,000 |
-| Share of verified saving | waived during pilot | Rs 12,24,000 | Rs 40,80,000 |
-| **Total revenue** | **Rs 1,50,000** | **Rs 19,74,000** | **Rs 61,80,000** |
+| Share of verified saving, at Rs 7,00,000 a unit | waived during pilot | Rs 84,00,000 | Rs 2,80,00,000 |
+| **Total revenue** | **Rs 1,50,000** | **Rs 91,50,000** | **Rs 3,01,00,000** |
 
 Year 1 is a pilot year and is not meant to make money; the share is waived
 while the baseline is still being established. Years 2 and 3 assume one CETP
@@ -453,7 +486,8 @@ each.
 
 Setup is billed once per unit, on new units only, so year 2 bills ten and year
 3 bills twenty-eight, not forty. The share is billed on every live unit against
-what the ledger says was actually saved.
+what the ledger says was actually saved, so if the measured saving comes in
+below the model, the revenue falls with it automatically.
 
 ## 10. Impact assessment
 
@@ -541,10 +575,9 @@ their choice actually costs, at the moment they make it.
 
 The prototype is built, running and open to inspection. The physics is checked
 against published plant measurements. A factory pays Rs 75,000 to connect and
-keeps three quarters of whatever the system can prove it saved, which on
-today's recommended plan returns the setup cost in about three months. The
-route to the cluster runs through 18 shared treatment plants whose own
-economics already point the same way.
+keeps three quarters of whatever the system can prove it saved, so it carries
+almost no risk and I carry the rest. The route to the cluster runs through 18
+shared treatment plants whose own economics already point the same way.
 
 What it does not have is a single measured number from a real factory, and I
 would rather say that plainly than let a reviewer discover it. Closing that gap
@@ -598,8 +631,11 @@ engine and fails if any has drifted.
 ### What this project has not done
 
 - No deployment, no customer, no pilot, no measured result.
+- The baseline is a conventional single-stage rinse. Units already on
+  counter-current cascade have taken that saving already, and I do not know
+  what share of Tirupur that is.
 - The cluster figure is a projection, not achieved impact.
-- The financial projections in section 9 are plans with stated assumptions. The pilot costs are built from quoted supplier and lab prices; the revenue figures are not.
+- The financial projections in section 9 are plans with stated assumptions. The pilot costs are built from quoted supplier and lab prices. The revenue figures rest on a modelled per-shift saving that no instrument has confirmed, and I have priced the projection at a fifth of it for that reason.
 - The shared-evaporator solver checks every combination, which will not scale to
   a treatment plant with hundreds of members.
 - The 60,000 mg/L limit is one modelled figure inside a published range of

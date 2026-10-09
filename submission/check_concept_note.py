@@ -41,6 +41,7 @@ HABIT = os.path.join(HERE, "concept_note", "CONCEPT_NOTE_HABIT.md")
 SHARE_OF_SAVING = 0.25
 SETUP_INR = 75000.0
 LOTS_PER_YEAR = 9000
+LOTS_PER_SHIFT = 5
 
 # Per-lot avoidance for the two plans, from the modelled shift of five
 # lots. The first is what the optimiser recommends under today's prices;
@@ -309,103 +310,84 @@ def build_expectations():
 
 def habit_expectations():
     """Figures quoted in the 12-section note that the shorter one omits."""
-    from core import economics
     exp = []
 
     def need(label, text):
         exp.append((label, text))
 
-    def case(fw, salt):
-        return economics.business_case({
-            "lots_per_year": LOTS_PER_YEAR,
-            "freshwater_avoided_per_lot_l": fw,
-            "salt_avoided_per_lot_kg": salt,
-            "freshwater_cost_inr_per_m3":
-                factors.get("freshwater_cost_inr_per_m3"),
-            "recycled_water_cost_inr_per_m3":
-                factors.get("recycled_water_cost_inr_per_m3"),
-            "steam_cost_inr_per_kwh_th":
-                factors.get("steam_cost_inr_per_kwh_th"),
-            "salt_cost_inr_per_kg": factors.get("salt_cost_inr_per_kg"),
-            "implementation_cost_inr": SETUP_INR,
-            # The fee is a share of the gross saving, so the gross is what
-            # the note quotes; pass no subscription and derive the share.
-            "annual_subscription_inr": 0.0,
-        })
+    sess = session_mod.Session()
+    sess.run_optimisation()
+    imp = sess.state()["impact"]
+    base_cost = imp["baseline_cost_inr"]
+    base_fw = imp["baseline_freshwater_intake_l"]
+    base_st = imp["baseline_mee_thermal_kwh"]
+    cmp_modes = {m["mode_name"]: m
+                 for m in scenarios.compare_modes(basin.DEFAULT_SITE)["modes"]}
+    nrm = cmp_modes["Normal operation"]
+    low = cmp_modes["Drought / abstraction restriction"]
 
-    today = case(TODAY_FW_PER_LOT, TODAY_SALT_PER_LOT)
-    lowsalt = case(LOWSALT_FW_PER_LOT, LOWSALT_SALT_PER_LOT)
-    for name, r in (("today", today), ("low-salt", lowsalt)):
-        if r.get("status") != "CALCULATED":
-            raise SystemExit(
-                "The %s business case no longer computes (%s). Section 6 of "
-                "the 12-section note quotes it." % (name, r.get("status")))
+    shifts_yr = LOTS_PER_YEAR // LOTS_PER_SHIFT
+    per_shift_t = base_cost - nrm["cost_inr"]
+    per_shift_l = base_cost - low["cost_inr"]
 
-    def k(v):
-        return lakh(round(v / 1000.0) * 1000)
+    # The ranking is the project's whole argument: the recommended plan
+    # saves MORE money and less water. If that flips, the note's
+    # reasoning collapses and renumbering will not save it.
+    if per_shift_t <= per_shift_l:
+        raise SystemExit(
+            "The low-salt plan now saves at least as much money as the "
+            "recommended plan (Rs %.0f vs Rs %.0f a shift). Section 6 of "
+            "the 12-section note is built on the opposite being true."
+            % (per_shift_l, per_shift_t))
 
-    g_today = today["annual_gross_benefit_inr"]
-    g_low = lowsalt["annual_gross_benefit_inr"]
-    fee_today = g_today * SHARE_OF_SAVING
-    fee_low = g_low * SHARE_OF_SAVING
-
+    need("per-shift row",
+         "| Net saving per machine-shift | Rs %s | Rs %s |"
+         % (thousands(per_shift_t), thousands(per_shift_l)))
+    need("shifts row",
+         "| Machine-shifts a year | %s | %s |"
+         % (lakh(shifts_yr), lakh(shifts_yr)))
+    need("annual row",
+         "| Net saving a year | **Rs %s** | **Rs %s** |"
+         % (lakh(round(per_shift_t * shifts_yr, -3)),
+            lakh(round(per_shift_l * shifts_yr, -3))))
+    need("share row",
+         "| My 25%% share | Rs %s | Rs %s |"
+         % (lakh(round(per_shift_t * shifts_yr * SHARE_OF_SAVING, -3)),
+            lakh(round(per_shift_l * shifts_yr * SHARE_OF_SAVING, -3))))
+    need("water steam row",
+         "| Water and steam cut | %d%% | %d%% |"
+         % (round((base_fw - nrm["freshwater_intake_l"]) / base_fw * 100),
+            round((base_fw - low["freshwater_intake_l"]) / base_fw * 100)))
     need("share", "| Share of verified saving | %d%% |"
          % round(SHARE_OF_SAVING * 100))
     need("setup cost", "| One-off setup | Rs %s per unit |" % lakh(SETUP_INR))
-    need("saving row",
-         "| Saving the system can verify | Rs %s | Rs %s |"
-         % (k(g_today), k(g_low)))
-    need("share row",
-         "| My %d%% share | Rs %s | Rs %s |"
-         % (round(SHARE_OF_SAVING * 100), k(fee_today), k(fee_low)))
-    need("factory keeps row",
-         "| **Factory keeps** | **Rs %s** | **Rs %s** |"
-         % (k(g_today - fee_today), k(g_low - fee_low)))
-    need("share per unit",
-         "about Rs %s a year" % k(fee_today))
 
-    # the flat-fee figure the note cites as the reason it was abandoned
-    need("rejected flat fee share",
-         "would have taken %d%% of the saving" % round(240000 / g_today * 100))
-
-    # payback on setup, in months, against what the factory keeps
-    months = SETUP_INR / (g_today - fee_today) * 12
-    if not 2.0 <= months <= 4.0:
-        raise SystemExit(
-            "Payback on setup is now %.1f months. Section 6 says 'about 3 "
-            "months'." % months)
-
-    # revenue projections
+    cautious = 700000
     live = {1: 2, 2: 12, 3: 40}
     new_units = {1: 2, 2: 10, 3: 28}
-    need("y2 setup", "| Setup revenue, new units only | Rs %s | Rs %s | Rs %s |"
+    need("setup revenue row",
+         "| Setup revenue, new units only | Rs %s | Rs %s | Rs %s |"
          % (lakh(new_units[1] * SETUP_INR), lakh(new_units[2] * SETUP_INR),
             lakh(new_units[3] * SETUP_INR)))
-    need("y2 share",
-         "| Share of verified saving | waived during pilot | Rs %s | Rs %s |"
-         % (lakh(round(live[2] * fee_today, -3)),
-            lakh(round(live[3] * fee_today, -3))))
-    y2 = new_units[2] * SETUP_INR + round(live[2] * fee_today, -3)
-    y3 = new_units[3] * SETUP_INR + round(live[3] * fee_today, -3)
+    need("share revenue row",
+         "| Share of verified saving, at Rs %s a unit | waived during pilot "
+         "| Rs %s | Rs %s |"
+         % (lakh(cautious), lakh(live[2] * cautious),
+            lakh(live[3] * cautious)))
     need("revenue totals",
          "| **Total revenue** | **Rs %s** | **Rs %s** | **Rs %s** |"
-         % (lakh(new_units[1] * SETUP_INR), lakh(y2), lakh(y3)))
+         % (lakh(new_units[1] * SETUP_INR),
+            lakh(new_units[2] * SETUP_INR + live[2] * cautious),
+            lakh(new_units[3] * SETUP_INR + live[3] * cautious)))
 
-    # pilot cost build-up
     per_site = 60000 + 50000 + 35000 + 15000 + 15000
     need("per site", "| **Per site** | **Rs %s** | |" % lakh(per_site))
-    two = per_site * 2
-    sub = two + 50000 + 60000 + 20000
+    sub = per_site * 2 + 50000 + 60000 + 20000
     need("pilot total", "| **Total** | **Rs %s** | |"
          % lakh(sub + round(sub * 0.10)))
     need("closing pilot cost", "costs about Rs %s"
          % lakh(sub + round(sub * 0.10)))
 
-    # market size follows from the share, so it has to move with it
-    need("tirupur market",
-         "roughly **Rs %.1f crore a year**" % (360 * fee_today / 1e7))
-
-    # --- physics and validation ---------------------------------------
     need("MEE thermal",
          "takes about %.0f kWh of heat"
          % factors.get("mee_specific_thermal_kwh_per_m3"))
@@ -415,14 +397,11 @@ def habit_expectations():
 
     proof = narrative.proof()
     if abs(proof["cut_water_20pct_change_pct"]) > 1e-9:
-        raise SystemExit(
-            "Cutting water now moves evaporator energy by %.4f%%. The "
-            "12-section note says 'no change at all'."
-            % proof["cut_water_20pct_change_pct"])
+        raise SystemExit("Cutting water now moves evaporator energy by "
+                         "%.4f%%." % proof["cut_water_20pct_change_pct"])
     if abs(proof["cut_salt_20pct_change_pct"] + 20.0) > 0.05:
-        raise SystemExit(
-            "Cutting salt 20%% now moves energy by %.2f%%, not -20%%."
-            % proof["cut_salt_20pct_change_pct"])
+        raise SystemExit("Cutting salt 20%% now moves energy by %.2f%%."
+                         % proof["cut_salt_20pct_change_pct"])
     need("cut water row", "| Uses 20% less water | **no change at all** |")
     need("cut salt row", "| Puts in 20% less salt | **20% less energy** |")
 
@@ -436,11 +415,9 @@ def habit_expectations():
          % (cpcb[0]["predicted_reject_frac_pct"],
             val["published_band_pct"][0], val["published_band_pct"][1]))
 
-    # --- counts --------------------------------------------------------
     counts = factors.evidence_summary()
     if counts.get("MEASURED"):
-        raise SystemExit("A coefficient is now MEASURED. Both notes say "
-                         "zero, in several places.")
+        raise SystemExit("A coefficient is now MEASURED.")
     need("input numbers row",
          "| Input numbers | %d, each labelled with its source. %d "
          "published, %d derived, %d assumed, 0 measured |"
@@ -454,18 +431,9 @@ def habit_expectations():
     need("api row", "| API | %d endpoints." % fg["endpoints"])
     need("tests row", "| Tests | %d, covering" % fg["tests"])
 
-    # --- per-shift and cluster -----------------------------------------
-    sess = session_mod.Session()
-    sess.run_optimisation()
-    imp = sess.state()["impact"]
-    cmp_modes = {m["mode_name"]: m
-                 for m in scenarios.compare_modes(basin.DEFAULT_SITE)["modes"]}
-    base_fw = imp["baseline_freshwater_intake_l"]
-    base_st = imp["baseline_mee_thermal_kwh"]
     need("baseline row",
          "| Baseline | %s L | %s kWh | Rs %s |"
-         % (thousands(base_fw), thousands(base_st),
-            thousands(imp["baseline_cost_inr"])))
+         % (thousands(base_fw), thousands(base_st), thousands(base_cost)))
     for name, label in (("Normal operation", "Recommended today"),
                         ("Drought / abstraction restriction",
                          "Available with low-salt chemistry")):
@@ -489,7 +457,6 @@ def habit_expectations():
     need("cluster co2", "| CO2 | %s tonnes |"
          % thousands(cl["co2e_avoided_tonnes_per_year"]))
 
-    # --- plant and policy ----------------------------------------------
     modes = scenarios.constraint_modes()
     pn = plant.plant_plan(weights=modes["NORMAL"].weights,
                           constraints=modes["NORMAL"].constraints)
@@ -514,16 +481,16 @@ def habit_expectations():
          "**%d%% cheaper** |"
          % (dye["current_value"], quoted(dye, 2),
             round(abs(dye["percent_change"]))))
-    need("steam row",
+    need("steam lever row",
          "| Boiler steam | Rs %.2f/kWh heat | Rs %s/kWh heat | %d%% dearer |"
          % (steam_l["current_value"], quoted(steam_l, 2),
             round(steam_l["percent_change"])))
-    need("water row",
+    need("water lever row",
          "| Fresh water | Rs %.0f/m3 | Rs %s/m3 | %d%% dearer |"
          % (water_l["current_value"], quoted(water_l, 0),
             round(water_l["percent_change"])))
     need("dye gap in business model",
-         "premium falls about %d%%" % round(abs(dye["percent_change"])))
+         "Close the %d%% gap" % round(abs(dye["percent_change"])))
 
     carbon = pol["implied_carbon_price"]
     need("steam increase",
