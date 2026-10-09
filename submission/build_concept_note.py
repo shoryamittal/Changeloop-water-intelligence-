@@ -34,7 +34,7 @@ def main():
         out=OUT,
         title="ChangeLoop — Concept Note",
         subject="SANKALP 2026 Students Track - concept note",
-        subtitle="In a zero-discharge dyeing factory, the coal bill is set "
+        subtitle="In a zero-discharge dyeing factory, the fuel bill is set "
                  "by the salt that goes in, not the water that comes out. "
                  "This is a tool that shows the planner that cost while "
                  "they are still choosing.",

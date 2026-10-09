@@ -5,9 +5,9 @@
 | | |
 |---|---|
 | **Startup name** | ChangeLoop |
-| **Tagline** | In a closed loop, salt sets the fuel bill. |
+| **Tagline** | Cut the water by a fifth. Burn exactly the same fuel. |
 | **Date** | 9 October 2026 |
-| **Prepared by** | Shorya Mittal, founder |
+| **Prepared by** | Shorya Mittal, project lead and sole developer |
 | **Contact** | shoryamittal9653@gmail.com |
 | **Working prototype** | https://changeloop-water-intelligence.onrender.com |
 
@@ -76,15 +76,46 @@ So two changes that look identical on a water meter do completely different
 things to the fuel bill. Most water-saving work in the cluster aims at the
 water. It does not touch the fuel.
 
-### Why it has not been fixed
+### Why a problem this simple is still not solved
 
-The salt load is decided by a production planner, choosing which dye lots run
-in what order and which rinse method to use. They make that call hours before
-anything shows up anywhere.
+It is fair to ask why, if the arithmetic is this plain, a cluster that exports
+Rs 46,000 crore a year has not already fixed it. The honest answer is that the
+saving is not hidden. It is known, documented, and still not taken.
 
-The fuel bill arrives weeks later, in a different department's budget, with no
-way to trace it back to the choice that caused it. The planner is not being
-careless. They are working without the one number that would change their mind.
+Energy audits of more than sixty dyeing units in Tiruppur during 2024 and early
+2025 found that simple efficiency measures could cut about **15% of fuel
+consumption**. Many of those measures needed little or no investment. Adoption
+stayed low anyway.
+
+That is the real problem, and it is not a technical one. Four things keep it
+in place.
+
+**An audit produces a report, not a decision.** A consultant visits, measures,
+writes it up and leaves. On Monday the planner schedules the day exactly as
+before, because nothing in their actual workflow changed. Reports do not run
+shifts.
+
+**Changing anything feels like risking production.** The audits name fear of
+disrupting production as a barrier even for measures that cost nothing. In a
+job-work cluster running to tight delivery dates, a late or off-shade lot costs
+far more than the fuel it might have saved. Any proposal that cannot guarantee
+the ship date is dead on arrival, however good its numbers are.
+
+**The person who decides does not see the bill.** The salt load is set by a
+production planner choosing which lots run in what order and which rinse method
+to use. They make that call hours before anything shows up. The fuel bill
+arrives weeks later, in a different department's budget, with no way to trace it
+back. The planner is not being careless. They are working without the one number
+that would change their mind.
+
+**Nobody meters the thing that matters.** Water is metered because it is billed
+and regulated. Salt is bought by the sack and dissolved into a bath, and no
+Indian dyehouse I can find reports salt load per lot. What is not measured does
+not get managed, and here the unmeasured variable is the one driving the cost.
+
+So the gap is not knowledge. It is that no tool puts the consequence in front of
+the person making the choice, at the moment they make it, without asking them to
+risk a delivery.
 
 There is a second problem one level up. A factory runs several dyeing machines
 into one shared evaporator. Each planner picks what is best for their own
@@ -134,58 +165,60 @@ point the same way.
 
 ## 4. Solution overview
 
-### What ChangeLoop is
+### What it does, in one paragraph
 
-ChangeLoop is a decision-support tool that sits where the dyehouse schedule
-gets made. Before a shift starts it looks at the different orders the planner
-could run the lots in, and the different rinse methods available. For each
-combination it works out the whole chain: water used, salt load, leftover
-volume, evaporator steam, CO2, rupees, and whether any delivery date is missed.
+ChangeLoop sits where the schedule is made. Before a shift starts, it takes the
+lots that have to run and works out every order they could run in, and every
+rinse method available for each. For each of those combinations it computes the
+full consequence: water drawn, salt added, leftover volume to boil, evaporator
+steam, CO2 and rupees, and whether any delivery date would be missed. It throws
+away everything that ships late, ranks what is left, and shows the planner the
+best plan with its working.
 
-Then it recommends one plan, and shows its working.
+The planner can accept it or ignore it. Nothing else changes: no new equipment,
+no new chemistry, no change to who approves what.
+
+### Why this is the right place to intervene
+
+Every other way of attacking this problem asks the factory to change something
+physical, and that is why they stall.
+
+Buy a better evaporator and you have spent capital on treating the symptom. Buy
+low-salt chemistry and you have raised the cost per kilogram today for a fuel
+saving you cannot yet see. Run an energy audit and you get a report. All three
+ask for money or risk up front against a benefit nobody has measured.
+
+Changing the order lots run in costs nothing, risks nothing, and is reversible
+the same day. It is the only lever in this process that is free to pull. What I
+have added is making it a visible lever rather than an invisible one.
 
 ### What makes it different
 
-**It optimises for the consequence, not for the throughput.** Existing dyehouse
-software plans for machine use and delivery dates. ChangeLoop adds the
-downstream thermal cost of the schedule, which is the part nobody currently
-prices.
+**One line, if you only read one.** Every planning tool in a dyehouse optimises
+for throughput and delivery. ChangeLoop is the only one that prices what the
+schedule does to the boiler, and it does that while the schedule is still being
+chosen.
 
-**A late delivery is not treated as a trade-off.** If a plan misses a ship
-date, it gets removed from the search rather than given a bad score. A factory
-cannot accept a schedule that saves water by shipping late, so the tool never
-offers one.
+The rest follows from treating that as a safety-critical decision rather than a
+dashboard.
 
-**Every input number says where it came from.** All 25 of them are tagged as
-published, derived, assumed or measured, with the source and the arithmetic.
-Anyone can open the list in the running system and read it.
-
-**It fails safe.** It issues no machine settings and cannot release a dye bath.
-Early release needs a named person to approve it. If a sensor reading is
-missing or implausible, the system stops and claims zero saving rather than
-guessing.
-
-**It only counts savings somebody approved.** If the planner turns a
-recommendation down, it counts as zero, even though the tool already worked out
-what it would have saved.
-
-**It handles the shared evaporator.** It compares what each machine would pick
-on its own against the cheapest combination that actually fits the plant, and
-prices the difference.
+| | How ChangeLoop behaves | Why it matters here |
+|---|---|---|
+| **Delivery dates** | A plan that ships late is deleted from the search, not scored badly | Removes the single objection that kills every efficiency proposal in a job-work cluster |
+| **Every input number** | All 25 are labelled published, derived, assumed or measured, with the source and the arithmetic, readable in the live system | A process engineer can audit the model instead of trusting it. None is MEASURED yet and a test enforces that |
+| **Authority** | Issues no machine settings and cannot release a dye bath. Early release needs a named person | The quality supervisor keeps the decision that carries the quality risk |
+| **Bad sensor data** | Holds and claims zero saving rather than estimating | An advisory tool that quietly guesses is worse than no tool |
+| **Credit for savings** | A recommendation the planner declines counts as zero, even though the engine computed it | The ledger records what was done, not what was advised, so it can be billed against |
+| **More than one machine** | Compares what each machine would pick alone against the cheapest combination the shared evaporator can take | Four locally correct choices can still breach the plant, and no single-machine tool can see it |
 
 ### Value proposition
 
-For a factory owner: lower fuel and water bills from a scheduling change, with
-no equipment to buy and no change to the existing approval process.
-
-For a planner: the number that is missing from their screen, at the moment they
-need it.
-
-For a shared treatment plant: less salt arriving, which means less steam to buy
-and less solid salt to store.
-
-For a regulator: a tool that quantifies what a price change would actually do,
-instead of arguing for one in principle.
+| Who | What they get |
+|---|---|
+| **Factory owner** | Lower fuel and water bills from a scheduling change, with nothing to buy and no change to the approval process |
+| **Production planner** | The missing number on their screen, at the moment they need it, with the ship date protected by construction |
+| **Shared treatment plant** | Less salt arriving, so less steam bought and less solid salt stored |
+| **Regulator or tariff-setter** | A figure for what a price change would actually do, instead of an argument in principle |
 
 ---
 
@@ -203,13 +236,17 @@ instead of arguing for one in principle.
 
 ### Long term, two to five years
 
-| Objective | Target |
-|---|---|
-| Reach the cluster through shared treatment plants | 40 paying units across 2 to 3 CETPs by year 3 |
-| Make the big saving the default | Low-salt chemistry adopted where the measured case supports it, worth about 47% of water and steam per shift |
-| Solve the cluster coordination problem | A method that works for hundreds of member units, not just the 256 combinations the current solver checks |
-| Prove the pricing argument | Published, independently reviewed evidence of what carbon or water pricing would change in this sector |
-| Extend beyond textiles | One validated application in another closed-loop system, such as evaporative cooling |
+The first two are the ones that matter. They change the cluster whether or not
+anyone buys the software.
+
+| Objective | Target | Why it has leverage |
+|---|---|---|
+| **Get treatment plants to charge by salt, not by volume** | One CETP piloting a salt-indexed tariff for its members | Today a member unit pays the same whether it sends clean water or brine, so the cost of the salt it created lands on the plant. Change that and every member has the incentive on day one, whether or not anyone buys my software. This is the single highest-leverage outcome in the project |
+| **Make salt load per lot a number the industry reports** | Salt per lot metered and reported at 40 units, the way water already is | Water got managed once it got metered. Nothing gets managed until it is measured, and right now nobody measures the variable that drives the cost |
+| Close the dye premium gap by buying together | A joint procurement approach across CETP members, aimed at the 12% gap my engine measured | 12% is small enough that aggregated demand across a few hundred units could close it. Then the 47% plan becomes the cheap plan and nobody has to be persuaded |
+| Solve cluster coordination properly | A method that works for hundreds of member units, not the 256 combinations the current solver checks exhaustively | The current approach is proven but will not scale, and I would rather say that than imply it will |
+| Put the evidence in the open | The measured coefficients published, with the method, for anyone to use or contest | A model nobody can check is worth less than one people argue with |
+| Extend beyond textiles | One validated application in another closed-loop system, such as evaporative cooling | The physics is not specific to dyeing, but it is unproven anywhere else |
 
 ---
 
@@ -227,6 +264,23 @@ connect it.
 
 No licence fee and no charge for the software itself. If the tool saves a
 factory nothing, it costs that factory nothing beyond the setup.
+
+The setup fee is engineering time, not margin. Roughly six to eight days of
+work at Indian specialist rates:
+
+| What the setup fee pays for | Amount |
+|---|---|
+| Getting the lot schedule out of the planning system and into a usable feed | Rs 25,000 |
+| Interfacing the existing meters and tagging which stream is which | Rs 20,000 |
+| Setting the coefficient registry to the site's own tariffs, machines and shade book | Rs 15,000 |
+| Training the planner and the quality supervisor, and sitting with them for the first week | Rs 15,000 |
+| **Total** | **Rs 75,000** |
+
+It does not include instruments. A site that already meters steam and reject
+conductivity needs none. A site that does not can either add them, at about
+Rs 1,75,000 as broken down in section 9, or run on published coefficients and
+accept that the saving is estimated rather than measured. I would rather be
+clear about that than bundle hardware into a software price.
 
 ### Why charge this way
 
@@ -661,6 +715,7 @@ engine and fails if any has drifted.
 | Praj on Tirupur textile effluent; VA Tech Wabag on evaporator-based ZLD | Company and trade press reporting |
 | 2011 closure of around 700 units | Madras High Court order, widely reported |
 | Tiruppur dyeing units burn about 2,000 tonnes of solid fuel a year each, primarily wood | Energy audits of more than sixty dyeing MSMEs in Tiruppur, 2024 to early 2025, reported by India Development Review |
+| About 15% of fuel consumption available from simple efficiency measures, with adoption still low | The same energy audits of more than sixty Tiruppur dyeing MSMEs, 2024 to early 2025 |
 | Water strength of 18,340 mg/L, leftover at 20-30%, evaporator steam use | Central Pollution Control Board assessment of textile dyeing units and ZLD at Tirupur |
 | Grid emissions, 0.705 kg CO2 per kWh | CO2 Baseline Database for the Indian Power Sector, Central Electricity Authority |
 | Carbon price of 82.40 euro a tonne, 5 October 2026 | European carbon prices, S&P Global Commodity Insights |
