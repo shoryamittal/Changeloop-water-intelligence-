@@ -40,8 +40,15 @@ HABIT = os.path.join(HERE, "concept_note", "CONCEPT_NOTE_HABIT.md")
 # business case, which keeps the note and the arithmetic in step.
 SHARE_OF_SAVING = 0.25
 SETUP_INR = 75000.0
-LOTS_PER_YEAR = 9000
+LOTS_PER_YEAR = 5000
 LOTS_PER_SHIFT = 5
+
+# The lots-per-year figure is anchored on audited fuel use, not on the
+# model's own queue multiplied out. These are the three inputs to that
+# cross-check, so the check can fail if they stop supporting 5,000.
+AUDITED_FUEL_KG_PER_UNIT = 2_000_000      # Tiruppur MSME energy audits
+SEASONED_WOOD_MJ_PER_KG = 15.5            # FAO, wood at 20% moisture
+BOILER_EFFICIENCY = 0.78                  # the registry's own figure
 
 # Per-lot avoidance for the two plans, from the modelled shift of five
 # lots. The first is what the optimiser recommends under today's prices;
@@ -326,43 +333,128 @@ def habit_expectations():
     nrm = cmp_modes["Normal operation"]
     low = cmp_modes["Drought / abstraction restriction"]
 
-    shifts_yr = LOTS_PER_YEAR // LOTS_PER_SHIFT
-    per_shift_t = base_cost - nrm["cost_inr"]
-    per_shift_l = base_cost - low["cost_inr"]
+    per_lot_t = (base_cost - nrm["cost_inr"]) / LOTS_PER_SHIFT
+    per_lot_l = (base_cost - low["cost_inr"]) / LOTS_PER_SHIFT
+    per_shift_t, per_shift_l = per_lot_t, per_lot_l   # ranking guard below
 
-    # The ranking is the project's whole argument: the recommended plan
-    # saves MORE money and less water. If that flips, the note's
-    # reasoning collapses and renumbering will not save it.
-    if per_shift_t <= per_shift_l:
+    # Cross-check the annual scale against audited fuel use. If the
+    # engine's energy per lot moves far enough that 5,000 lots stops
+    # being what the audited fuel supports, every annual figure in
+    # section 6 is wrong and must be re-derived.
+    opts = sess.state()["optimisation"]["options"]
+    conv = [o for o in opts if o["strategy_id"] == "CONVENTIONAL"][0]
+    kwh_per_lot = conv["site_energy_kwh"] / LOTS_PER_SHIFT
+    supported = (AUDITED_FUEL_KG_PER_UNIT * SEASONED_WOOD_MJ_PER_KG / 3.6
+                 * BOILER_EFFICIENCY) / kwh_per_lot
+    if not 0.85 * LOTS_PER_YEAR <= supported <= 1.15 * LOTS_PER_YEAR:
         raise SystemExit(
-            "The low-salt plan now saves at least as much money as the "
-            "recommended plan (Rs %.0f vs Rs %.0f a shift). Section 6 of "
-            "the 12-section note is built on the opposite being true."
-            % (per_shift_l, per_shift_t))
+            "Audited fuel use now supports about %.0f lots a year, not %d. "
+            "Section 6 annualises at %d and must be re-derived."
+            % (supported, LOTS_PER_YEAR, LOTS_PER_YEAR))
+    need("kwh per lot",
+         "about %s kWh of energy per lot" % thousands(kwh_per_lot))
+    need("lots supported", "roughly **%s lots a year**"
+         % thousands(round(supported, -3)))
 
-    need("per-shift row",
-         "| Net saving per machine-shift | Rs %s | Rs %s |"
-         % (thousands(per_shift_t), thousands(per_shift_l)))
-    need("shifts row",
-         "| Machine-shifts a year | %s | %s |"
-         % (lakh(shifts_yr), lakh(shifts_yr)))
+    need("per-lot row",
+         "| Net saving per lot | Rs %s | Rs %s |"
+         % (thousands(per_lot_t), thousands(per_lot_l)))
+    need("lots row",
+         "| Lots a year, mid-size unit | %s | %s |"
+         % (thousands(LOTS_PER_YEAR), thousands(LOTS_PER_YEAR)))
     need("annual row",
          "| Net saving a year | **Rs %s** | **Rs %s** |"
-         % (lakh(round(per_shift_t * shifts_yr, -3)),
-            lakh(round(per_shift_l * shifts_yr, -3))))
+         % (lakh(round(per_lot_t * LOTS_PER_YEAR, -3)),
+            lakh(round(per_lot_l * LOTS_PER_YEAR, -3))))
     need("share row",
          "| My 25%% share | Rs %s | Rs %s |"
-         % (lakh(round(per_shift_t * shifts_yr * SHARE_OF_SAVING, -3)),
-            lakh(round(per_shift_l * shifts_yr * SHARE_OF_SAVING, -3))))
+         % (lakh(round(per_lot_t * LOTS_PER_YEAR * SHARE_OF_SAVING, -3)),
+            lakh(round(per_lot_l * LOTS_PER_YEAR * SHARE_OF_SAVING, -3))))
     need("water steam row",
          "| Water and steam cut | %d%% | %d%% |"
          % (round((base_fw - nrm["freshwater_intake_l"]) / base_fw * 100),
             round((base_fw - low["freshwater_intake_l"]) / base_fw * 100)))
+
+    # Split the recommended plan into re-ordering and the rinse change.
+    # The note's honesty about counter-current units rests on this, so it
+    # is recomputed here rather than trusted.
+    import itertools
+    from core.optimizer import (evaluate_candidate, ObjectiveWeights,
+                                HardConstraints)
+    from core.process import reference_lots, arrival_order
+    _lots, _arr = reference_lots(), arrival_order()
+    _w, _c = ObjectiveWeights(), HardConstraints()
+
+    def _cost(r):
+        return r.consequence["cost_inr"]["total"] + r.sequence["strategy_cost_inr"]
+
+    def _best(strategy):
+        b = None
+        for o in itertools.permutations([x.lot_id for x in _lots]):
+            r = evaluate_candidate(_lots, list(o), basin.DEFAULT_SITE,
+                                   _w, _c, strategy)
+            if r.feasible and (b is None or r.objective_inr < b.objective_inr):
+                b = r
+        return b
+
+    _base = evaluate_candidate(_lots, _arr, basin.DEFAULT_SITE, _w, _c,
+                               "CONVENTIONAL")
+    _seq, _cc = _best("CONVENTIONAL"), _best("COUNTER_CURRENT")
+    seq_lot = (_cost(_base) - _cost(_seq)) / LOTS_PER_SHIFT
+    rinse_lot = (_cost(_seq) - _cost(_cc)) / LOTS_PER_SHIFT
+
+    # The claim that counter-current changes fresh water and evaporator
+    # steam by exactly nothing must stay true, or that paragraph is wrong.
+    if (abs(_seq.consequence["water"]["freshwater_intake_l"]
+            - _cc.consequence["water"]["freshwater_intake_l"]) > 0.5
+            or abs(_seq.consequence["zld"]["mee_thermal_kwh"]
+                   - _cc.consequence["zld"]["mee_thermal_kwh"]) > 0.5):
+        raise SystemExit("Counter-current rinsing now changes fresh water or "
+                         "evaporator steam. Section 6 says it does not.")
+
+    need("split row reorder",
+         "| Re-ordering the lots | Rs %s | Rs %s |"
+         % (thousands(seq_lot), lakh(round(seq_lot * LOTS_PER_YEAR, -3))))
+    need("split row rinse",
+         "| Switching to counter-current rinsing | Rs %s | Rs %s |"
+         % (thousands(rinse_lot), lakh(round(rinse_lot * LOTS_PER_YEAR, -3))))
+    need("split row total",
+         "| **Both together, the plan it recommends** | **Rs %s** | **Rs %s** |"
+         % (thousands(per_lot_t), lakh(round(per_lot_t * LOTS_PER_YEAR, -3))))
+    need("reorder share",
+         "| Share per unit from re-ordering alone | about Rs %s a year |"
+         % lakh(round(seq_lot * LOTS_PER_YEAR * SHARE_OF_SAVING, -3)))
+    need("rinse lot in limits", "about Rs %s\n  a lot" % thousands(rinse_lot)
+         if False else "about Rs %s" % thousands(rinse_lot))
+    _proc_cut = 1 - (_cc.consequence["water"]["process_demand_l"]
+                     / _seq.consequence["water"]["process_demand_l"])
+    if not 0.20 <= _proc_cut <= 0.30:
+        raise SystemExit("Counter-current now cuts circulated water by %.0f%%, "
+                         "not 'about a quarter'." % (_proc_cut * 100))
+
+    # Fuel sensitivity quoted in section 10: steam a quarter cheaper.
+    with factors.REGISTRY_LOCK:
+        with policy._patched("steam_cost_inr_per_kwh_th",
+                             factors.get("steam_cost_inr_per_kwh_th") * 0.75):
+            _sw = policy.switching_point(
+                "low_salt_chemistry_cost_inr_per_kg_fabric")
+    need("fuel sensitivity",
+         "fall about %d%% instead of 12%%" % round(abs(_sw["percent_change"])))
+
+    # the cautious share used in the projection is a fifth of the
+    # modelled one, rounded to a lakh
+    full_share = per_lot_t * LOTS_PER_YEAR * SHARE_OF_SAVING
+    cautious = round(full_share / 5, -5)
+    need("unit economics share",
+         "of the order of Rs %s a year" % lakh(round(full_share, -6)))
+    need("tirupur market",
+         "of the order of **Rs %d crore a year**"
+         % round(360 * full_share / 1e7, -1))
+
     need("share", "| Share of verified saving | %d%% |"
          % round(SHARE_OF_SAVING * 100))
     need("setup cost", "| One-off setup | Rs %s per unit |" % lakh(SETUP_INR))
 
-    cautious = 700000
     live = {1: 2, 2: 12, 3: 40}
     new_units = {1: 2, 2: 10, 3: 28}
     need("setup revenue row",

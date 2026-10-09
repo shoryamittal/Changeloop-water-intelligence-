@@ -438,10 +438,10 @@
   "mee_specific": 188.08,
   "narrative": {
     "analogy": "Think of wringing out a wet cloth. Most of the water comes out easily - that is the membrane stage, and it is cheap. But you can never wring it fully dry, and what stays behind clings to whatever is dissolved in it. The more salt you put in, the more you are left holding. And the part you cannot wring out is the part you have to boil.",
-    "consequence": "Which means almost every water-saving project in the cluster is aimed at the wrong number. Cut effluent volume by 20% and the evaporator burns exactly the same coal. Cut the salt by 20% and it burns 20% less. Two levers that both look like 'saving water' do completely different things to the energy bill, and nobody on the dyehouse floor can see which is which.",
+    "consequence": "Which means almost every water-saving project in the cluster is aimed at the wrong number. Cut effluent volume by 20% and the evaporator burns exactly the same fuel. Cut the salt by 20% and it burns 20% less. Two levers that both look like 'saving water' do completely different things to the energy bill, and nobody on the dyehouse floor can see which is which.",
     "equation": "V_reject = M_salt / C_reject_max",
-    "hook": "In a zero-discharge dyehouse, the coal bill is set by how much salt goes into the dye bath \u2014 not by how much water comes out.",
-    "hook_short": "Salt sets the coal bill. Not water.",
+    "hook": "In a zero-discharge dyehouse, the evaporator's fuel bill is set by how much salt goes into the dye bath \u2014 not by how much water comes out.",
+    "hook_short": "Salt sets the fuel bill. Not water.",
     "mechanism": "A zero-discharge plant is not allowed to release anything, so whatever it cannot recycle it has to boil dry. Membranes pull most of the clean water back cheaply, but they have to stop before the leftover brine gets thick enough to scale up the tubes - around 60,000 mg/L of dissolved solids. That ceiling is fixed by chemistry, not by choice. So the volume left to boil is simply the salt mass divided by that ceiling. Put in more water with the same salt and the membranes just recover more clean water; the brine left at the end is the same, and so is the steam. Put in more salt and there is more brine to boil, whatever you did about water. Water is the carrier. Salt is the load.",
     "not_claimed": [
       "Counter-current rinsing is not our invention. It is established Best Available Technique and has been for decades.",

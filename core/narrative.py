@@ -40,16 +40,16 @@ from core import factors, process, zld
 # ---------------------------------------------------------------------------
 
 HOOK = (
-    "In a zero-discharge dyehouse, the coal bill is set by how much salt "
-    "goes into the dye bath — not by how much water comes out."
+    "In a zero-discharge dyehouse, the evaporator's fuel bill is set by how "
+    "much salt goes into the dye bath — not by how much water comes out."
 )
 
-HOOK_SHORT = "Salt sets the coal bill. Not water."
+HOOK_SHORT = "Salt sets the fuel bill. Not water."
 
 CONSEQUENCE = (
     "Which means almost every water-saving project in the cluster is aimed "
     "at the wrong number. Cut effluent volume by 20% and the evaporator "
-    "burns exactly the same coal. Cut the salt by 20% and it burns 20% "
+    "burns exactly the same fuel. Cut the salt by 20% and it burns 20% "
     "less. Two levers that both look like 'saving water' do completely "
     "different things to the energy bill, and nobody on the dyehouse floor "
     "can see which is which."

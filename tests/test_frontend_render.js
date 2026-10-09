@@ -221,7 +221,7 @@ async function main() {
         check('  command renders the plain-language band',
           html.indexOf('class="pb"') !== -1);
         check('  band carries the jargon-free hook',
-          html.indexOf('the coal bill is set by how much salt') !== -1);
+          html.indexOf('fuel bill is set by how much salt') !== -1);
         check('  band shows the water half of the proof (0.0%)',
           /pb-flat[\s\S]{0,240}0\.0%/.test(html));
         check('  band shows the salt half of the proof (-20.0%)',

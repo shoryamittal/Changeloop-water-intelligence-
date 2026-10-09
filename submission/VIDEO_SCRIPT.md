@@ -41,7 +41,7 @@ By the end of each part, the jury should be thinking one sentence:
 salt poisoned the farmers' wells
    → the court said: release nothing
 filters clean the water — but cannot get rid of salt
-   → so it is boiled out, and boiling burns coal
+   → so it is boiled out, and boiling burns fuel
 and then the salt is still there — over a lakh tonnes, in sheds, with nowhere to go
    → everyone is trying to get rid of it at the end
 but the amount is decided at the start — at six in the morning, by one planner
@@ -105,7 +105,7 @@ moving when you click **Accept**.
 
 ---
 
-## A2. Today — the coal, and the mountain
+## A2. Today — the fuel, and the mountain
 
 > Tirupur rebuilt. Four hundred and fifty dyeing units spent over a thousand
 > crore rupees on shared treatment plants. Today they recycle a hundred and
@@ -120,17 +120,17 @@ moving when you click **Accept**.
 > you are not allowed to pour anywhere.
 >
 > So you boil it, until only dry salt is left. Boiling needs steam. Steam
-> comes from a coal boiler.
+> comes from a boiler, mostly burning wood.
 >
-> The salt that once poisoned the river now burns coal.
+> The salt that once poisoned the river now burns fuel.
 
 *(pause)*
 
 > And when the boiling is done — the salt is still there.
 >
 > Last year, the Dyers Association of Tiruppur said more than one lakh tonnes
-> of it is sitting in sheds at the treatment plants. Three years earlier, it
-> was fifty thousand. It has doubled.
+> of it is sitting in sheds at the treatment plants. Three years earlier,
+> reports put it at fifty to sixty thousand. It has nearly doubled.
 >
 > In their own words: "We don't have the technology for this salt, so we pile
 > up huge amounts of salt."
@@ -198,7 +198,7 @@ moving when you click **Accept**.
 >
 > And the same rule — release nothing — now applies across India. To
 > tanneries. To distilleries. To paper mills. Every one of them will meet the
-> same salt, and the same coal.
+> same salt, and the same fuel bill.
 
 ---
 
@@ -208,8 +208,8 @@ moving when you click **Accept**.
 
 > Here is what I found.
 >
-> In a zero discharge dyehouse, the coal bill is set by how much salt goes
-> into the dye bath. Not by how much water comes out.
+> In a zero discharge dyehouse, the evaporator's fuel bill is set by how
+> much salt goes into the dye bath. Not by how much water comes out.
 
 *Explain:*
 
@@ -394,10 +394,10 @@ cut — if your limit is a hard 3:30, drop B0 and start straight at B1.
 > Tirupur rebuilt, and now recycles a hundred and thirty million litres a day.
 >
 > But filters do not get rid of salt. They squeeze it into less water, until
-> it has to be boiled dry — with steam, from coal.
+> it has to be boiled dry — with steam from the boiler.
 >
 > And then the salt is still there. The Dyers Association says more than one
-> lakh tonnes now sits in sheds — double what it was three years ago. In their
+> lakh tonnes now sits in sheds — nearly double what it was three years ago. In their
 > words: "We don't have the technology for this salt."
 
 **B3. One morning**
@@ -418,8 +418,8 @@ cut — if your limit is a hard 3:30, drop B0 and start straight at B1.
 
 **B5. The insight** — *read the big sentence, then point at the numbers*
 
-> Here is what I found. In a zero discharge dyehouse, the coal bill is set by
-> how much salt goes into the dye bath. Not by how much water comes out.
+> Here is what I found. In a zero discharge dyehouse, the evaporator's fuel
+> bill is set by how much salt goes into the dye bath. Not by how much water comes out.
 >
 > Cut water twenty percent: energy moves zero point zero. Cut salt twenty
 > percent: it drops twenty. This is ChangeLoop. Step by step:
@@ -479,7 +479,7 @@ Keep this open in another window.
 | Dyeing units / shared plants | **450 / 18** | Economic Times, June 2025 |
 | Spent on treatment plants | **over ₹1,000 crore** (₹1,013 cr) | Economic Times, June 2025 |
 | Recycled today | **130 million litres a day** | Economic Times, June 2025 |
-| Salt piled in sheds, 2022 | **~50,000 tonnes** | DT Next, Oct 2022 |
+| Salt piled in sheds, 2022 | **50,000 to 60,000 tonnes** | DT Next and Ecotextile News, Oct 2022 |
 | Salt piled in sheds, 2025 | **over 1 lakh tonnes** | Dyers Association, via Economic Times, June 2025 |
 | Salt added per day | **up to 70 tonnes** | DT Next, Oct 2022 |
 | Clean-out after carbon black | **over 7,000 L** (7,200 L) | the engine |
@@ -566,8 +566,8 @@ we would do with support.
 
 Whichever version you use, never lose these:
 
-1. **"The salt that once poisoned the river now burns coal."**
-2. **The shed — over a lakh tonnes, doubled in three years.** The real, current problem.
+1. **"The salt that once poisoned the river now burns fuel."**
+2. **The shed — over a lakh tonnes, nearly doubled in three years.** The real, current problem.
 3. **"Zero point zero percent."** The insight.
 4. **Option C refused, and the gate refusing your own release.** The proof it can be trusted.
 5. **"Getting rid of the salt is one answer. Not putting it in is a better one."**

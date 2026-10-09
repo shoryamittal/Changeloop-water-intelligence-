@@ -25,7 +25,7 @@ estimated. It comes out of salt mass divided by the highest concentration the
 membranes can safely reach, which I model at 60,000 mg/L. That number is a model
 parameter, not a claim that every membrane in Tirupur sits at exactly that
 limit. Reject volume then determines evaporator heat, which determines steam,
-coal and carbon.
+fuel and carbon.
 
 For the five-lot example the system evaluates 480 candidate plans, every running
 order against every process strategy, and picks the best one that is actually
@@ -39,7 +39,7 @@ instead of releasing, and credits zero saving.
 
 I tested it three ways.
 
-**Automated tests.** 143 of them, covering the calculations, the accounting
+**Automated tests.** 180 of them, covering the calculations, the accounting
 invariants, the safety interlocks, record integrity, fault behaviour and
 concurrency.
 
@@ -90,7 +90,7 @@ rather than for a scoreboard.
 
 | Claim | Value | Where to verify |
 |---|---|---|
-| Automated tests | 143 | `python -m pytest tests/ -q` |
+| Automated tests | 180 | `python -m pytest tests/ -q` |
 | Candidate plans evaluated | 480 | `figures.json` → `candidates`; 120 orders × 4 strategies |
 | Membrane concentration ceiling | 60,000 mg/L | `core/factors.py` → `ro_max_reject_tds_mg_l`, inside a published 15,000–80,000 band |
 | CPCB measured inlet | 18,340 mg/L | CPCB Tirupur ZLD assessment |

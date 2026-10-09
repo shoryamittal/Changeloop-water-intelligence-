@@ -28,11 +28,11 @@ they cannot remove salt from it. All they do is squeeze the same salt into a
 smaller and smaller volume of water. Eventually you are holding a brine that
 cannot be discharged, cannot be reused, and has to go somewhere. So it gets
 boiled until only dry salt is left, and the steam for that boiling comes off a
-coal boiler.
+boiler that, in Tiruppur, mostly burns wood.
 
 Then you still have the salt. The Dyers Association of Tiruppur said in 2025
 that over one lakh tonnes of it is sitting in sheds at the treatment plants,
-roughly double the 2022 figure, because nobody has worked out how to dispose of
+nearly double the 2022 figure, because nobody has worked out how to dispose of
 it. Their own words were that the technology for it is yet to evolve.
 
 So a dyehouse ends up paying for the same salt twice. Once when it buys it for

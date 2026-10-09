@@ -10,9 +10,9 @@ How much they have to boil depends on how much salt went into the dye bath. It
 does not depend on how much water they used. This sounds wrong, but it comes
 straight out of mass conservation, and I can show it.
 
-So if a factory cuts its water use by 20%, the fuel bill stays exactly the
-same. Cut the salt by 20% and the fuel bill drops by 20%. Both of those look
-identical on a water meter. Most water-saving work in the cluster aims at the
+So if a factory cuts its water use by 20%, the evaporator burns exactly the same
+fuel. Cut the salt by 20% and the evaporator's fuel drops by 20%. Both of those
+look identical on a water meter. Most water-saving work in the cluster aims at the
 water.
 
 The person who sets the salt load is the production planner, choosing what
@@ -44,11 +44,12 @@ published plant data.
 
 ### Where it happens
 
-Tirupur in Tamil Nadu makes knitwear. Its dyeing factories sit on the Noyyal
-river. In 2011 the Madras High Court shut around 700 of them for putting salty
-waste water into the river. They were allowed to reopen only if they stopped
-releasing liquid waste completely. The rule is called zero liquid discharge, or
-ZLD.
+Tirupur in Tamil Nadu makes over 54% of India's knitwear exports. Its dyeing
+factories sit on the Noyyal river. In 2011 the Madras High Court ordered every
+dyeing and bleaching unit shut for putting salty waste water into the river.
+Over 700 units and treatment plants closed and 40,000 to 50,000 workers lost
+their jobs. They were allowed to reopen only if they stopped releasing liquid
+waste completely. The rule is called zero liquid discharge, or ZLD.
 
 It worked for the river. The waste water stopped going in.
 
@@ -266,8 +267,8 @@ The person who uses it and the person who pays for it are not the same.
 ### Why the treatment plant already wants this
 
 Less salt arriving means less steam to buy and less solid salt to store.
-Tirupur's treatment plants have built up somewhere between 60,000 and 73,000
-tonnes of waste salt, with no settled route for disposing of it.
+Over 1,00,000 tonnes of mixed waste salt now sits in sheds at Tirupur's
+treatment plants, and no disposal method has yet been found.
 
 So cutting salt at source is something a treatment plant operator wants for
 their own reasons, which have nothing to do with me. That is a good position
@@ -321,6 +322,11 @@ chasing profit picks the 47% plan on its own.
 The dye premium only needs to come down by about 12%. That is the whole
 distance between what the cluster runs today and a plan that nearly halves both
 water and steam. It is a buying problem, not a research problem.
+
+Two honest limits on that 12%. The dye premium of Rs 6.50 a kilogram is one of
+my four assumed coefficients, so the 12% is a computed result on an assumed
+input. And it is computed against a coal-based steam price: where steam is a
+quarter cheaper, the premium would need to fall about 17% instead.
 
 The steam row turns into a carbon price. Steam would need to go up Rs 1.09 per
 kWh of heat. Making that heat gives off 0.452 kg of CO2. Divide one by the
