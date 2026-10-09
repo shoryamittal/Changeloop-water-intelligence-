@@ -1384,3 +1384,41 @@ dl.defs dd { margin: 0; font-size: var(--t-small); line-height: 1.5; }
 @media (prefers-reduced-motion: no-preference) {
   .pb-seg rect { transition: fill var(--m-norm, 220ms) var(--ease, ease); }
 }
+
+/* ==========================================================================
+   POLICY - distance to the switching price
+   One scale for every lever, because the comparison between them is the
+   whole point. The nearest lever is the only one that takes the accent.
+   ========================================================================== */
+.leverviz svg { min-width: 700px; }
+
+.lv-hd {
+  font: 650 9.5px/1 var(--mono);
+  letter-spacing: .09em;
+  fill: var(--slate-2);
+}
+.lv-axis { stroke: var(--hair-3); stroke-width: 1; }
+
+.lv-lab {
+  font: 650 11.5px/1 var(--sans);
+  fill: var(--graphite);
+}
+.lv-lab-2 {
+  font: 400 11px/1 var(--mono);
+  fill: var(--slate-2);
+}
+
+.lv-far  { fill: var(--hair-3); }
+.lv-near { fill: var(--water); }
+
+.lv-val {
+  font: 500 12px/1 var(--mono);
+  fill: var(--slate);
+}
+.lv-val-near { fill: var(--water); font-weight: 600; }
+
+.lv-note {
+  font: 500 10px/1 var(--sans);
+  letter-spacing: .04em;
+  fill: var(--water);
+}

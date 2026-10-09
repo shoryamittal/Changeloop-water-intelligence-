@@ -29,7 +29,7 @@ sys.path.insert(0, str(ROOT))
 import core
 from core import (
     factors, basin, process, zld, telemetry, provenance, economics,
-    scenarios, ledger, forecast, narrative, plant,
+    scenarios, ledger, forecast, narrative, plant, policy,
 )
 from core.session import get_session
 
@@ -602,6 +602,26 @@ class App(SimpleHTTPRequestHandler):
                 )
                 # Which constraint is binding changes what each machine
                 # wants, so it changes whether the plant fits at all.
+                out["mode_id"] = mode.mode_id
+                out["mode_name"] = mode.name
+                return self.send_json(out)
+
+            # Switching prices. The only endpoint that answers a
+            # question about policy rather than about this shift, and the
+            # one that turns "price water properly" into a figure.
+            if route == "/api/policy":
+                mode_id = one("mode", "NORMAL")
+                modes = scenarios.constraint_modes()
+                if mode_id not in modes:
+                    return self.send_error_json(
+                        400, "UNKNOWN_MODE", "Unknown constraint mode.",
+                        {"valid": sorted(modes)})
+                mode = modes[mode_id]
+                out = policy.policy_levers(
+                    site_id=s.site_id,
+                    weights=mode.weights,
+                    constraints=mode.constraints,
+                )
                 out["mode_id"] = mode.mode_id
                 out["mode_name"] = mode.name
                 return self.send_json(out)

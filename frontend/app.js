@@ -20,7 +20,7 @@ var S = {
   view: 'command',
   forecast: null, insight: null, evidence: null, ablation: null,
   sensitivity: null, modeCompare: null, cluster: null, pilot: null,
-  governance: null, matrix: null, businessCase: null, plant: null, plantDrought: null,
+  governance: null, matrix: null, businessCase: null, plant: null, plantDrought: null, policy: null,
   selectedStream: null,
   busy: false, loadedAt: null
 };
@@ -34,7 +34,8 @@ var VIEWS = [
   { id: 'impact',    label: 'Impact',    group: 'Evidence',   ico: 'impact' },
   { id: 'evidence',  label: 'Evidence',  group: 'Evidence',   ico: 'evidence' },
   { id: 'audit',     label: 'Audit',     group: 'Evidence',   ico: 'audit' },
-  { id: 'scenarios', label: 'Scenarios', group: 'Analysis',   ico: 'scenarios' }
+  { id: 'scenarios', label: 'Scenarios', group: 'Analysis',   ico: 'scenarios' },
+  { id: 'policy',    label: 'Policy',    group: 'Analysis',   ico: 'policy' }
 ];
 
 /* ==========================================================================
@@ -50,6 +51,7 @@ var ICON = {
   audit:     'M8 2 3 4v4.5c0 3 2.1 5.1 5 6 2.9-.9 5-3 5-6V4zM6 8l1.6 1.6L10.5 6.7',
   scenarios: 'M3 3h10M5 3v4.2L3 13h10l-2-5.8V3',
   plant:     'M2 14h12M3.6 14V7l3 2V7l3 2V5.6L12.6 3v11',
+  policy:    'M8 2v12M3 5.5h10M4.6 5.5 2.6 10h4zM11.4 5.5l-2 4.5h4z',
   reset:     'M13 8a5 5 0 1 1-1.8-3.8M13 2v3h-3',
   export:    'M8 2v8M5 7l3 3 3-3M3 13h10',
   check:     'M3 8.4 6.2 11.6 13 4.8',
@@ -253,7 +255,7 @@ function renderChrome() {
         .then(function (x) {
           S.state = x;
           S.ablation = S.sensitivity = S.modeCompare = S.forecast = null;
-          S.plant = S.plantDrought = null;
+          S.plant = S.plantDrought = S.policy = null;
           return api('/api/forecast').then(function (f) { S.forecast = f; });
         })
         .then(function () {
@@ -270,7 +272,7 @@ function renderChrome() {
   }).join('');
   modeSel.onchange = function () {
     S.mode = modeSel.value;
-    S.ablation = S.sensitivity = S.plant = null;
+    S.ablation = S.sensitivity = S.plant = S.policy = null;
     guard(function () {
       return post('/api/optimise', { mode: S.mode })
         .then(function (x) { S.state = x; return api('/api/forecast'); })
@@ -402,7 +404,7 @@ function render() {
   var map = {
     command: vCommand, forecast: vForecast, decisions: vDecisions,
     water: vWater, plant: vPlant, impact: vImpact, evidence: vEvidence,
-    audit: vAudit, scenarios: vScenarios
+    audit: vAudit, scenarios: vScenarios, policy: vPolicy
   };
   document.getElementById('view').innerHTML = (map[S.view] || vCommand)();
   wire();
@@ -3191,6 +3193,199 @@ function vPlant() {
           'returned. Nothing is sampled. At cluster scale that stops being ' +
           'possible and the method has to change, which is a real limit ' +
           'rather than a detail.</p>') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ==========================================================================
+   SIGNATURE VISUAL 4 - DISTANCE TO THE SWITCHING PRICE
+   One bar per lever: how far that price has to move before the 47% plan
+   becomes the profitable one. Drawn on one scale on purpose. The dye
+   premium needs a move you can barely see next to the water tariff, and
+   that contrast is the finding - which lever policy should actually pull.
+   ========================================================================== */
+function leverBars(p) {
+  var found = (p.levers || []).filter(function (l) {
+    return l.status === 'FOUND' && l.percent_change != null;
+  });
+  if (!found.length) return '';
+
+  var W = 940, rowH = 58, padL = 300, padR = 108, top = 44;
+  var inner = W - padL - padR;
+  var max = Math.max.apply(null, found.map(function (l) {
+    return Math.abs(l.percent_change);
+  }));
+  var H = top + found.length * rowH + 34;
+
+  var bars = found.map(function (l, i) {
+    var y = top + i * rowH;
+    var mag = Math.abs(l.percent_change);
+    var w = (mag / max) * inner;
+    var smallest = l.coefficient === p.smallest_move;
+    return '<g data-k="' + esc(l.coefficient) + '">' +
+      '<text x="0" y="' + (y + 15) + '" class="lv-lab">' +
+        esc(l.label) + '</text>' +
+      '<text x="0" y="' + (y + 31) + '" class="lv-lab lv-lab-2">' +
+        esc(_fmtLv(l.current_value)) + ' &rarr; ' +
+        esc(_fmtLv(l.switching_value)) + ' ' + esc(l.unit) + '</text>' +
+      '<rect x="' + padL + '" y="' + (y + 4) + '" ' +
+        'width="' + Math.max(2, w).toFixed(1) + '" height="26" rx="2" ' +
+        'class="' + (smallest ? 'lv-near' : 'lv-far') + '">' +
+        '<title>' + esc(l.label) + ': ' +
+        (l.percent_change > 0 ? '+' : '') + num(l.percent_change, 1) +
+        '%</title></rect>' +
+      '<text x="' + (padL + Math.max(2, w) + 10).toFixed(1) + '" y="' +
+        (y + 22) + '" class="lv-val' + (smallest ? ' lv-val-near' : '') +
+        '">' + (l.percent_change > 0 ? '+' : '') +
+        num(l.percent_change, 1) + '%</text>' +
+      (smallest ? '<text x="' + padL + '" y="' + (y + 48) +
+        '" class="lv-note">smallest move of the three</text>' : '') +
+      '</g>';
+  }).join('');
+
+  return '<figure class="viz leverviz"><svg viewBox="0 0 ' + W + ' ' + H +
+    '" width="100%" role="img" aria-label="How far each price has to move ' +
+    'before the low-salt plan becomes the profitable choice">' +
+    '<text x="0" y="16" class="lv-hd">HOW FAR EACH PRICE HAS TO MOVE</text>' +
+    '<line x1="' + padL + '" y1="' + (top - 8) + '" x2="' + padL +
+      '" y2="' + (H - 26) + '" class="lv-axis"/>' +
+    bars +
+    '</svg><figcaption>Same scale for all three. The bar is the size of ' +
+    'the price change needed, not the size of the saving &mdash; every ' +
+    'one of them reaches the same plan.</figcaption></figure>';
+}
+
+function _fmtLv(v) {
+  if (v == null) return '—';
+  return num(v, Math.abs(v) >= 100 ? 0 : 2);
+}
+
+/* ==========================================================================
+   VIEW - POLICY
+   ========================================================================== */
+function vPolicy() {
+  if (!S.policy) {
+    api('/api/policy?mode=' + encodeURIComponent(S.mode))
+      .then(function (d) { S.policy = d; soft('policy'); });
+  }
+  var p = S.policy;
+
+  if (!p) {
+    return phead('Policy', 'What price would change the answer', '') +
+      '<div class="sec">' + loading('Searching for switching prices') +
+      '</div>';
+  }
+
+  var c = p.implied_carbon_price || {};
+  var b = c.benchmark || null;
+
+  return phead('Policy', 'What price would change the answer',
+    'Every other view reports what the optimiser recommends under ' +
+    'today&rsquo;s prices. This one asks what a price would have to be ' +
+    'before it recommended something better.',
+    ev('DERIVED')) +
+
+  /* --- the question --------------------------------------------------- */
+  '<div class="sec">' + srule('The question this answers',
+    'the honest version of &ldquo;price water properly&rdquo;') +
+    '<p class="lede" style="max-width:var(--measure)">' +
+      esc(p.question) + '</p>' +
+    leverBars(p) +
+    '<p class="lede" style="max-width:var(--measure);margin-top:18px">' +
+      esc(p.reading) + '</p>' +
+  '</div>' +
+
+  /* --- the carbon price ----------------------------------------------- */
+  (c.inr_per_tonne_co2e ? '<div class="sec">' +
+    srule('The carbon price this decision needs',
+      'derived from the steam lever') +
+    '<div class="grid g-7-5"><div>' +
+      '<p class="small" style="max-width:var(--measure)">' +
+        'Steam would have to cost ' + inr(c.steam_increase_inr_per_kwh_th) +
+        ' more per kWh of heat. Burning enough fuel to deliver that heat ' +
+        'emits ' + num(c.boiler_co2e_kg_per_kwh_th, 3) + ' kg of CO&#8322;e, ' +
+        'so the carbon price that produces the rise is simple division.</p>' +
+      '<p class="small mono" style="margin-top:10px">' +
+        esc(c.arithmetic) + '</p>' +
+      (b ? '<p class="lede" style="max-width:var(--measure);margin-top:16px">' +
+        esc(b.reading) + '</p>' : '') +
+      '<p class="small" style="max-width:var(--measure);margin-top:14px">' +
+        '<b>What this assumes.</b> ' + esc(c.what_it_assumes) + '</p>' +
+      '<p class="small" style="max-width:var(--measure);margin-top:8px">' +
+        '<b>What it is not.</b> ' + esc(c.what_it_is_not) + '</p>' +
+    '</div><div class="stack">' +
+      readout({ label: 'Carbon price needed', k: 'po_c',
+        raw: inr(c.inr_per_tonne_co2e), value: c.inr_per_tonne_co2e,
+        unit: '/t CO&#8322;e', size: 'xl', tone: 'water',
+        foot: b ? '&asymp; &euro;' + esc(b.implied_price_eur_per_tonne) +
+          ' a tonne' : '' }) +
+      (b ? readout({ label: esc(b.benchmark), k: 'po_b',
+        raw: '&euro;' + num(b.benchmark_eur_per_tonne, 2),
+        value: b.benchmark_eur_per_tonne, unit: '/t', size: 'sm',
+        tone: 'salt',
+        foot: 'as of ' + esc(b.benchmark_as_of) + ' &mdash; ' +
+          esc(b.benchmark_is_this_many_times_higher) +
+          '&times; what this needs' }) : '') +
+      disc('Where the benchmark comes from',
+        '<p class="small">' + esc(b ? b.benchmark_source : '') +
+        '</p><p class="small" style="margin-top:8px">It is deliberately ' +
+        'kept out of the coefficient registry. Nothing is computed from ' +
+        'it; it is here only so the implied price can be read against one ' +
+        'that industry somewhere already pays.</p>') +
+    '</div></div>' +
+  '</div>' : '') +
+
+  /* --- lever by lever -------------------------------------------------- */
+  '<div class="sec">' + srule('Lever by lever',
+    'and the instrument that would move each one') +
+    '<div class="tw"><table class="t"><thead><tr><th>Price</th>' +
+      '<th class="n">Today</th><th class="n">Switches at</th>' +
+      '<th class="n">Change</th><th>Policy instrument</th>' +
+      '</tr></thead><tbody>' +
+      (p.levers || []).map(function (l) {
+        var near = l.coefficient === p.smallest_move;
+        return '<tr' + (near ? ' class="rec"' : '') + '>' +
+          '<td><span class="t-k">' + esc(l.label) + '</span>' +
+          '<div class="t-s">' + esc(l.unit) + ' &nbsp;' +
+            ev(l.evidence) + '</div></td>' +
+          '<td class="n">' + _fmtLv(l.current_value) + '</td>' +
+          '<td class="n">' + (l.status === 'FOUND'
+            ? _fmtLv(l.switching_value)
+            : '<span class="muted">not found</span>') + '</td>' +
+          '<td class="n">' + (l.percent_change == null ? '—'
+            : '<span class="delta ' +
+              (l.direction === 'down' ? 'down' : 'up') + '">' +
+              (l.percent_change > 0 ? '+' : '') +
+              num(l.percent_change, 1) + '%</span>') + '</td>' +
+          '<td class="small muted" style="max-width:34ch">' +
+            esc(l.policy_instrument) + '</td></tr>';
+      }).join('') + '</tbody></table></div>' +
+    '<p class="small" style="margin-top:12px;max-width:var(--measure)">' +
+      'Each row is the full optimiser re-run with one coefficient changed, ' +
+      'nothing else. The crossing is found by scan and then bisection, and ' +
+      'reported on the side where the lever is actually bought &mdash; a ' +
+      'price that does not quite flip the decision would be worse than no ' +
+      'price at all.</p>' +
+  '</div>' +
+
+  /* --- honesty --------------------------------------------------------- */
+  '<div class="sec">' + srule('What this is not', 'the limits') +
+    '<div class="grid g-7-5"><div>' +
+      '<p class="small" style="max-width:var(--measure)">' +
+        esc(p.honesty) + '</p></div>' +
+      '<div class="stack">' +
+        disc('Why only the first crossing', '<p class="small">Bisection ' +
+          'alone would assume the answer moves one way with the price, ' +
+          'and that has not been proven here. A coarse scan finds the ' +
+          'first crossing &mdash; the one a tariff-setter cares about ' +
+          '&mdash; and nothing claims it is the only one.</p>') +
+        disc('Why these three levers', '<p class="small">They are the ' +
+          'three prices in the model that a policy or a market could ' +
+          'actually move: the cost of burning fuel, the cost of taking ' +
+          'water, and the cost of the cleaner chemistry. The rest are ' +
+          'physical constants or plant characteristics, and no tariff ' +
+          'changes them.</p>') +
       '</div>' +
     '</div>' +
   '</div>';

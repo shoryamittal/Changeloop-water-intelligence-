@@ -112,7 +112,7 @@ async function main() {
 
   const [state, sites, modes, insight, ablation, sens, modeCmp, evidence,
          pilot, cluster, forecast, matrix, narrative, plantNormal,
-         plantDrought] = await Promise.all([
+         plantDrought, policyLevers] = await Promise.all([
     get('/api/state'), get('/api/sites'), get('/api/modes'),
     get('/api/insight/salt-is-water'), get('/api/ablation'),
     get('/api/sensitivity'), get('/api/modes/compare'), get('/api/evidence'),
@@ -124,6 +124,10 @@ async function main() {
     // skipped and the test would pass over the markup it most needs to
     // check.
     get('/api/plant?mode=NORMAL'), get('/api/plant?mode=DROUGHT'),
+    // the switching-price sweep re-runs the optimiser a few hundred
+    // times, so it is slow; fetching it here keeps the view's own
+    // request out of the sandbox, which has no network at all.
+    get('/api/policy?mode=NORMAL'),
   ]);
   const businessCase = await postJson('/api/business-case', {
     lots_per_year: 9000,
@@ -182,6 +186,7 @@ async function main() {
   S.narrative = narrative;
   S.plant = plantNormal;
   S.plantDrought = plantDrought;
+  S.policy = policyLevers;
 
   const VIEWS = vm.runInContext('VIEWS', ctx);
 
