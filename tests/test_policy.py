@@ -96,6 +96,36 @@ class TheSearchFindsARealCrossing(unittest.TestCase):
                 self.assertLess(l["switching_value"], l["current_value"])
 
 
+class TheCacheIsSafe(unittest.TestCase):
+    """The sweep is cached because it is slow. A cache that served a
+    stale answer after a coefficient moved would be worse than the wait,
+    so the key has to notice."""
+
+    def test_repeated_calls_agree(self):
+        a = policy.policy_levers()
+        b = policy.policy_levers()
+        self.assertEqual(a["implied_carbon_price"]["inr_per_tonne_co2e"],
+                         b["implied_carbon_price"]["inr_per_tonne_co2e"])
+
+    def test_a_changed_coefficient_invalidates_it(self):
+        before = policy.policy_levers()
+        base = before["implied_carbon_price"]["inr_per_tonne_co2e"]
+        with factors.REGISTRY_LOCK:
+            with policy._patched("boiler_co2e_kg_per_kwh_th",
+                                 factors.get("boiler_co2e_kg_per_kwh_th") * 2):
+                during = policy.policy_levers()
+        self.assertNotAlmostEqual(
+            during["implied_carbon_price"]["inr_per_tonne_co2e"], base,
+            places=0,
+            msg="Doubling the boiler emission factor did not change the "
+                "implied carbon price, so the cache returned a stale "
+                "answer.")
+        after = policy.policy_levers()
+        self.assertAlmostEqual(
+            after["implied_carbon_price"]["inr_per_tonne_co2e"], base,
+            places=0)
+
+
 class TheCarbonPrice(unittest.TestCase):
 
     @classmethod

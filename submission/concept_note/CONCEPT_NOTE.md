@@ -4,23 +4,23 @@
 
 Dyeing factories in Tirupur are not allowed to let any waste water out. So they
 boil the leftover salty water until only dry salt is left. The boiling runs on
-coal.
+solid fuel, mostly wood, with coal and briquettes also used.
 
 How much they have to boil depends on how much salt went into the dye bath. It
 does not depend on how much water they used. This sounds wrong, but it comes
 straight out of mass conservation, and I can show it.
 
-So if a factory cuts its water use by 20%, the coal bill stays exactly the
-same. Cut the salt by 20% and the coal bill drops by 20%. Both of those look
+So if a factory cuts its water use by 20%, the fuel bill stays exactly the
+same. Cut the salt by 20% and the fuel bill drops by 20%. Both of those look
 identical on a water meter. Most water-saving work in the cluster aims at the
 water.
 
 The person who sets the salt load is the production planner, choosing what
 order to run the day's dye lots in. They decide hours before anything shows up,
-and the coal bill lands weeks later in another department's budget. Nobody
+and the fuel bill lands weeks later in another department's budget. Nobody
 connects the two.
 
-I built a tool that puts the coal cost in front of that planner while they are
+I built a tool that puts the fuel cost in front of that planner while they are
 still choosing. It is running now and the numbers can be checked.
 
 **Live:** https://changeloop-water-intelligence.onrender.com
@@ -30,7 +30,7 @@ What I can show, and what I cannot:
 | | |
 |---|---|
 | The physics holds up | I fed it the water strength that CPCB measured at a real Tirupur factory. It predicted 30.6% reject. Indian plants report 20 to 30%. I did not tune it to land there. |
-| The tool works | 34 API endpoints, 178 tests, 25 input numbers each labelled with where it came from, and a tamper-proof record of every decision. |
+| The tool works | 34 API endpoints, 180 tests, 25 input numbers each labelled with where it came from, and a tamper-proof record of every decision. |
 | It found something I did not expect | The better plan is blocked by a small price gap, not by technology. About 12% off the price of low-salt dye would be enough. |
 | Nothing has been measured | No sensor on any real factory has ever fed this system. A test checks that I never quietly claim otherwise. |
 
@@ -60,10 +60,17 @@ The waste water goes through membranes. The clean part goes back into
 production. The salty leftover goes into an evaporator, which boils it down
 until only solid salt remains.
 
-Boiling needs heat, the heat comes from steam, and in Tirupur the steam mostly
-comes from coal. Boiling one cubic metre of leftover takes about 188 kWh of
-heat. So a rule written to protect a river created a large and permanent coal
-bill.
+Boiling needs heat and the heat comes from steam. Energy audits of more than
+sixty dyeing units in Tiruppur during 2024 and early 2025 found each one
+burning about 2,000 tonnes of solid fuel a year, primarily wood. Boiling one
+cubic metre of leftover takes about 188 kWh of heat. So a rule written to
+protect a river created a large and permanent fuel bill.
+
+The rupee and carbon figures in this note are derived on a coal-fired basis,
+which is what my coefficient registry states. A wood-fired boiler has different
+fuel economics and a different carbon profile, so both need re-deriving per
+site. The physics does not move: salt sets how much has to be boiled whatever
+raises the steam.
 
 ### The part people miss
 
@@ -83,7 +90,7 @@ solid, and the only way out is through the evaporator. So the evaporator has to
 boil whatever amount of water that salt happens to be sitting in.
 
 Using less water makes the loop smaller. Only using less salt makes the boiling
-smaller, and the boiling is what burns coal.
+smaller, and the boiling is what burns fuel.
 
 The system checks this on every request:
 
@@ -95,7 +102,7 @@ The system checks this on every request:
 Zero, not a small amount. It falls out of the arithmetic.
 
 This is why a water dashboard cannot find the saving. Two changes that look the
-same on a water meter do completely different things to the coal bill, and
+same on a water meter do completely different things to the fuel bill, and
 nothing on the factory floor tells them apart.
 
 ### Why it has not been fixed
@@ -103,7 +110,7 @@ nothing on the factory floor tells them apart.
 The salt load is set by a production planner. They choose which dye lots run in
 what order, and which rinse method to use.
 
-They make that choice hours before any of it shows up anywhere. The coal bill
+They make that choice hours before any of it shows up anywhere. The fuel bill
 arrives weeks later, in a different department's budget, with no way to trace
 it back to the choice that caused it.
 
@@ -194,7 +201,7 @@ screenshots.
 |---|---|
 | Backend | Plain Python, no framework, nothing to install |
 | API | 34 endpoints. Every saving is worked out on the server, so the browser cannot claim one |
-| Tests | 178, covering the physics, the safety rules, concurrency and the interface |
+| Tests | 180, covering the physics, the safety rules, concurrency and the interface |
 | Front end | No libraries. Ten screens |
 | Record of decisions | A chained hash of every entry, re-checked on every health check. It is not a blockchain and the system says so |
 
@@ -401,7 +408,7 @@ cluster has paid for it.
 
 ### The pitch in three sentences
 
-ZLD saved the Noyyal river and left the cluster with a coal bill. That bill is
+ZLD saved the Noyyal river and left the cluster with a fuel bill. That bill is
 set by salt, not water, so most of the water-saving work in Tirupur is aimed at
 the wrong thing. ChangeLoop shows the planner what their choice actually costs,
 at the moment they make it.
@@ -519,6 +526,8 @@ are sourced. I did not relabel anything I could not back up.
   15,000 to 80,000. Whether it holds in real running conditions, I do not know.
 - The tool handles machines inside one factory. It does not schedule them
   against each other in time.
+- The rupee and carbon conversions assume a coal-fired boiler. Tiruppur units
+  mostly burn wood, so both need re-deriving per site.
 - The data centre idea is an argument from structure. It is not a result.
 - There is no trained model in here and I do not call it AI-powered. The
   decision record is a hash chain, not a blockchain, and the system says so.
@@ -569,12 +578,12 @@ it. Four numbers are in that state and all four are commercial prices.
 
 ## Closing
 
-ChangeLoop is a working system anyone can open, with 178 tests, 25 labelled
+ChangeLoop is a working system anyone can open, with 180 tests, 25 labelled
 input numbers, a check against CPCB measurements, and no measured data at all.
 It tells you that last part itself, on every screen.
 
 The claim is small enough to check and big enough to matter. In a closed loop,
-salt sets the coal bill. The person who controls the salt cannot see what it
+salt sets the fuel bill. The person who controls the salt cannot see what it
 costs. I built the thing that shows them, proved the physics, and then worked
 out what the saving is actually waiting on.
 

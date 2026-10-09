@@ -48,6 +48,7 @@ with the figure.
 Everything here is DERIVED from the engine. No coefficient is added.
 """
 from typing import Any, Dict, List, Optional
+import threading
 
 from . import factors
 from .basin import DEFAULT_SITE
@@ -393,14 +394,44 @@ def _benchmark(per_tonne: float) -> Dict[str, Any]:
     }
 
 
+# The sweep re-runs the optimiser a few hundred times, which takes about
+# 20 seconds on a laptop and over a minute on a small cloud instance.
+# The answer only changes when a coefficient or the constraint set
+# changes, so it is cached on exactly those. A reviewer clicking the
+# Policy screen should not be left looking at a spinner.
+_LEVER_CACHE: Dict[Any, Dict[str, Any]] = {}
+_LEVER_CACHE_LOCK = threading.Lock()
+
+
+def _cache_key(site_id, weights, constraints) -> tuple:
+    # Every tunable coefficient, not just the three levers. Several
+    # others feed the optimiser, and a key that ignored them would
+    # serve a stale answer after a sweep or a what-if changed one.
+    with factors.REGISTRY_LOCK:
+        coeffs = tuple(sorted(
+            (k, f.value) for k, f in factors.FACTORS.items() if f.tunable))
+    return (site_id, coeffs,
+            tuple(sorted(weights.to_dict().items())),
+            tuple(sorted(constraints.to_dict().items())))
+
+
 def policy_levers(site_id: str = DEFAULT_SITE,
                   weights: Optional[ObjectiveWeights] = None,
                   constraints: Optional[HardConstraints] = None
                   ) -> Dict[str, Any]:
     """All three levers, plus the carbon price the steam lever implies."""
+    weights = weights or ObjectiveWeights()
+    constraints = constraints or HardConstraints()
+    key = _cache_key(site_id, weights, constraints)
+    with _LEVER_CACHE_LOCK:
+        hit = _LEVER_CACHE.get(key)
+    if hit is not None:
+        return hit
+
     levers: List[Dict[str, Any]] = []
-    for key in LEVERS:
-        levers.append(switching_point(key, site_id, weights, constraints))
+    for lever_key in LEVERS:
+        levers.append(switching_point(lever_key, site_id, weights,
+                                      constraints))
 
     by_key = {l["coefficient"]: l for l in levers}
     carbon = implied_carbon_price(by_key["steam_cost_inr_per_kwh_th"])
@@ -409,7 +440,7 @@ def policy_levers(site_id: str = DEFAULT_SITE,
     cheapest = min(found, key=lambda l: abs(l.get("percent_change") or 1e9),
                    default=None)
 
-    return {
+    out = {
         "site_id": site_id,
         "question": ("The low-salt plan is feasible and cuts freshwater "
                      "and evaporator steam by about 47%, and the optimiser "
@@ -428,6 +459,9 @@ def policy_levers(site_id: str = DEFAULT_SITE,
             "been measured at a real site."),
         "classification": "DERIVED",
     }
+    with _LEVER_CACHE_LOCK:
+        _LEVER_CACHE[key] = out
+    return out
 
 
 def _overall_reading(levers, carbon, cheapest) -> str:

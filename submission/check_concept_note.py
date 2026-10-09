@@ -38,8 +38,8 @@ HABIT = os.path.join(HERE, "concept_note", "CONCEPT_NOTE_HABIT.md")
 # The commercial terms quoted in the 12-section note. They are business
 # decisions rather than engine outputs, so they live here and feed the
 # business case, which keeps the note and the arithmetic in step.
-SUBSCRIPTION_INR = 240000.0
-SETUP_INR = 450000.0
+SHARE_OF_SAVING = 0.25
+SETUP_INR = 75000.0
 LOTS_PER_YEAR = 9000
 
 # Per-lot avoidance for the two plans, from the modelled shift of five
@@ -328,7 +328,9 @@ def habit_expectations():
                 factors.get("steam_cost_inr_per_kwh_th"),
             "salt_cost_inr_per_kg": factors.get("salt_cost_inr_per_kg"),
             "implementation_cost_inr": SETUP_INR,
-            "annual_subscription_inr": SUBSCRIPTION_INR,
+            # The fee is a share of the gross saving, so the gross is what
+            # the note quotes; pass no subscription and derive the share.
+            "annual_subscription_inr": 0.0,
         })
 
     today = case(TODAY_FW_PER_LOT, TODAY_SALT_PER_LOT)
@@ -342,28 +344,66 @@ def habit_expectations():
     def k(v):
         return lakh(round(v / 1000.0) * 1000)
 
-    need("subscription", "Rs %s per unit" % lakh(SUBSCRIPTION_INR))
-    need("setup cost", "Rs %s per unit" % lakh(SETUP_INR))
-    need("gross saving row",
-         "| Gross saving a year | Rs %s | Rs %s |"
-         % (k(today["annual_gross_benefit_inr"]),
-            k(lowsalt["annual_gross_benefit_inr"])))
-    need("net benefit row",
-         "| Net benefit a year | **Rs %s** | **Rs %s** |"
-         % (k(today["annual_net_benefit_inr"]),
-            k(lowsalt["annual_net_benefit_inr"])))
-    need("payback row",
-         "| Payback on setup | %.1f years | about 5 weeks |"
-         % today["payback_years"])
-    need("roi row",
-         "| Return on cost | %d%% | %s%% |"
-         % (round(today["annual_roi_percent"]),
-            lakh(round(lowsalt["annual_roi_percent"]))))
+    g_today = today["annual_gross_benefit_inr"]
+    g_low = lowsalt["annual_gross_benefit_inr"]
+    fee_today = g_today * SHARE_OF_SAVING
+    fee_low = g_low * SHARE_OF_SAVING
 
-    if lowsalt["payback_years"] * 52 > 8:
+    need("share", "| Share of verified saving | %d%% |"
+         % round(SHARE_OF_SAVING * 100))
+    need("setup cost", "| One-off setup | Rs %s per unit |" % lakh(SETUP_INR))
+    need("saving row",
+         "| Saving the system can verify | Rs %s | Rs %s |"
+         % (k(g_today), k(g_low)))
+    need("share row",
+         "| My %d%% share | Rs %s | Rs %s |"
+         % (round(SHARE_OF_SAVING * 100), k(fee_today), k(fee_low)))
+    need("factory keeps row",
+         "| **Factory keeps** | **Rs %s** | **Rs %s** |"
+         % (k(g_today - fee_today), k(g_low - fee_low)))
+    need("share per unit",
+         "about Rs %s a year" % k(fee_today))
+
+    # the flat-fee figure the note cites as the reason it was abandoned
+    need("rejected flat fee share",
+         "would have taken %d%% of the saving" % round(240000 / g_today * 100))
+
+    # payback on setup, in months, against what the factory keeps
+    months = SETUP_INR / (g_today - fee_today) * 12
+    if not 2.0 <= months <= 4.0:
         raise SystemExit(
-            "The low-salt payback is now %.1f weeks. Section 6 says 'about "
-            "5 weeks'." % (lowsalt["payback_years"] * 52))
+            "Payback on setup is now %.1f months. Section 6 says 'about 3 "
+            "months'." % months)
+
+    # revenue projections
+    live = {1: 2, 2: 12, 3: 40}
+    new_units = {1: 2, 2: 10, 3: 28}
+    need("y2 setup", "| Setup revenue, new units only | Rs %s | Rs %s | Rs %s |"
+         % (lakh(new_units[1] * SETUP_INR), lakh(new_units[2] * SETUP_INR),
+            lakh(new_units[3] * SETUP_INR)))
+    need("y2 share",
+         "| Share of verified saving | waived during pilot | Rs %s | Rs %s |"
+         % (lakh(round(live[2] * fee_today, -3)),
+            lakh(round(live[3] * fee_today, -3))))
+    y2 = new_units[2] * SETUP_INR + round(live[2] * fee_today, -3)
+    y3 = new_units[3] * SETUP_INR + round(live[3] * fee_today, -3)
+    need("revenue totals",
+         "| **Total revenue** | **Rs %s** | **Rs %s** | **Rs %s** |"
+         % (lakh(new_units[1] * SETUP_INR), lakh(y2), lakh(y3)))
+
+    # pilot cost build-up
+    per_site = 60000 + 50000 + 35000 + 15000 + 15000
+    need("per site", "| **Per site** | **Rs %s** | |" % lakh(per_site))
+    two = per_site * 2
+    sub = two + 50000 + 60000 + 20000
+    need("pilot total", "| **Total** | **Rs %s** | |"
+         % lakh(sub + round(sub * 0.10)))
+    need("closing pilot cost", "costs about Rs %s"
+         % lakh(sub + round(sub * 0.10)))
+
+    # market size follows from the share, so it has to move with it
+    need("tirupur market",
+         "roughly **Rs %.1f crore a year**" % (360 * fee_today / 1e7))
 
     # --- physics and validation ---------------------------------------
     need("MEE thermal",

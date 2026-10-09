@@ -5,10 +5,10 @@
 | | |
 |---|---|
 | **Startup name** | ChangeLoop |
-| **Tagline** | In a closed loop, salt sets the coal bill. |
+| **Tagline** | In a closed loop, salt sets the fuel bill. |
 | **Date** | 9 October 2026 |
 | **Prepared by** | Shorya Mittal, founder |
-| **Contact** | *[email and phone to be filled in before submission]* |
+| **Contact** | shoryamittal9653@gmail.com |
 | **Working prototype** | https://changeloop-water-intelligence.onrender.com |
 
 ---
@@ -38,9 +38,18 @@ moved to the boiler house, and nobody is managing it.
 ### The problem
 
 To recycle the water, a factory has to boil the leftover salty stream until
-only dry salt is left. Boiling needs heat, the heat comes from steam, and in
-Tirupur the steam mostly comes from coal. Boiling one cubic metre of leftover
+only dry salt is left. Boiling needs heat and the heat comes from steam.
+Energy audits of more than sixty dyeing units in Tiruppur during 2024 and early
+2025 found each one burning about 2,000 tonnes of solid fuel a year, primarily
+wood, with coal and briquettes also in use. Boiling one cubic metre of leftover
 takes about 188 kWh of heat.
+
+One caveat I want up front rather than buried. The rupee and carbon figures in
+this note are derived on a coal-fired basis, which is what my coefficient
+registry states. A wood-fired boiler has different fuel economics and a
+different carbon profile, so those two conversions need re-deriving for any
+particular site. The physics underneath does not move: salt sets how much has
+to be boiled whatever fuel raises the steam.
 
 Here is the part almost nobody acts on.
 
@@ -64,8 +73,8 @@ The result is easy to test, and my system tests it on every request:
 Zero, not a small amount. It falls straight out of the arithmetic.
 
 So two changes that look identical on a water meter do completely different
-things to the coal bill. Most water-saving work in the cluster aims at the
-water. It does not touch the coal.
+things to the fuel bill. Most water-saving work in the cluster aims at the
+water. It does not touch the fuel.
 
 ### Why it has not been fixed
 
@@ -73,7 +82,7 @@ The salt load is decided by a production planner, choosing which dye lots run
 in what order and which rinse method to use. They make that call hours before
 anything shows up anywhere.
 
-The coal bill arrives weeks later, in a different department's budget, with no
+The fuel bill arrives weeks later, in a different department's budget, with no
 way to trace it back to the choice that caused it. The planner is not being
 careless. They are working without the one number that would change their mind.
 
@@ -92,7 +101,7 @@ did not choose and cannot opt out of.
 | Who | Why this matters to them |
 |---|---|
 | **Production planners** in Tirupur dyeing units | They make this decision every shift and cannot see what it costs |
-| **Factory owners** | They pay a coal bill they cannot trace or control |
+| **Factory owners** | They pay a fuel bill they cannot trace or control |
 | **The 18 shared treatment plants** | They buy the steam and store the salt. Somewhere between 60,000 and 73,000 tonnes of waste salt has built up across them, with no settled disposal route |
 | **Households and farmers in the Noyyal basin** | Groundwater here is heavily stressed. Every litre not pulled out matters more than a litre saved somewhere easy |
 
@@ -166,7 +175,7 @@ prices the difference.
 
 ### Value proposition
 
-For a factory owner: lower coal and water bills from a scheduling change, with
+For a factory owner: lower fuel and water bills from a scheduling change, with
 no equipment to buy and no change to the existing approval process.
 
 For a planner: the number that is missing from their screen, at the moment they
@@ -208,37 +217,46 @@ instead of arguing for one in principle.
 
 ### How it makes money
 
-An annual software subscription per dyeing unit, sold mainly through the shared
-treatment plants rather than factory by factory.
+A share of the saving the system can prove, plus a small one-off fee to
+connect it.
 
-The two prices below are my own proposal. They are not benchmarked against
-comparable software, because I could not find published pricing for anything
-that does this job. Everything downstream of them in this section, including
-the market size, moves if the price moves.
+| Item | Amount |
+|---|---|
+| Share of verified saving | 25% |
+| One-off setup | Rs 75,000 per unit |
 
-| Item | Amount | Notes |
-|---|---|---|
-| Annual subscription | Rs 2,40,000 per unit | Covers the machines in scope, typically four |
-| One-off setup | Rs 4,50,000 per unit | Connecting to the planning system and the effluent meters, plus training |
+No licence fee and no charge for the software itself. If the tool saves a
+factory nothing, it costs that factory nothing beyond the setup.
 
-### Why a factory would pay that
+### Why charge this way
 
-Using today's tariffs and the plan the tool actually recommends right now, for
-a unit running 9,000 lots a year:
+A flat subscription was my first instinct and the arithmetic killed it. On the
+plan the optimiser recommends under today's prices, a Rs 2,40,000 annual fee
+would have taken 59% of the saving and left the factory 41%. Nobody running a
+thin-margin dyeing unit signs that, least of all for a saving that is modelled
+rather than measured.
+
+The share model fits what is already built. The system computes every saving on
+the server, counts only what a named person actually approved, and writes it to
+a tamper-evident ledger. That ledger is a billing basis, not just an audit
+trail. It also turns the project's weakest point into the mechanism: nothing
+has been measured yet, so nothing is owed yet.
+
+### What a factory actually gets
+
+For a unit running 9,000 lots a year, on the plan the tool recommends today:
 
 | | Plan it recommends today | Low-salt plan, once the price gap closes |
 |---|---|---|
-| Gross saving a year | Rs 4,08,000 | Rs 52,04,000 |
-| Less subscription | Rs 2,40,000 | Rs 2,40,000 |
-| Net benefit a year | **Rs 1,68,000** | **Rs 49,64,000** |
-| Payback on setup | 2.7 years | about 5 weeks |
-| Return on cost | 37% | 1,103% |
+| Saving the system can verify | Rs 4,08,000 | Rs 52,04,000 |
+| My 25% share | Rs 1,02,000 | Rs 13,01,000 |
+| **Factory keeps** | **Rs 3,06,000** | **Rs 39,03,000** |
+| Payback on the Rs 75,000 setup | about 3 months | a few weeks |
 
-I am showing both columns on purpose. The left column is what a factory gets
-today, and it is a modest, believable return. The right column is what the same
-factory gets if the low-salt dye premium falls about 12%, which is the gap my
-system measured. The upside is real, but it is not what I would ask anyone to
-sign for.
+I am showing both columns on purpose. The left is what a factory gets today and
+it is modest. The right is the same factory once the low-salt dye premium falls
+about 12%, which is the gap my system measured. The upside is real, but the
+left column is what I would ask anyone to sign for.
 
 ### How customers are reached
 
@@ -275,8 +293,8 @@ context this belongs in.
 
 | Level | Size | Basis |
 |---|---|---|
-| Tirupur, immediate | About 360 dyeing units. At my price of Rs 2,40,000 a year that is roughly **Rs 8.6 crore a year** | 300 units on 18 CETPs plus 60 with their own plants. Other reports put the figure nearer 450 |
-| Indian textile ZLD, wider | Tirupur is one of several clusters under ZLD rules. Surat, Erode, Karur, Ludhiana, Panipat and Jetpur have similar processing bases | Directional. I have not counted units outside Tirupur and I am not going to present a number I cannot source |
+| Tirupur, immediate | About 360 dyeing units. At a 25% share of what the recommended plan saves today, that is roughly **Rs 3.7 crore a year**, and it grows with every unit that adopts the low-salt plan | 300 units on 18 CETPs plus 60 with their own plants. Other reports put the figure nearer 450 |
+| Indian textile ZLD, wider | Tirupur is one of several clusters under ZLD rules. Surat, Erode, Karur, Ludhiana, Panipat and Jetpur have similar processing bases. The whole Indian ZLD equipment market across all industries is put at about **USD 1.33 billion in 2025**, growing to USD 2.52 billion by 2032 | The dollar figure is a commercial market estimate covering all ZLD, not textile software. I have not counted dyeing units outside Tirupur and will not present a number I cannot source |
 | Adjacent closed loops, later | Evaporative cooling, boiler blowdown and mine water share the same physics | Unvalidated. Listed as direction, not as market |
 
 The growth driver is regulation that already exists. ZLD is compulsory and
@@ -297,14 +315,14 @@ commitment anyone has made.
 | Who | What they do | Why ChangeLoop is different |
 |---|---|---|
 | **Dyehouse software**, such as SedoMaster and Datatex | Plan production, manage recipes, track batches | They schedule for throughput and delivery. Neither prices the downstream thermal cost of the schedule, which is the whole point here |
-| **ZLD equipment companies**, such as Praj, Thermax, VA Tech Wabag | Build and run the membranes and evaporators | They sell the plant. They do not touch the upstream decision that sets how hard the plant has to work |
-| **Water monitoring and IoT dashboards** | Report flows and quality after the fact | They measure water volume, which the table in section 2 shows is the wrong number for the coal bill |
-| **Low-salt dye suppliers**, such as DyStar and Archroma | Sell the chemistry that cuts salt | They sell the lever. They cannot tell a factory when it pays, which is exactly what my system computes |
+| **ZLD equipment companies**, such as Praj and VA Tech Wabag | Build and run the membranes and evaporators. Praj has worked on Tirupur textile effluent; VA Tech Wabag builds evaporator-based ZLD plants | They sell the plant. They do not touch the upstream decision that sets how hard the plant has to work |
+| **Water monitoring and IoT dashboards** | Report flows and quality after the fact | They measure water volume, which the table in section 2 shows is the wrong number for the fuel bill |
+| **Low-salt dye chemistry**, such as Archroma's Avitera range, and CIRCOT's low-salt dyeing work in India | Sell or license the chemistry that cuts salt | They sell the lever. They cannot tell a factory when it pays, which is exactly what my system computes |
 | **Consultancies and energy audits** | One-off studies | A report is read once. This runs every shift and is checked against what was actually approved |
 
 The honest summary: the pieces exist. The membranes exist, the chemistry
 exists, the planning software exists. What does not exist is anything that
-connects the upstream scheduling decision to the downstream coal bill, which is
+connects the upstream scheduling decision to the downstream fuel bill, which is
 where the saving is hiding.
 
 ---
@@ -319,7 +337,7 @@ mockup.
 | | |
 |---|---|
 | API | 34 endpoints. Every saving is worked out on the server, so the browser cannot claim one |
-| Tests | 178, covering the physics, the safety rules, concurrency and the interface |
+| Tests | 180, covering the physics, the safety rules, concurrency and the interface |
 | Input numbers | 25, each labelled with its source. 17 published, 4 derived, 4 assumed, 0 measured |
 | Validation | Fed the water strength CPCB measured at a Tirupur unit, 18,340 mg/L, the model predicted 30.6% leftover. Indian plants report 20 to 30% |
 
@@ -354,48 +372,88 @@ one question: did the tool cause the saving, or would it have happened anyway?
 ## 9. Financial overview
 
 All figures in this section are plans, not results. I have no revenue and no
-customers today.
+customers today. The software already exists and runs, so what follows is the
+cost of proving it on a real factory, not the cost of building it.
 
-### What the first year needs
+### What the pilot actually costs
 
-| Item | Amount | What it buys |
+Instrumentation per site. These are the two readings that turn the heaviest
+assumptions in the model into measurements.
+
+| Item | Cost | Why this figure |
 |---|---|---|
-| Instruments for two pilot sites | Rs 6,00,000 | Steam flow meters and conductivity probes, plus installation and calibration |
-| Site integration and engineering | Rs 5,00,000 | Connecting to planning systems and effluent meters at two sites |
-| Independent lab testing | Rs 2,00,000 | Colour-fastness testing on every early-released lot |
-| Founder stipend, 12 months | Rs 6,00,000 | Full-time work on the pilot |
-| Cloud, tooling and travel | Rs 2,00,000 | Hosting, site visits, instrument servicing |
-| Contingency | Rs 2,00,000 | About 10% |
-| **Total** | **Rs 23,00,000** | |
+| Vortex steam flow meter, DN50, steam rated | Rs 60,000 | Indian suppliers quote Rs 35,500 to Rs 96,000 depending on line size and specification |
+| Inductive conductivity transmitter and sensor | Rs 50,000 | The reject stream fouls contacting electrodes, so an inductive probe is the correct type. Indian industrial units run Rs 25,000 to Rs 60,000 |
+| Tapping, wiring and commissioning | Rs 35,000 | Hot line tapping and a safe install on an existing steam header |
+| Data logger and gateway | Rs 15,000 | So readings reach the system without someone copying them down |
+| Calibration and first-year checks | Rs 15,000 | A drifting sensor is worse than no sensor |
+| **Per site** | **Rs 1,75,000** | |
 
-### Funding requirement
+The whole pilot across twelve months, for two sites.
 
-I am seeking **Rs 23,00,000** as grant or seed funding for a 12-month pilot
-programme across two to three dyeing units in Tirupur.
+| Item | Cost | Why this figure |
+|---|---|---|
+| Instrumentation, two sites | Rs 3,50,000 | Two sites so the result is not one factory's quirk |
+| Independent colour-fastness testing | Rs 50,000 | About 150 samples. SITRA in Coimbatore publishes Rs 300 to Rs 350 per sample for colour fastness to washing |
+| Travel to Tirupur, about twelve visits | Rs 60,000 | About Rs 5,000 a visit including travel and a night's stay. Install, calibrate, and sit with the planner during the shadow weeks |
+| Cloud hosting and domain | Rs 20,000 | The system runs on a small instance today |
+| Contingency, about 10% | Rs 48,000 | |
+| **Total** | **Rs 5,28,000** | |
 
-The largest single line is instrumentation, and that is deliberate. The
-weakness of this project today is that nothing has been measured. Two
-instruments at one site turn the two heaviest numbers in the model from
-published figures into measured ones, and nothing else buys as much credibility
-for as little money.
+### What costs nothing
+
+The software is built, tested and running. Extending it to a second or third
+factory is configuration, not development.
+
+The host factory contributes in kind rather than in cash: access to the steam
+header and the reject line, an extract from its planning system, and some of
+the planner's time during the weeks when the tool changes nothing. None of that is a
+cheque, and without it the cash above buys nothing.
+
+My own work on the pilot is not costed here. I am doing it either way.
+
+### How a pilot like this gets funded
+
+Three routes, and they are not exclusive. A treatment plant can co-fund the
+instruments, because the steam saving lands on its own bill. A state or
+central scheme for cluster-level environmental work can cover metering. Or the
+first site pays a reduced fee and keeps the saving, which is the cleanest test
+of whether anyone actually wants this.
+
+I am not putting a funding request in this note. The number above is here so
+the cost of the next step is visible, and because a plan that cannot say what
+it costs is not a plan.
+
+### Unit economics, once it is selling
+
+| Item | Amount |
+|---|---|
+| Share of verified saving | 25% |
+| One-off setup | Rs 75,000 per unit |
+| Share per unit at today's recommended plan | about Rs 1,02,000 a year |
 
 ### Revenue projections
 
-These assume the pilot succeeds and the shared treatment plant channel works.
-Both are assumptions.
+These assume the pilot succeeds and the treatment plant channel works. Both are
+assumptions, and the share figures assume units stay on the plan the tool
+recommends today rather than moving to the low-salt plan. If they move, the
+numbers below are low by a wide margin.
 
 | | Year 1 | Year 2 | Year 3 |
 |---|---|---|---|
-| Paying units | 2 at pilot rate | 12 | 40 |
-| Subscription revenue | Rs 3,00,000 | Rs 28,80,000 | Rs 96,00,000 |
-| Setup revenue | included in pilot | Rs 45,00,000 | Rs 1,26,00,000 |
-| **Total revenue** | **Rs 3,00,000** | **Rs 73,80,000** | **Rs 2,22,00,000** |
+| Live units | 2, pilot | 12 | 40 |
+| Setup revenue, new units only | Rs 1,50,000 | Rs 7,50,000 | Rs 21,00,000 |
+| Share of verified saving | waived during pilot | Rs 12,24,000 | Rs 40,80,000 |
+| **Total revenue** | **Rs 1,50,000** | **Rs 19,74,000** | **Rs 61,80,000** |
 
-Year 1 is a pilot year and is not meant to make money. Years 2 and 3 assume one
-CETP relationship in year 2 and two or three by year 3, at about 17 member
-units each.
+Year 1 is a pilot year and is not meant to make money; the share is waived
+while the baseline is still being established. Years 2 and 3 assume one CETP
+relationship in year 2 and two or three by year 3, at about 17 member units
+each.
 
----
+Setup is billed once per unit, on new units only, so year 2 bills ten and year
+3 bills twenty-eight, not forty. The share is billed on every live unit against
+what the ledger says was actually saved.
 
 ## 10. Impact assessment
 
@@ -412,8 +470,10 @@ conventional single-stage rinse:
 
 ### If the cluster adopts it
 
-A straight-line projection across 400 units at 900 lots each a year. This is a
-projection and my system labels it as one. It assumes every factory resembles
+A straight-line projection across 400 units at 900 lots each a year. The 400 is
+the figure my engine uses; it sits between the 360 counted earlier and the 450
+other reports give, so it is a reasonable stand-in for the cluster rather than a
+separate claim. This is a projection and my system labels it as one. It assumes every factory resembles
 the modelled one and that every recommendation is approved. Neither has been
 tested, and it must not be read as achieved impact.
 
@@ -426,8 +486,8 @@ tested, and it must not be read as achieved impact.
 
 ### Environmental benefit
 
-Less groundwater pulled out of a basin that is already stressed. Less coal
-burned for the same output. Less solid salt added to the 60,000 to 73,000
+Less groundwater pulled out of a basin that is already stressed. Less solid fuel
+burned for the same output, which in Tiruppur mostly means less wood. Less solid salt added to the 60,000 to 73,000
 tonnes already stockpiled across Tirupur's treatment plants with no settled
 disposal route.
 
@@ -459,33 +519,50 @@ The EU carbon market was charging 82.40 euro a tonne on 5 October 2026, close
 to four times more. So this saving is not waiting for an impossible price. It
 is waiting for any price at all.
 
-That is a finding a regulator can act on, and it came out of the engine rather
-than out of an opinion.
+Three caveats travel with that figure. It assumes the whole carbon cost reaches
+the factory as a higher steam price, which is the best case. It is the point
+where this decision flips in my model, not a recommendation for what a carbon
+price ought to be. And it is computed on a coal-fired boiler, so at a
+wood-fired site the carbon lever is weaker and the dye premium matters more.
+
+The dye premium and steam cost rows do not depend on the fuel at all. Whatever
+makes steam cost 54% more flips the decision, and a 12% fall in the dye premium
+flips it without touching the boiler. Those two findings stand whatever is
+burning, and they came out of the engine rather than out of an opinion.
 
 ---
 
 ## 11. Conclusion
 
-ZLD saved the Noyyal river and left the cluster with a coal bill nobody is
+ZLD saved the Noyyal river and left the cluster with a fuel bill nobody is
 managing. That bill is set by salt, not water, so most of the water-saving work
 in Tirupur is aimed at the wrong number. ChangeLoop shows the planner what
 their choice actually costs, at the moment they make it.
 
 The prototype is built, running and open to inspection. The physics is checked
-against published plant measurements. The business case pays back in under
-three years on the conservative plan, and in weeks if a small price gap closes.
-The route to the cluster runs through 18 shared treatment plants whose own
+against published plant measurements. A factory pays Rs 75,000 to connect and
+keeps three quarters of whatever the system can prove it saved, which on
+today's recommended plan returns the setup cost in about three months. The
+route to the cluster runs through 18 shared treatment plants whose own
 economics already point the same way.
 
 What it does not have is a single measured number from a real factory, and I
-would rather say that plainly than let a reviewer discover it. That is exactly
-what the funding is for.
+would rather say that plainly than let a reviewer discover it. Closing that gap
+costs about Rs 5,28,000 and needs one factory willing to let me put two
+instruments on its pipework.
 
-### What I am asking for
+### What would help most
 
-- **Rs 23,00,000** for a 12-month pilot across two to three Tirupur dyeing units
-- **An introduction to a shared treatment plant** willing to host the pilot
-- **Technical review** of the model by someone who knows textile effluent
+None of these is money.
+
+- **An introduction to a shared treatment plant** in Tirupur willing to host a
+  pilot. This is the single thing standing between the project and its first
+  measured number.
+- **A technical review** of the model by someone who knows textile effluent. I
+  would rather be told a coefficient is wrong now than after a factory has
+  relied on it.
+- **An introduction to a dye chemistry supplier**, to put a real price on the
+  lever my system says has the smallest gap to close.
 
 ### Next steps
 
@@ -522,11 +599,14 @@ engine and fails if any has drifted.
 
 - No deployment, no customer, no pilot, no measured result.
 - The cluster figure is a projection, not achieved impact.
-- The financial projections in section 9 are plans with stated assumptions.
+- The financial projections in section 9 are plans with stated assumptions. The pilot costs are built from quoted supplier and lab prices; the revenue figures are not.
 - The shared-evaporator solver checks every combination, which will not scale to
   a treatment plant with hundreds of members.
 - The 60,000 mg/L limit is one modelled figure inside a published range of
   15,000 to 80,000. Whether it holds in real running conditions is unknown.
+- The rupee and carbon conversions assume a coal-fired boiler. Tiruppur units
+  mostly burn wood, so both need re-deriving per site. The physics and the dye
+  premium finding do not depend on the fuel.
 - The data centre and cooling tower idea is an argument from structure, not a
   result.
 - There is no trained model in this system and I do not call it AI-powered. The
@@ -540,7 +620,11 @@ engine and fails if any has drifted.
 | 300 dyeing units on 18 CETPs, 60 with their own plants, 120 MLD recycled, 94% recovery | Reported cluster data, 2026. Other reports put the unit count nearer 450 |
 | Waste salt backlog of 60,000 to 73,000 tonnes across the 18 CETPs | Dyers Association of Tiruppur, reported by Ecotextile News, 2022, and later reporting on accumulated salt at the CETPs |
 | EU carbon border mechanism covers iron and steel, cement, aluminium, fertilisers, electricity and hydrogen, not textiles | European Commission scope; textiles named as a candidate for a later phase |
+| Indian ZLD market of about USD 1.33 billion in 2025, USD 2.52 billion by 2032 | MarkNtel Advisors, India Zero Liquid Discharge Market report. A commercial estimate, cited as such |
+| Archroma Avitera SE reduced-salt reactive dye range | Ecotextile News, January 2024 |
+| Praj on Tirupur textile effluent; VA Tech Wabag on evaporator-based ZLD | Company and trade press reporting |
 | 2011 closure of around 700 units | Madras High Court order, widely reported |
+| Tiruppur dyeing units burn about 2,000 tonnes of solid fuel a year each, primarily wood | Energy audits of more than sixty dyeing MSMEs in Tiruppur, 2024 to early 2025, reported by India Development Review |
 | Water strength of 18,340 mg/L, leftover at 20-30%, evaporator steam use | Central Pollution Control Board assessment of textile dyeing units and ZLD at Tirupur |
 | Grid emissions, 0.705 kg CO2 per kWh | CO2 Baseline Database for the Indian Power Sector, Central Electricity Authority |
 | Carbon price of 82.40 euro a tonne, 5 October 2026 | European carbon prices, S&P Global Commodity Insights |
