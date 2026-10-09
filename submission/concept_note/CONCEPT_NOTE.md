@@ -259,8 +259,8 @@ The person who uses it and the person who pays for it are not the same.
 ### Why the treatment plant already wants this
 
 Less salt arriving means less steam to buy and less solid salt to store.
-India's textile ZLD plants are sitting on over one lakh tonnes of recovered
-salt with nowhere to send it.
+Tirupur's treatment plants have built up somewhere between 60,000 and 73,000
+tonnes of waste salt, with no settled route for disposing of it.
 
 So cutting salt at source is something a treatment plant operator wants for
 their own reasons, which have nothing to do with me. That is a good position

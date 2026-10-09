@@ -28,7 +28,9 @@ discharge, or ZLD.
 
 Today about 300 dyeing units run on 18 shared treatment plants, and another 60
 have their own. Between them they recycle about 120 million litres of water a
-day and recover around 94% of it.
+day and recover around 94% of it. Reported unit counts vary between sources,
+from roughly 360 to 450, so I treat the cluster as a few hundred units rather
+than a precise number.
 
 It worked for the river. The waste water stopped going in. But the problem
 moved to the boiler house, and nobody is managing it.
@@ -91,7 +93,7 @@ did not choose and cannot opt out of.
 |---|---|
 | **Production planners** in Tirupur dyeing units | They make this decision every shift and cannot see what it costs |
 | **Factory owners** | They pay a coal bill they cannot trace or control |
-| **The 18 shared treatment plants** | They buy the steam and store the salt. Over one lakh tonnes of recovered salt is sitting in India's textile ZLD plants with nowhere to send it |
+| **The 18 shared treatment plants** | They buy the steam and store the salt. Somewhere between 60,000 and 73,000 tonnes of waste salt has built up across them, with no settled disposal route |
 | **Households and farmers in the Noyyal basin** | Groundwater here is heavily stressed. Every litre not pulled out matters more than a litre saved somewhere easy |
 
 ---
@@ -209,6 +211,11 @@ instead of arguing for one in principle.
 An annual software subscription per dyeing unit, sold mainly through the shared
 treatment plants rather than factory by factory.
 
+The two prices below are my own proposal. They are not benchmarked against
+comparable software, because I could not find published pricing for anything
+that does this job. Everything downstream of them in this section, including
+the market size, moves if the price moves.
+
 | Item | Amount | Notes |
 |---|---|---|
 | Annual subscription | Rs 2,40,000 per unit | Covers the machines in scope, typically four |
@@ -268,7 +275,7 @@ context this belongs in.
 
 | Level | Size | Basis |
 |---|---|---|
-| Tirupur, immediate | About 360 dyeing units. At Rs 2,40,000 a year that is roughly **Rs 8.6 crore a year** | 300 units on 18 CETPs plus 60 with their own plants |
+| Tirupur, immediate | About 360 dyeing units. At my price of Rs 2,40,000 a year that is roughly **Rs 8.6 crore a year** | 300 units on 18 CETPs plus 60 with their own plants. Other reports put the figure nearer 450 |
 | Indian textile ZLD, wider | Tirupur is one of several clusters under ZLD rules. Surat, Erode, Karur, Ludhiana, Panipat and Jetpur have similar processing bases | Directional. I have not counted units outside Tirupur and I am not going to present a number I cannot source |
 | Adjacent closed loops, later | Evaporative cooling, boiler blowdown and mine water share the same physics | Unvalidated. Listed as direction, not as market |
 
@@ -276,10 +283,14 @@ The growth driver is regulation that already exists. ZLD is compulsory and
 already paid for. ChangeLoop does not ask anyone to install new equipment, it
 makes equipment they already own cheaper to run.
 
-The second driver is carbon. European buyers are beginning to ask Indian
-suppliers for emissions data, and the border carbon mechanism puts a price on
-embedded emissions. A tool that can show measured, traceable reductions in
-process emissions becomes a compliance asset, not just a cost saver.
+The second driver is carbon reporting. European buyers increasingly ask
+Indian suppliers for emissions data. The EU carbon border mechanism does not
+cover textiles today, since it applies to iron and steel, cement, aluminium,
+fertilisers, electricity and hydrogen, but textiles have been named as a
+candidate for a later phase. If that happens, a tool that can show measured
+and traceable reductions in process emissions becomes a compliance asset as
+well as a cost saver. I am treating that as a possible tailwind, not as a
+commitment anyone has made.
 
 ### Competitive landscape
 
@@ -416,8 +427,9 @@ tested, and it must not be read as achieved impact.
 ### Environmental benefit
 
 Less groundwater pulled out of a basin that is already stressed. Less coal
-burned for the same output. Less solid salt added to the one lakh tonnes
-already stockpiled with no disposal route.
+burned for the same output. Less solid salt added to the 60,000 to 73,000
+tonnes already stockpiled across Tirupur's treatment plants with no settled
+disposal route.
 
 ### Economic benefit
 
@@ -525,7 +537,9 @@ engine and fails if any has drifted.
 | Figure | Where it comes from |
 |---|---|
 | Tirupur exports of about Rs 46,000 crore in FY26 | Tiruppur Exporters Association, reported March 2026 |
-| 300 dyeing units on 18 CETPs, 60 with their own plants, 120 MLD recycled, 94% recovery | Reported cluster data, 2026 |
+| 300 dyeing units on 18 CETPs, 60 with their own plants, 120 MLD recycled, 94% recovery | Reported cluster data, 2026. Other reports put the unit count nearer 450 |
+| Waste salt backlog of 60,000 to 73,000 tonnes across the 18 CETPs | Dyers Association of Tiruppur, reported by Ecotextile News, 2022, and later reporting on accumulated salt at the CETPs |
+| EU carbon border mechanism covers iron and steel, cement, aluminium, fertilisers, electricity and hydrogen, not textiles | European Commission scope; textiles named as a candidate for a later phase |
 | 2011 closure of around 700 units | Madras High Court order, widely reported |
 | Water strength of 18,340 mg/L, leftover at 20-30%, evaporator steam use | Central Pollution Control Board assessment of textile dyeing units and ZLD at Tirupur |
 | Grid emissions, 0.705 kg CO2 per kWh | CO2 Baseline Database for the Indian Power Sector, Central Electricity Authority |
