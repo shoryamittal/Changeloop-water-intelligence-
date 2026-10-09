@@ -33,6 +33,39 @@ from core import economics                                   # noqa: E402
 from core import narrative, session as session_mod             # noqa: E402
 
 NOTE = os.path.join(HERE, "concept_note", "CONCEPT_NOTE.md")
+HABIT = os.path.join(HERE, "concept_note", "CONCEPT_NOTE_HABIT.md")
+
+# The commercial terms quoted in the 12-section note. They are business
+# decisions rather than engine outputs, so they live here and feed the
+# business case, which keeps the note and the arithmetic in step.
+SUBSCRIPTION_INR = 240000.0
+SETUP_INR = 450000.0
+LOTS_PER_YEAR = 9000
+
+# Per-lot avoidance for the two plans, from the modelled shift of five
+# lots. The first is what the optimiser recommends under today's prices;
+# the second is the low-salt plan it declines to pick.
+TODAY_FW_PER_LOT = 144.0
+TODAY_SALT_PER_LOT = 0.0
+LOWSALT_FW_PER_LOT = 1107.6
+LOWSALT_SALT_PER_LOT = 12.5
+
+
+def lakh(v):
+    """Indian digit grouping: 5204000 -> 52,04,000."""
+    n = int(round(v))
+    sign = "-" if n < 0 else ""
+    d = str(abs(n))
+    if len(d) <= 3:
+        return sign + d
+    head, tail = d[:-3], d[-3:]
+    parts = []
+    while len(head) > 2:
+        parts.insert(0, head[-2:])
+        head = head[:-2]
+    if head:
+        parts.insert(0, head)
+    return sign + ",".join(parts) + "," + tail
 
 
 def thousands(v):
@@ -274,6 +307,218 @@ def build_expectations():
     return exp
 
 
+def habit_expectations():
+    """Figures quoted in the 12-section note that the shorter one omits."""
+    from core import economics
+    exp = []
+
+    def need(label, text):
+        exp.append((label, text))
+
+    def case(fw, salt):
+        return economics.business_case({
+            "lots_per_year": LOTS_PER_YEAR,
+            "freshwater_avoided_per_lot_l": fw,
+            "salt_avoided_per_lot_kg": salt,
+            "freshwater_cost_inr_per_m3":
+                factors.get("freshwater_cost_inr_per_m3"),
+            "recycled_water_cost_inr_per_m3":
+                factors.get("recycled_water_cost_inr_per_m3"),
+            "steam_cost_inr_per_kwh_th":
+                factors.get("steam_cost_inr_per_kwh_th"),
+            "salt_cost_inr_per_kg": factors.get("salt_cost_inr_per_kg"),
+            "implementation_cost_inr": SETUP_INR,
+            "annual_subscription_inr": SUBSCRIPTION_INR,
+        })
+
+    today = case(TODAY_FW_PER_LOT, TODAY_SALT_PER_LOT)
+    lowsalt = case(LOWSALT_FW_PER_LOT, LOWSALT_SALT_PER_LOT)
+    for name, r in (("today", today), ("low-salt", lowsalt)):
+        if r.get("status") != "CALCULATED":
+            raise SystemExit(
+                "The %s business case no longer computes (%s). Section 6 of "
+                "the 12-section note quotes it." % (name, r.get("status")))
+
+    def k(v):
+        return lakh(round(v / 1000.0) * 1000)
+
+    need("subscription", "Rs %s per unit" % lakh(SUBSCRIPTION_INR))
+    need("setup cost", "Rs %s per unit" % lakh(SETUP_INR))
+    need("gross saving row",
+         "| Gross saving a year | Rs %s | Rs %s |"
+         % (k(today["annual_gross_benefit_inr"]),
+            k(lowsalt["annual_gross_benefit_inr"])))
+    need("net benefit row",
+         "| Net benefit a year | **Rs %s** | **Rs %s** |"
+         % (k(today["annual_net_benefit_inr"]),
+            k(lowsalt["annual_net_benefit_inr"])))
+    need("payback row",
+         "| Payback on setup | %.1f years | about 5 weeks |"
+         % today["payback_years"])
+    need("roi row",
+         "| Return on cost | %d%% | %s%% |"
+         % (round(today["annual_roi_percent"]),
+            lakh(round(lowsalt["annual_roi_percent"]))))
+
+    if lowsalt["payback_years"] * 52 > 8:
+        raise SystemExit(
+            "The low-salt payback is now %.1f weeks. Section 6 says 'about "
+            "5 weeks'." % (lowsalt["payback_years"] * 52))
+
+    # --- physics and validation ---------------------------------------
+    need("MEE thermal",
+         "takes about %.0f kWh of heat"
+         % factors.get("mee_specific_thermal_kwh_per_m3"))
+    need("reject ceiling",
+         "The %s mg/L limit" % thousands(
+             factors.get("ro_max_reject_tds_mg_l")))
+
+    proof = narrative.proof()
+    if abs(proof["cut_water_20pct_change_pct"]) > 1e-9:
+        raise SystemExit(
+            "Cutting water now moves evaporator energy by %.4f%%. The "
+            "12-section note says 'no change at all'."
+            % proof["cut_water_20pct_change_pct"])
+    if abs(proof["cut_salt_20pct_change_pct"] + 20.0) > 0.05:
+        raise SystemExit(
+            "Cutting salt 20%% now moves energy by %.2f%%, not -20%%."
+            % proof["cut_salt_20pct_change_pct"])
+    need("cut water row", "| Uses 20% less water | **no change at all** |")
+    need("cut salt row", "| Puts in 20% less salt | **20% less energy** |")
+
+    val = narrative.validation()
+    cpcb = [q for q in val["points"] if abs(q["inlet_tds_mg_l"] - 18340) < 1]
+    if not cpcb:
+        raise SystemExit("The CPCB 18,340 mg/L validation point is gone.")
+    need("validation row",
+         "18,340 mg/L, the model predicted %.1f%% leftover. Indian plants "
+         "report %.0f to %.0f%%"
+         % (cpcb[0]["predicted_reject_frac_pct"],
+            val["published_band_pct"][0], val["published_band_pct"][1]))
+
+    # --- counts --------------------------------------------------------
+    counts = factors.evidence_summary()
+    if counts.get("MEASURED"):
+        raise SystemExit("A coefficient is now MEASURED. Both notes say "
+                         "zero, in several places.")
+    need("input numbers row",
+         "| Input numbers | %d, each labelled with its source. %d "
+         "published, %d derived, %d assumed, 0 measured |"
+         % (sum(counts.values()), counts.get("PUBLISHED", 0),
+            counts.get("DERIVED", 0), counts.get("ASSUMED", 0)))
+    need("published row", "| Published | %d |" % counts.get("PUBLISHED", 0))
+
+    import json as _json
+    fg = _json.load(io.open(os.path.join(HERE, "figures.json"),
+                            encoding="utf-8"))["counts"]
+    need("api row", "| API | %d endpoints." % fg["endpoints"])
+    need("tests row", "| Tests | %d, covering" % fg["tests"])
+
+    # --- per-shift and cluster -----------------------------------------
+    sess = session_mod.Session()
+    sess.run_optimisation()
+    imp = sess.state()["impact"]
+    cmp_modes = {m["mode_name"]: m
+                 for m in scenarios.compare_modes(basin.DEFAULT_SITE)["modes"]}
+    base_fw = imp["baseline_freshwater_intake_l"]
+    base_st = imp["baseline_mee_thermal_kwh"]
+    need("baseline row",
+         "| Baseline | %s L | %s kWh | Rs %s |"
+         % (thousands(base_fw), thousands(base_st),
+            thousands(imp["baseline_cost_inr"])))
+    for name, label in (("Normal operation", "Recommended today"),
+                        ("Drought / abstraction restriction",
+                         "Available with low-salt chemistry")):
+        m = cmp_modes[name]
+        need("%s row" % label.lower(),
+             "| %s | %s L (-%d%%) | %s kWh (-%d%%) | Rs %s |"
+             % (label, thousands(m["freshwater_intake_l"]),
+                round((base_fw - m["freshwater_intake_l"]) / base_fw * 100),
+                thousands(m["mee_thermal_kwh"]),
+                round((base_st - m["mee_thermal_kwh"]) / base_st * 100),
+                thousands(m["cost_inr"])))
+
+    cl = economics.cluster_projection()
+    need("cluster units", "across %d units at 900 lots" % cl["units"])
+    need("cluster water", "| Fresh water | %.0f million litres |"
+         % cl["freshwater_avoided_million_litres_per_year"])
+    need("cluster salt", "| Salt | %s tonnes |"
+         % thousands(cl["salt_avoided_tonnes_per_year"]))
+    need("cluster steam", "| Evaporator steam | %s MWh |"
+         % thousands(cl["evaporator_steam_avoided_mwh_per_year"]))
+    need("cluster co2", "| CO2 | %s tonnes |"
+         % thousands(cl["co2e_avoided_tonnes_per_year"]))
+
+    # --- plant and policy ----------------------------------------------
+    modes = scenarios.constraint_modes()
+    pn = plant.plant_plan(weights=modes["NORMAL"].weights,
+                          constraints=modes["NORMAL"].constraints)
+    need("plant breach",
+         "**%.1f%% of what it can" % pn["selfish"]["utilisation_pct"])
+
+    pol = policy.policy_levers()
+    lv = {l["coefficient"]: l for l in pol["levers"]}
+    dye = lv["low_salt_chemistry_cost_inr_per_kg_fabric"]
+    steam_l = lv["steam_cost_inr_per_kwh_th"]
+    water_l = lv["freshwater_cost_inr_per_m3"]
+
+    def quoted(lever, dp):
+        scale = 10 ** dp
+        v = lever["switching_value"]
+        v = (math.ceil(v * scale) if lever["direction"] == "up"
+             else math.floor(v * scale)) / scale
+        return ("%%.%df" % dp) % v
+
+    need("dye row",
+         "| Low-salt dye premium | Rs %.2f/kg fabric | Rs %s/kg fabric | "
+         "**%d%% cheaper** |"
+         % (dye["current_value"], quoted(dye, 2),
+            round(abs(dye["percent_change"]))))
+    need("steam row",
+         "| Boiler steam | Rs %.2f/kWh heat | Rs %s/kWh heat | %d%% dearer |"
+         % (steam_l["current_value"], quoted(steam_l, 2),
+            round(steam_l["percent_change"])))
+    need("water row",
+         "| Fresh water | Rs %.0f/m3 | Rs %s/m3 | %d%% dearer |"
+         % (water_l["current_value"], quoted(water_l, 0),
+            round(water_l["percent_change"])))
+    need("dye gap in business model",
+         "premium falls about %d%%" % round(abs(dye["percent_change"])))
+
+    carbon = pol["implied_carbon_price"]
+    need("steam increase",
+         "rise Rs %.2f" % carbon["steam_increase_inr_per_kwh_th"])
+    need("boiler factor",
+         "gives off %.3f kg of CO2" % carbon["boiler_co2e_kg_per_kwh_th"])
+    need("carbon price",
+         "**Rs %s a tonne, about %.0f euro**"
+         % (thousands(carbon["inr_per_tonne_co2e"]),
+            round(float(carbon["benchmark"]["implied_price_eur_per_tonne"]
+                        .split(" to ")[0]))))
+    need("eu benchmark",
+         "charging %.2f euro a tonne on 5 October 2026"
+         % carbon["benchmark"]["benchmark_eur_per_tonne"])
+
+    return exp
+
+
+def check_one(path, expectations, heading):
+    if not os.path.exists(path):
+        raise SystemExit("missing: " + path)
+    flat = flatten(io.open(path, encoding="utf-8").read())
+    safe("")
+    safe(heading)
+    safe("=" * 66)
+    missing = []
+    for label, text in expectations:
+        hit = flatten(text) in flat
+        if not hit:
+            missing.append((label, text))
+        safe("  %s  %-26s %s" % ("ok  " if hit else "FAIL", label,
+                                 "" if hit else text))
+    return missing
+
+
 def safe(line):
     """Print on a console that may not speak Unicode (Windows cp1252)."""
     try:
@@ -283,34 +528,25 @@ def safe(line):
 
 
 def main():
-    if not os.path.exists(NOTE):
-        raise SystemExit("missing: " + NOTE)
-    note = io.open(NOTE, encoding="utf-8").read()
-    # the note is written with en-dashes and non-breaking context; compare on
-    # a whitespace-normalised copy so a line wrap cannot fail a real match
-    flat = flatten(note)
-
     expectations = build_expectations()
-    missing = []
-    for label, text in expectations:
-        if flatten(text) not in flat:
-            missing.append((label, text))
+    missing = check_one(NOTE, expectations, "SHORT CONCEPT NOTE")
 
-    print("CONCEPT NOTE FIGURE CHECK")
-    print("=" * 66)
-    for label, text in expectations:
-        hit = flatten(text) in flat
-        line = "  %s  %-24s %s" % ("ok  " if hit else "FAIL", label,
-                                     text if not hit else "")
-        safe(line)
-    print("=" * 66)
+    # The 12-section note quotes the same engine plus the commercial
+    # figures, so it gets the shared set and its own on top.
+    hx = habit_expectations()
+    missing += check_one(HABIT, hx,
+                         "12-SECTION CONCEPT NOTE (HABIT TEMPLATE)")
+    total = len(expectations) + len(hx)
+
+    safe("=" * 66)
     if missing:
-        print("\n%d of %d figures in the note no longer match the engine."
-              % (len(missing), len(expectations)))
-        print("Fix the note - or if the engine changed on purpose, fix both.")
+        safe("")
+        safe("%d of %d figures no longer match the engine."
+             % (len(missing), total))
+        safe("Fix the note - or if the engine changed on purpose, fix both.")
         return 1
-    print("\nAll %d engine figures in the concept note still check out."
-          % len(expectations))
+    safe("")
+    safe("All %d engine figures across both concept notes check out." % total)
     return 0
 
 
