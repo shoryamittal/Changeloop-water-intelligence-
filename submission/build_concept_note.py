@@ -34,9 +34,10 @@ def main():
         out=OUT,
         title="ChangeLoop — Concept Note",
         subject="SANKALP 2026 Students Track - concept note",
-        subtitle="Salt sets the coal bill, not water. A decision layer for "
-                 "zero-discharge dyehouses, and what it finds when four "
-                 "machines share one evaporator.",
+        subtitle="In a zero-discharge dyeing factory, the coal bill is set "
+                 "by the salt that goes in, not the water that comes out. "
+                 "This is a tool that shows the planner that cost while "
+                 "they are still choosing.",
         footer_text="ChangeLoop  ·  SANKALP 2026 Students Track  "
                     "·  Concept note",
         # the sources sit inline with the claims they support

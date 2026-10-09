@@ -58,23 +58,23 @@ def build_expectations():
 
     # --- coefficients -------------------------------------------------
     need("MEE specific thermal",
-         "about %.0f kWh of thermal energy"
+         "takes about %.0f kWh of"
          % factors.get("mee_specific_thermal_kwh_per_m3"))
     need("latent heat",
          "Latent heat of %.3f kWh/kg" % factors.get("h_vap_kwh_per_kg"))
     need("steam economy",
-         "steam economy of %.2f kg" % factors.get("mee_steam_economy"))
-    need("reject TDS ceiling",
-         "around %s mg/L" % thousands(factors.get("ro_max_reject_tds_mg_l")))
+         "Steam economy of %.2f kg per kg"
+         % factors.get("mee_steam_economy"))
+
 
     # --- evidence posture ---------------------------------------------
     counts = factors.evidence_summary()
     need("evidence mix",
-         "%d published, %d derived, %d assumed"
+         "That makes %d published, %d derived, %d assumed"
          % (counts.get("PUBLISHED", 0), counts.get("DERIVED", 0),
             counts.get("ASSUMED", 0)))
     need("coefficient total",
-         "Each of the %d numbers" % sum(counts.values()))
+         "runs on %d input numbers" % sum(counts.values()))
     if counts.get("MEASURED"):
         raise SystemExit(
             "A coefficient is now classed MEASURED. The note says zero are "
@@ -82,12 +82,23 @@ def build_expectations():
 
     # --- the salt-not-water proof -------------------------------------
     proof = narrative.proof()
-    need("cut water effect",
-         "| Cut effluent water volume by 20%% | **%+.1f%%** |"
-         % proof["cut_water_20pct_change_pct"])
-    need("cut salt effect",
-         "| Cut salt load by 20%% | **%.1f%%** |"
-         % proof["cut_salt_20pct_change_pct"])
+    # The note now states these in words rather than as signed
+    # percentages, so the check is that the engine still produces
+    # exactly no change and exactly a matching cut - the two facts the
+    # wording rests on.
+    if abs(proof["cut_water_20pct_change_pct"]) > 1e-9:
+        raise SystemExit(
+            "Cutting water now moves evaporator energy by %.4f%%. The note "
+            "says 'no change at all' in a table and 'Zero, not a small "
+            "amount' under it. Both need rewriting."
+            % proof["cut_water_20pct_change_pct"])
+    if abs(proof["cut_salt_20pct_change_pct"] + 20.0) > 0.05:
+        raise SystemExit(
+            "Cutting salt 20%% now moves energy by %.2f%%, not -20%%. The "
+            "note's '20% less energy' row is wrong."
+            % proof["cut_salt_20pct_change_pct"])
+    need("cut water row", "| Use 20% less water | **no change at all** |")
+    need("cut salt row", "| Put in 20% less salt | **20% less energy** |")
 
     # --- external validation ------------------------------------------
     val = narrative.validation()
@@ -96,33 +107,38 @@ def build_expectations():
         raise SystemExit("The CPCB 18,340 mg/L validation point is gone.")
     need("CPCB inlet TDS", "18,340 mg/L")
     need("CPCB predicted reject",
-         "reject fraction of **%.1f%%**" % cpcb[0]["predicted_reject_frac_pct"])
-    need("published band", "%.0f-%.0f%% of inlet volume"
+         "said **%.1f%%** of the volume"
+         % cpcb[0]["predicted_reject_frac_pct"])
+    need("published band", "report %.0f to %.0f%% of inlet volume"
          % tuple(val["published_band_pct"]))
 
     # --- cluster projection -------------------------------------------
     cl = economics.cluster_projection()
-    need("cluster units", "across %d units" % cl["units"])
-    need("cluster freshwater", "| %.0f million litres/year |"
+    need("cluster units", "across %d factories" % cl["units"])
+    need("cluster freshwater", "| Fresh water | %.0f million litres |"
          % cl["freshwater_avoided_million_litres_per_year"])
-    need("cluster salt", "| %s tonnes/year |"
+    need("cluster salt", "| Salt | %s tonnes |"
          % thousands(cl["salt_avoided_tonnes_per_year"]))
-    need("cluster steam", "| %s MWh/year |"
+    need("cluster steam", "| Evaporator steam | %s MWh |"
          % thousands(cl["evaporator_steam_avoided_mwh_per_year"]))
-    need("cluster co2e", "| %s tonnes/year |"
+    need("cluster co2e", "| CO2 | %s tonnes |"
          % thousands(cl["co2e_avoided_tonnes_per_year"]))
 
     # --- per-shift comparison -----------------------------------------
     s = session_mod.Session()
     s.run_optimisation()
     imp = s.state()["impact"]
-    need("baseline freshwater",
-         "| Baseline | %s L |" % thousands(imp["baseline_freshwater_intake_l"]))
-    need("baseline steam",
-         "%s kWh | ₹%s |" % (thousands(imp["baseline_mee_thermal_kwh"]),
-                                  thousands(imp["baseline_cost_inr"])))
+
+    need("baseline row",
+         "| Baseline | %s L | %s kWh | Rs %s |"
+         % (thousands(imp["baseline_freshwater_intake_l"]),
+            thousands(imp["baseline_mee_thermal_kwh"]),
+            thousands(imp["baseline_cost_inr"])))
     need("basin stress weight",
          "stress weight of %.2f" % imp["stress_weight"])
+    need("reject ceiling plain",
+         "around %s mg/L for dyeing water"
+         % thousands(factors.get("ro_max_reject_tds_mg_l")))
 
     cmp_modes = {m["mode_name"]: m
                  for m in scenarios.compare_modes(basin.DEFAULT_SITE)["modes"]}
@@ -135,7 +151,7 @@ def build_expectations():
         fw_cut = round((base_fw - m["freshwater_intake_l"]) / base_fw * 100)
         st_cut = round((base_st - m["mee_thermal_kwh"]) / base_st * 100)
         need("%s row" % label,
-             "%s L (−%d%%) | %s kWh (−%d%%) | ₹%s |"
+             "%s L (-%d%%) | %s kWh (-%d%%) | Rs %s |"
              % (thousands(m["freshwater_intake_l"]), fw_cut,
                 thousands(m["mee_thermal_kwh"]), st_cut,
                 thousands(m["cost_inr"])))
@@ -143,7 +159,7 @@ def build_expectations():
     n = cmp_modes["Normal operation"]
     d = cmp_modes["Drought / abstraction restriction"]
     need("the 6-vs-47 gap",
-         "That %d%% against %d%% gap"
+         "%d%% against %d%% is the most important comparison"
          % (round((base_fw - n["freshwater_intake_l"]) / base_fw * 100),
             round((base_fw - d["freshwater_intake_l"]) / base_fw * 100)))
 
@@ -154,17 +170,20 @@ def build_expectations():
     pd = plant.plant_plan(weights=modes["DROUGHT"].weights,
                           constraints=modes["DROUGHT"].constraints)
     need("plant breach",
-         "**%.1f%% of capacity**" % pn["selfish"]["utilisation_pct"])
+         "**%.1f%% of what it can handle**"
+         % pn["selfish"]["utilisation_pct"])
     need("plant normal row",
-         "| Normal operation | %.1f%% | Yes — %d of %d machines"
+         "| Today's prices | %.1f%% | Yes. Two of four machines take a "
+         "worse plan, costing Rs %s a day |"
          % (pn["selfish"]["utilisation_pct"],
-            len(pn["coordinated"]["machines_that_move"]), pn["machines"]))
-    need("coordination premium",
-         "₹%s/day" % thousands(
-             pn["coordinated"]["coordination_premium_inr_per_day"]))
+            thousands(
+                pn["coordinated"]["coordination_premium_inr_per_day"])))
     need("plant drought row",
-         "| Scarcity priced (drought) | %.1f%% | None | ₹0 |"
+         "| Water priced for scarcity | %.1f%% | No. Everything fits |"
          % pd["selfish"]["utilisation_pct"])
+    need("transfer payment",
+         "Rs %s a day in the model" % thousands(
+             pn["coordinated"]["coordination_premium_inr_per_day"]))
     if pd["status"] != "WITHIN_CAPACITY":
         raise SystemExit(
             "Priced scarcity no longer removes the breach. The note's "
@@ -177,9 +196,11 @@ def build_expectations():
     import json
     fg = json.load(io.open(os.path.join(HERE, "figures.json"),
                            encoding="utf-8"))["counts"]
-    need("test count", "| Tests | %d," % fg["tests"])
-    need("endpoint count", "| %d REST endpoints" % fg["endpoints"])
+    need("test count", "| Tests | %d, covering" % fg["tests"])
+    need("endpoint count", "| API | %d endpoints." % fg["endpoints"])
     need("closing test count", "with %d tests" % fg["tests"])
+    need("summary counts",
+         "%d API endpoints, %d tests" % (fg["endpoints"], fg["tests"]))
 
     # --- switching prices ---------------------------------------------
     pol = policy.policy_levers()
@@ -211,16 +232,19 @@ def build_expectations():
 
     need("dye premium row",
          "| Low-salt dye premium | Rs %.2f/kg fabric | Rs %s/kg fabric | "
-         "**%.1f%%** |" % (dye["current_value"], quoted(dye, 2),
-                           dye["percent_change"]))
+         "**%d%% cheaper** |"
+         % (dye["current_value"], quoted(dye, 2),
+            round(abs(dye["percent_change"]))))
     need("steam row",
-         "| Boiler steam cost | Rs %.2f/kWh thermal | Rs %s/kWh thermal "
-         "| +%.1f%% |" % (steam["current_value"], quoted(steam, 2),
-                          steam["percent_change"]))
+         "| Boiler steam | Rs %.2f/kWh heat | Rs %s/kWh heat | %d%% dearer |"
+         % (steam["current_value"], quoted(steam, 2),
+            round(steam["percent_change"])))
     need("water row",
-         "| Freshwater tariff | Rs %.0f/m3 | Rs %s/m3 | +%.0f%% |"
+         "| Fresh water | Rs %.0f/m3 | Rs %s/m3 | %d%% dearer |"
          % (water["current_value"], quoted(water, 0),
-            water["percent_change"]))
+            round(water["percent_change"])))
+    need("dye premium in prose",
+         "come down by about %d%%" % round(abs(dye["percent_change"])))
 
     if dye["coefficient"] != pol["smallest_move"]:
         raise SystemExit(
@@ -229,24 +253,33 @@ def build_expectations():
 
     carbon = pol["implied_carbon_price"]
     need("carbon price",
-         "**Rs %s per tonne, about EUR %.0f**"
+         "**Rs %s a tonne, about %.0f euro**"
          % (thousands(carbon["inr_per_tonne_co2e"]),
             round(float(
                 carbon["benchmark"]["implied_price_eur_per_tonne"]
                 .split(" to ")[0]))))
     need("steam increase",
-         "rise by Rs %.2f per kWh of heat"
+         "go up Rs %.2f per kWh of heat"
          % carbon["steam_increase_inr_per_kwh_th"])
     need("boiler factor",
-         "emits %.3f kg of CO2e" % carbon["boiler_co2e_kg_per_kwh_th"])
+         "gives off %.3f kg of CO2" % carbon["boiler_co2e_kg_per_kwh_th"])
     bm = carbon["benchmark"]
     need("eu benchmark",
-         "EUR %.2f a tonne on 5 October 2026" % bm["benchmark_eur_per_tonne"])
+         "charging %.2f euro a tonne on 5 October 2026"
+         % bm["benchmark_eur_per_tonne"])
 
     # --- pilot --------------------------------------------------------
-    need("pilot length", "32-week staged pilot")
+    need("pilot length", "Thirty-two weeks, in six stages")
 
     return exp
+
+
+def safe(line):
+    """Print on a console that may not speak Unicode (Windows cp1252)."""
+    try:
+        print(line)
+    except UnicodeEncodeError:
+        print(line.encode("ascii", "replace").decode("ascii"))
 
 
 def main():
@@ -267,8 +300,9 @@ def main():
     print("=" * 66)
     for label, text in expectations:
         hit = flatten(text) in flat
-        print("  %s  %-24s %s" % ("ok  " if hit else "FAIL", label,
-                                  text if not hit else ""))
+        line = "  %s  %-24s %s" % ("ok  " if hit else "FAIL", label,
+                                     text if not hit else "")
+        safe(line)
     print("=" * 66)
     if missing:
         print("\n%d of %d figures in the note no longer match the engine."

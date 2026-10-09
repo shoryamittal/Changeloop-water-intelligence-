@@ -1,503 +1,584 @@
 # ChangeLoop
 
-## In one paragraph
+## The short version
 
-In a dyehouse running zero liquid discharge, the coal bill is set by how much
-salt goes into the dye bath, not by how much water comes out. That single fact
-is counter-intuitive, it is provable from mass conservation, and almost nobody
-acts on it. It means most water-saving work in India's largest textile cluster
-is aimed at a number that does not drive the emissions. ChangeLoop puts the
-downstream thermal consequence in front of the person making the upstream
-scheduling decision, at the moment they make it. It is live, it is open to
-inspection, and every figure in it carries a label saying how much it should
-be trusted.
+Dyeing factories in Tirupur are not allowed to let any waste water out. So they
+boil the leftover salty water until only dry salt is left. The boiling runs on
+coal.
 
-**Live prototype:** https://changeloop-water-intelligence.onrender.com
+How much they have to boil depends on how much salt went into the dye bath. It
+does not depend on how much water they used. This sounds wrong, but it comes
+straight out of mass conservation, and I can show it.
 
----
+So if a factory cuts its water use by 20%, the coal bill stays exactly the
+same. Cut the salt by 20% and the coal bill drops by 20%. Both of those look
+identical on a water meter. Most water-saving work in the cluster aims at the
+water.
 
-## 1. Problem Statement
+The person who sets the salt load is the production planner, choosing what
+order to run the day's dye lots in. They decide hours before anything shows up,
+and the coal bill lands weeks later in another department's budget. Nobody
+connects the two.
 
-### The place
+I built a tool that puts the coal cost in front of that planner while they are
+still choosing. It is running now and the numbers can be checked.
 
-Tirupur, in the Noyyal sub-basin of the Cauvery system, is India's knitwear
-capital. In 2011 the Madras High Court ordered roughly 700 dyeing and
-bleaching units shut for discharging saline effluent into the Noyyal. They
-were allowed to reopen only under zero liquid discharge: nothing leaves the
-site as liquid.
+**Live:** https://changeloop-water-intelligence.onrender.com
 
-ZLD worked. The river stopped receiving effluent. But it moved the problem
-rather than removing it, and the place it moved to is the boiler house.
+What I can show, and what I cannot:
 
-### What ZLD actually does
-
-Under ZLD, effluent goes through membranes. The clean permeate returns to the
-process. The concentrated reject goes to a multiple-effect evaporator, which
-boils it until only solid salt remains. Boiling water takes heat, the heat
-comes from steam, and in Tirupur the steam comes overwhelmingly from coal.
-
-So a regulation written to protect a river created a large, permanent thermal
-load. Evaporating one cubic metre of reject takes about 188 kWh of thermal
-energy. Latent heat of 0.627 kWh/kg from steam tables, divided by a steam
-economy of 3.33 kg of water per kg of live steam, which is the reciprocal of
-the 0.25-0.35 kg steam per kg evaporated that textile MEE trains are reported
-to achieve. The result lands inside the 150-250 kWh/m3 band independently
-published for the evaporator section of textile ZLD plants, which is a useful
-check: two unrelated published numbers, multiplied, fall inside a third that
-was never used in the calculation.
-
-### The mechanism nobody is looking at
-
-Here is the part that matters, and it is the reason this project exists.
-
-In a closed loop, the volume the evaporator has to boil is not set by how much
-water you used. It is set by how much salt you put in:
-
-```
-V_reject  =  M_salt  /  C_reject_max
-```
-
-Salt mass divided by the maximum concentration the membranes can push the
-reject to, which for a textile RO train is around 60,000 mg/L. Water entering
-the loop comes back round. Salt does not. Salt has to leave as a solid, and
-the only exit is through the evaporator, which means the evaporator must boil
-whatever volume of water that salt is dissolved in at the concentration
-ceiling.
-
-The consequence is sharp enough to be tested, and the running system tests it
-on every request:
-
-| Intervention | Effect on evaporator energy |
+| | |
 |---|---|
-| Cut effluent water volume by 20% | **+0.0%** |
-| Cut salt load by 20% | **−20.0%** |
+| The physics holds up | I fed it the water strength that CPCB measured at a real Tirupur factory. It predicted 30.6% reject. Indian plants report 20 to 30%. I did not tune it to land there. |
+| The tool works | 34 API endpoints, 178 tests, 25 input numbers each labelled with where it came from, and a tamper-proof record of every decision. |
+| It found something I did not expect | The better plan is blocked by a small price gap, not by technology. About 12% off the price of low-salt dye would be enough. |
+| Nothing has been measured | No sensor on any real factory has ever fed this system. A test checks that I never quietly claim otherwise. |
 
-Not "a little". Zero, to the precision of the arithmetic. It falls directly
-out of salt mass conservation.
-
-This is why a water dashboard cannot find this saving. Two interventions that
-both read as "saving water" on any volume meter do completely different things
-to the coal bill, and nothing on the factory floor distinguishes them.
-
-### Why it has stayed unsolved
-
-The decision that sets salt load is made by a production planner, choosing
-what order to run today's dye lots in and which rinse strategy to use. They
-make it hours before anything is visible. The evaporator's fuel bill arrives
-weeks later, on a different cost centre, with no way to trace it back to the
-decision that caused it.
-
-That is a broken feedback loop, not a technology gap. The planner is not
-careless. They are working without the one number that would change their
-mind, and no system currently puts it in front of them.
-
-### And one layer above that
-
-There is a second failure, and it only appears when you stop looking at one
-machine.
-
-A real mill runs several machines into one shared evaporator. Each planner
-picks the plan that is best for their own machine. Every one of those choices
-is locally correct. Their sum can still exceed what the shared plant is able
-to boil.
-
-In the modelled site, four machines each choosing their own optimum put the
-shared evaporator at **121.9% of capacity**. Nobody chose badly. The sum does
-not fit. No tool that looks at one machine at a time can see this, and no
-planner can be blamed for it.
+That last row matters. I have not run a pilot and I have no customer. What I
+have is the decision logic, the physics behind it, and a check against
+published plant data.
 
 ---
 
-## 2. Proposed Solution
+## 1. The problem
 
-ChangeLoop prices the downstream consequence into the upstream decision.
+### Where it happens
 
-It is a decision-support layer that sits where the schedule is made. Before a
-shift starts, it searches the combinations of lot order and process strategy
-available to the planner, and for each one computes the full consequence
-chain: water demand, salt load, reject volume, evaporator steam, CO2e, rupees,
-and whether any ship date is missed.
+Tirupur in Tamil Nadu makes knitwear. Its dyeing factories sit on the Noyyal
+river. In 2011 the Madras High Court shut around 700 of them for putting salty
+waste water into the river. They were allowed to reopen only if they stopped
+releasing liquid waste completely. The rule is called zero liquid discharge, or
+ZLD.
 
-Four design choices do the actual work.
+It worked for the river. The waste water stopped going in.
 
-**Hard constraints are feasibility, not penalty.** A plan that misses a ship
-date is not a worse plan. It is not a plan. It is removed from the search
-rather than given a bad score, because a schedule that saves water by
-shipping late is not a trade-off a factory can accept and should never be
-offered as one.
+The problem moved to the boiler house.
 
-**Every coefficient is classified and visible.** Each of the 25 numbers that
-drive the model is labelled PUBLISHED, DERIVED, ASSUMED or MEASURED, with its
-source and its arithmetic. Anyone can open the registry in the running system
-and check. Currently: 17 published, 4 derived, 4 assumed, and **zero
-measured** — a test enforces that last count so it cannot quietly become a
-marketing claim.
+### What ZLD actually involves
 
-**The system fails closed.** It issues no setpoints. It cannot release a dye
-bath. Early wash-off release requires a named human to approve it, and
-`automatic_release` is hardcoded to `False`. If a sensor reading is missing,
-frozen or implausible, the system holds and credits zero saving rather than
-estimating. An advisory tool that quietly guesses is worse than no tool.
+The waste water goes through membranes. The clean part goes back into
+production. The salty leftover goes into an evaporator, which boils it down
+until only solid salt remains.
 
-**Savings are credited only when a human approved the action.** If a
-recommendation is not approved, it contributes zero to the ledger, even though
-the engine computed it. The ledger records the decision actually taken, not
-the decision that would have looked best.
+Boiling needs heat, the heat comes from steam, and in Tirupur the steam mostly
+comes from coal. Boiling one cubic metre of leftover takes about 188 kWh of
+heat. So a rule written to protect a river created a large and permanent coal
+bill.
 
-### The plant layer
+### The part people miss
 
-The newest component answers the coordination failure described above. It
-compares two plans over the same day: what each machine would choose alone,
-and the cheapest combination that actually fits the shared evaporator.
+This is what the whole project is built on.
 
-The capacity figure is **derived, not invented**. In a closed loop the
-freshwater makeup is the evaporative loss is the reject volume, so the site's
-daily abstraction allowance and the volume the evaporator must boil are the
-same number read two ways. This matters, because the easiest way to make a
-coordination demo impressive is to pick a capacity that guarantees a breach.
-That number is the basin allowance the rest of the system already runs on.
+In a closed loop, the amount you have to boil is fixed by the salt.
 
-And the result is the most interesting finding in the project:
+```
+leftover volume  =  salt mass  /  strongest the membranes can make it
+```
 
-| Binding constraint | Plant load | Coordination needed | Premium |
-|---|---|---|---|
-| Normal operation | 121.9% | Yes — 2 of 4 machines forced off their own optimum | ₹4,123/day |
-| Scarcity priced (drought) | 68.8% | None | ₹0 |
+Salt mass, divided by the strongest the membranes can make the leftover, which
+is around 60,000 mg/L for dyeing water.
 
-Under today's tariffs, freshwater is cheap enough that every machine privately
-prefers the water-saving plan, and their sum breaks the evaporator. Price
-scarcity properly, and all four machines choose the low-salt plan on their own
-account. The plant fits, nobody is made worse off, and the premium disappears.
+Water goes round the loop and comes back. Salt does not. Salt has to leave as a
+solid, and the only way out is through the evaporator. So the evaporator has to
+boil whatever amount of water that salt happens to be sitting in.
 
-Nothing was rescheduled to get there. **The breach is a pricing failure, not a
-scheduling failure.** The plan the site has to force onto two machines today is
-the plan every machine would pick for itself if water cost what it is worth.
-That is a policy argument that comes out of the engine rather than out of an
-opinion, and a test pins it so it cannot drift.
+Using less water makes the loop smaller. Only using less salt makes the boiling
+smaller, and the boiling is what burns coal.
+
+The system checks this on every request:
+
+| Change you make | What happens to evaporator energy |
+|---|---|
+| Use 20% less water | **no change at all** |
+| Put in 20% less salt | **20% less energy** |
+
+Zero, not a small amount. It falls out of the arithmetic.
+
+This is why a water dashboard cannot find the saving. Two changes that look the
+same on a water meter do completely different things to the coal bill, and
+nothing on the factory floor tells them apart.
+
+### Why it has not been fixed
+
+The salt load is set by a production planner. They choose which dye lots run in
+what order, and which rinse method to use.
+
+They make that choice hours before any of it shows up anywhere. The coal bill
+arrives weeks later, in a different department's budget, with no way to trace
+it back to the choice that caused it.
+
+The planner is not being careless. They are working without the one number that
+would change their mind.
+
+### A second problem, one level up
+
+This one only appears when you stop looking at a single machine.
+
+A real factory runs several dyeing machines into one shared evaporator. Each
+planner picks what is best for their own machine. Every one of those choices is
+correct on its own. Added together, they can still be more than the evaporator
+can physically boil.
+
+In my model, four machines each picking their own best plan put the shared
+evaporator at **121.9% of what it can handle**. Nobody made a bad call. A tool
+that looks at one machine at a time cannot see this at all.
 
 ---
 
-## 3. Prototype Details
+## 2. What I built
 
-A working system, publicly reachable, not a mockup.
+ChangeLoop sits where the schedule gets made. Before a shift starts it looks at
+the different orders the planner could run the lots in, and the different rinse
+methods available. For each combination it works out the whole chain: water
+used, salt load, leftover volume, evaporator steam, CO2, rupees, and whether
+any delivery date gets missed.
+
+Then it recommends one, and shows its working.
+
+### Four rules I made it follow
+
+**A late delivery is not a trade-off.** If a plan misses a ship date it gets
+removed from the search, not given a bad score. A factory cannot accept a
+schedule that saves water by shipping late, so the tool never offers one.
+
+**Every input number says where it came from.** All 25 of them are tagged as
+published, derived, assumed, or measured, along with the source and the
+arithmetic. You can open the list in the running system and read it yourself.
+
+**It fails safe.** It issues no machine settings and cannot release a dye bath.
+Early release needs a named person to approve it. If a sensor reading is
+missing or looks wrong, the system stops and claims zero saving rather than
+guessing.
+
+**It only counts savings somebody approved.** If the planner turns a
+recommendation down, it counts as zero, even though the tool already worked out
+what it would have saved. The record shows what was actually done.
+
+### The shared evaporator
+
+The newest part deals with the problem from the end of section 1. It compares
+two plans for the same day: what each machine would pick on its own, and the
+cheapest combination that actually fits the shared evaporator.
+
+I did not invent the capacity figure. In a closed loop the water you bring in
+equals the water you boil off, so the factory's daily water allowance and the
+amount the evaporator has to boil are the same number looked at twice. This
+matters, because the easiest way to make a demo like this look impressive is to
+pick a capacity that guarantees a problem.
+
+| Conditions | Load on the evaporator | Does anyone have to give way? |
+|---|---|---|
+| Today's prices | 121.9% | Yes. Two of four machines take a worse plan, costing Rs 4,123 a day |
+| Water priced for scarcity | 68.8% | No. Everything fits |
+
+At today's prices, water is cheap enough that every machine prefers the
+water-saving plan, and together they overload the evaporator. Price water
+properly and all four machines pick the low-salt plan by themselves. The
+factory fits, nobody loses out, and the extra cost disappears.
+
+Nothing got rescheduled to get there. The plan the factory has to force on two
+machines today is the plan every machine would choose on its own if water cost
+what it is worth. A test checks this, and if it ever stops being true the test
+tells me to rewrite the claim rather than adjust a number.
+
+---
+
+## 3. The prototype
+
+It is a working system that anyone can open, not a mockup or a set of
+screenshots.
 
 **https://changeloop-water-intelligence.onrender.com**
 
 | | |
 |---|---|
-| Backend | Python standard library only — no framework, no install step |
-| API | 34 REST endpoints, every impact figure computed server side |
-| Tests | 178, covering physics, safety interlocks, concurrency, switching-price search and the UI |
-| Front end | Dependency-free; ten operating views |
-| Ledger | HMAC-SHA256 append-only hash chain, verified on every health check |
+| Backend | Plain Python, no framework, nothing to install |
+| API | 34 endpoints. Every saving is worked out on the server, so the browser cannot claim one |
+| Tests | 178, covering the physics, the safety rules, concurrency and the interface |
+| Front end | No libraries. Ten screens |
+| Record of decisions | A chained hash of every entry, re-checked on every health check. It is not a blockchain and the system says so |
 
-### What you can do in it
+### What you can try in it
 
-Choose a site and a binding constraint. Watch the optimiser change its
-recommendation as the constraint changes — it returns two genuinely different
-plans across four modes, which is the test of whether it is optimising or just
-replaying an answer. Open any number and trace it to its coefficient, its
-source classification and its arithmetic. Approve a sequence, or decline it,
-and watch the ledger credit accordingly. Trigger a sensor fault and watch the
-system hold instead of guessing. Open the Plant view and see four correct
-decisions produce one breach.
+Change the operating conditions in the top bar and watch the recommendation
+change. Across four modes it gives two genuinely different answers, which is
+how you tell whether it is working something out or replaying a stored result.
 
-### How it is validated
+Click any number and trace it back to the input it came from, the source of
+that input, and the arithmetic. Approve a recommendation, or turn it down, and
+watch the record update. Break a sensor and watch the system stop instead of
+guessing. Open the Plant screen to see four correct choices overload one
+evaporator. Open the Policy screen to watch the tool search for the price that
+would change its own answer.
 
-Nothing here has been measured on a real asset, and the system says so in
-every view. What it has instead is external cross-validation.
+### How I checked it
 
-Fed the inlet TDS that CPCB measured at an assessed Tirupur dyeing unit —
-18,340 mg/L — the model predicts a reject fraction of **30.6%**. Indian textile
-ZLD operators independently report RO reject at 20-30% of inlet volume. The
-model lands inside that band using an input it never reads back, and the check
-runs as a test rather than sitting in a slide.
+No instrument on a real factory has ever fed this system, and it says so on
+every screen. What I could do instead was check it against measurements
+somebody else published.
 
-The honest reading of that: the physics is behaving like real plants. It is
-not evidence that any specific figure describes any specific site. Those are
-different claims and the system keeps them apart.
+CPCB measured the water strength going into evaporation at a Tirupur dyeing
+unit: 18,340 mg/L. I fed that in. The model said **30.6%** of the volume would
+end up as leftover to boil. Indian ZLD plants report 20 to 30% of inlet volume.
 
-### Deliberate scope limits, stated in the product
+So it lands where real plants sit, using a number it never gets to see the
+answer to. That check runs as a test, not as a line on a slide.
 
-The interface carries its own limitations rather than hiding them: no
-scheduling of machines against each other in time, no surge storage modelling,
-machines within one unit rather than a CETP's hundreds of members, a simulated
-order book, and nothing measured anywhere.
+The 188 kWh figure gets the same treatment. Latent heat of 0.627 kWh/kg comes
+from steam tables. Steam economy of 3.33 kg per kg comes from what textile
+evaporators are reported to achieve. Multiply them out and you get 188, which
+sits inside the 150 to 250 band published for this kind of plant. That band was
+not used anywhere in the calculation, so it is a real check.
 
----
+What this does and does not mean: the physics behaves like real plants do. It
+does not mean any number here describes any particular factory. Those are
+different claims and I keep them apart.
 
-## 4. Target Audience
+### What it does not do
 
-### Who uses it
-
-**The production planner** is the primary user. They already make this
-decision every shift; ChangeLoop changes what they can see when they make it.
-This matters for adoption — the tool does not ask anyone to do a new job.
-
-**The quality supervisor** holds authority over wash-off release and keeps it.
-The system can recommend early release; only they can grant it.
-
-**The unit owner** takes the financial benefit and signs off the chemistry
-decision, which runs on a procurement cycle rather than a daily one.
-
-### Who buys it
-
-**The common effluent treatment plant is the efficient channel.** One
-connection reaches many member units, and the incentive already points the
-right way: less salt arriving means less steam bought and less solid salt to
-store. India's textile ZLD plants are holding over one lakh tonnes of
-recovered salt with no viable disposal route, so reducing salt at source is
-something a CETP operator wants for reasons that have nothing to do with us.
-
-### Who benefits without using it
-
-Households and farmers in the Noyyal sub-basin, whose groundwater carries a
-basin stress weight of 11.08 in this model — every litre not abstracted here
-counts for far more than a litre elsewhere. And the cluster's workforce, for
-whom the 2011 shutdown is living memory rather than history.
+The interface carries its own limits rather than hiding them. It does not
+schedule machines against each other in time. It does not model storage tanks
+that would absorb some of the problem. It handles machines inside one factory,
+not the hundreds of members of a shared treatment plant. The order book is made
+up. And nothing in it has been measured.
 
 ---
 
-## 5. Impact and Feasibility
+## 4. Who it is for
 
-### What one shift looks like
+The person who uses it and the person who pays for it are not the same.
 
-Baseline is a conventional single-stage rinse. Everything below is MODELLED
-on a simulated order book of five lots.
+| Who | What they do with it |
+|---|---|
+| **Production planner** | The main user. They already make this decision every shift. The tool only changes what they can see while making it, so nobody is being asked to do a new job. |
+| **Quality supervisor** | Keeps control of early wash-off release. The tool can suggest it. Only they can allow it. |
+| **Factory owner** | Gets the money saved, and signs off the dye chemistry decision, which happens on a buying cycle rather than a daily one. |
+| **Shared treatment plant** | The best way in commercially. One relationship reaches many member factories. |
+| **People living in the basin** | Gain without ever touching it. Groundwater here carries a stress weight of 11.08 in my model, so a litre saved here counts for much more than a litre saved somewhere easy. |
 
-| | Freshwater | Evaporator steam | Cost |
+### Why the treatment plant already wants this
+
+Less salt arriving means less steam to buy and less solid salt to store.
+India's textile ZLD plants are sitting on over one lakh tonnes of recovered
+salt with nowhere to send it.
+
+So cutting salt at source is something a treatment plant operator wants for
+their own reasons, which have nothing to do with me. That is a good position
+for a new tool to be in.
+
+There is also the workforce. For people in Tirupur the 2011 shutdown is
+something they remember, not something they read about. The commercial case and
+the keep-the-factory-open case point the same way here.
+
+---
+
+## 5. What it saves, and whether it can work
+
+The big saving is already available and nobody is buying it, because the price
+signal never reaches the person deciding. I would rather put that up front than
+hide it behind the better number.
+
+### One shift
+
+The baseline is a conventional single-stage rinse, on a made-up order book of
+five lots. All of this is modelled.
+
+| Plan | Fresh water | Evaporator steam | Cost |
 |---|---|---|---|
-| Baseline | 11,907 L | 2,239 kWh | ₹33,897 |
-| Recommended under normal economics | 11,187 L (−6%) | 2,104 kWh (−6%) | ₹26,038 |
-| Available under priced scarcity | 6,369 L (−47%) | 1,198 kWh (−47%) | ₹29,984 |
+| Baseline | 11,907 L | 2,239 kWh | Rs 33,897 |
+| What it recommends today | 11,187 L (-6%) | 2,104 kWh (-6%) | Rs 26,038 |
+| What is available | 6,369 L (-47%) | 1,198 kWh (-47%) | Rs 29,984 |
 
-That 6% against 47% gap is the most important number in this document, and it
-is not a weakness in the optimiser. The 47% plan is fully feasible — it misses
-no ship date. It is not selected under normal operation because the low-salt
-chemistry premium costs more than the steam it saves at today's tariffs. The
-engine is telling the truth about the economics it was given.
+6% against 47% is the most important comparison in this document.
 
-Which is precisely the finding. **The large saving is available and nobody is
-buying it, because the price signal does not reach the person deciding.** Price
-water and carbon properly and the same engine, unchanged, recommends the 47%
-plan. We did not hide this behind the better number.
+The 47% plan works. It misses no delivery date. The tool does not pick it
+because low-salt dye chemistry costs more than the steam it saves at today's
+prices. The tool is telling the truth about the money it was given.
+
+So the thing standing in the way is a price, not the technology and not the
+schedule.
 
 ### What price would change the answer
 
-Saying "price water properly" is easy. The engine computes what that would
-actually take. It walks each price across a range, re-running the full
-optimiser at every step, and finds the first value at which a profit-seeking
-mill picks the 47% plan on its own account.
+Saying "price water properly" is easy. I wanted to know what that actually
+means, so the tool works it out. It walks each price up or down, re-running the
+whole calculation at every step, and finds the first point where a factory
+chasing profit picks the 47% plan on its own.
 
-| Price | Today | Switches at | Change needed |
+| Price | Today | Changes at | Move needed |
 |---|---|---|---|
-| Low-salt dye premium | Rs 6.50/kg fabric | Rs 5.74/kg fabric | **-11.6%** |
-| Boiler steam cost | Rs 2.03/kWh thermal | Rs 3.13/kWh thermal | +53.9% |
-| Freshwater tariff | Rs 45/m3 | Rs 251/m3 | +457% |
+| Low-salt dye premium | Rs 6.50/kg fabric | Rs 5.74/kg fabric | **12% cheaper** |
+| Boiler steam | Rs 2.03/kWh heat | Rs 3.13/kWh heat | 54% dearer |
+| Fresh water | Rs 45/m3 | Rs 251/m3 | 457% dearer |
 
-The dye premium needs to fall by under 12%. That is the distance between the
-plan the cluster runs today and a plan that cuts freshwater and evaporator
-steam nearly in half. It is a procurement question, not a research question.
+The dye premium only needs to come down by about 12%. That is the whole
+distance between what the cluster runs today and a plan that nearly halves both
+water and steam. It is a buying problem, not a research problem.
 
-The steam lever converts straight into a carbon price. Steam would have to rise
-by Rs 1.09 per kWh of heat; delivering that heat emits 0.452 kg of CO2e; so the
-carbon price that produces the rise is **Rs 2,423 per tonne, about EUR 21**.
+The steam row turns into a carbon price. Steam would need to go up Rs 1.09 per
+kWh of heat. Making that heat gives off 0.452 kg of CO2. Divide one by the
+other and you get **Rs 2,423 a tonne, about 21 euro**.
 
-The EU Emissions Trading System was charging EUR 82.40 a tonne on 5 October
-2026, roughly four times more. This abatement is not waiting on an unreachable
-price. It is waiting on any price at all.
+The EU carbon market was charging 82.40 euro a tonne on 5 October 2026. Close
+to four times more. So this saving is not waiting for some impossible price. It
+is waiting for any price at all.
 
-Two caveats travel with that figure and the system states both. It assumes the
-whole carbon cost reaches the mill as a higher steam price, which is the
-optimistic case; where it does not, the price needed is higher. And it is the
-level at which this particular decision flips in this modelled mill, not a
-proposal for what a carbon price should be.
+Two things to be careful about, and the system says both. It assumes the whole
+carbon cost reaches the factory as a higher steam price, which is the best
+case. And it is the point where this decision flips in my model, not a
+recommendation for what a carbon price ought to be.
 
-### At cluster scale
+### If the whole cluster did this
 
-A linear projection across 400 units, 900 lots each per year. This is a
-PROJECTION and the system labels it as one — it assumes every unit resembles
-the modelled one and that every recommendation is approved, neither of which
-has been tested.
+A straight-line projection across 400 factories at 900 lots each a year. The
+system labels this as a projection, because it assumes every factory is like
+the modelled one and that every recommendation gets approved. Neither has been
+tested.
 
-| Freshwater avoided | 75 million litres/year |
+| Saved per year | |
 |---|---|
-| Salt avoided | 4,500 tonnes/year |
-| Evaporator steam avoided | 14,106 MWh/year |
-| CO2e avoided | 6,376 tonnes/year |
+| Fresh water | 75 million litres |
+| Salt | 4,500 tonnes |
+| Evaporator steam | 14,106 MWh |
+| CO2 | 6,376 tonnes |
 
-Freshwater avoided equals reject avoided exactly, because in a closed loop the
-makeup water is the water that was evaporated. That identity is enforced by a
-test, after an earlier version of this projection violated it and overstated
-water by a factor of five. Finding and fixing that is part of why the identity
-is now a test rather than a convention.
+Water saved equals leftover saved exactly, because in a closed loop the water
+you bring in is the water you boiled off. A test enforces that. An earlier
+version of this projection broke it and overstated water by five times, which
+is why it is now a test and not a convention.
 
-### Why it is feasible
+### Why it can actually happen
 
-**No capital equipment.** The intervention is a decision, not a retrofit. The
-first two phases change nothing on the floor at all.
+There is no equipment to buy. The change is a decision, and the first two
+stages of the pilot change nothing on the floor at all.
 
-**It rides an existing mandate.** ZLD is already compulsory and already paid
-for. ChangeLoop makes existing assets cheaper to run; it does not ask anyone
-to install one.
+It also rides a rule that already exists. ZLD is compulsory and already paid
+for. The tool makes equipment a factory already owns cheaper to run.
 
-**Advisory from the start.** The existing planning procedure stays
-authoritative throughout. That is what makes a pilot approvable.
+And it stays advisory. The existing planning process stays in charge the whole
+way through, which is what makes a pilot something a factory might actually
+agree to.
 
-**A 32-week staged pilot**, defined in the engine rather than written for this
-document: baseline metering, then shadow mode where recommendations are
-produced and nobody acts, then advisory with approval, then a controlled
-wash-off release trial, then the chemistry decision, then expansion. Alternate
-weeks on and off, so the comparison is against the same season, order mix and
-crew.
+### The pilot
 
-The pilot is designed to answer one question: *did ChangeLoop cause the
-reduction, or would it have happened anyway?* A single wash-fastness failure
-stops the release trial, because a re-processed lot costs more water than was
-saved.
+Thirty-two weeks, in six stages. These are defined in the engine, not written
+for this document.
 
-### What would falsify this
+| Stage | Weeks | What happens |
+|---|---|---|
+| 1. Measure the baseline | 1-4 | Nothing changes. Just metering. |
+| 2. Run it silently | 5-8 | The tool recommends, nobody acts. Compare against what the planner actually did. |
+| 3. Planner may approve | 9-16 | Reordering only. No chemistry change yet. |
+| 4. Early release trial | 17-24 | Quality supervisor may allow early wash-off release. |
+| 5. Decide on chemistry | 25-32 | With steam cost now measured, decide if low-salt dye pays. |
+| 6. More factories | 33+ | Second and third unit on the same treatment plant. |
 
-Worth stating plainly. If a pilot measures evaporator steam per cubic metre
-far from 188 kWh, or finds the 60,000 mg/L concentration ceiling does not hold
-across a real operating range, the magnitude of everything here changes. The
-direction would survive — it follows from mass conservation — but the numbers
-would not. That is exactly what phase 1 exists to find out, and better to know
-in week six than after a cluster has paid for it.
+Two points can stop it. The planner has to agree with more than 60% of
+recommendations on their own in stage 2. And one colour-fastness failure ends
+the release trial in stage 4.
 
----
+The weeks run on and off in alternate blocks, so the comparison is against the
+same season, the same order mix and the same crew.
 
-## 6. Pitch and Idea Diffusion
+The whole point is to answer one question: did the tool cause the saving, or
+would it have happened anyway? If a lot fails its colour-fastness test after
+early release, the trial stops, because reprocessing a lot wastes more water
+than the release saved.
 
-### The pitch, in three sentences
+### What would prove me wrong
 
-Zero liquid discharge saved the Noyyal and handed the cluster a coal bill.
-That bill is set by salt, not water, so most water-saving work in Tirupur is
-aimed at the wrong number. ChangeLoop shows the planner the real consequence
-at the moment they choose, and the engine proves the claim rather than
-asserting it.
+If a pilot measures evaporator steam a long way from 188 kWh per cubic metre,
+or finds that the 60,000 mg/L limit does not hold in real running conditions,
+then every number in this document changes size. The direction would survive,
+because it comes out of mass conservation. The amounts would not.
 
-### How the idea spreads
-
-**Through the CETP, not unit by unit.** One commercial relationship reaches
-many members, and the CETP's own economics already favour less salt arriving.
-
-**Through shadow mode.** Four weeks of being correct while changing nothing is
-how a tool earns the right to influence a factory's decisions. It is the
-cheapest trust-building mechanism available and it costs the site nothing.
-
-**Through the open coefficient registry.** Every number, source and derivation
-is inspectable in the running system. A process engineer who disagrees with a
-coefficient can see exactly what it is and what it changes. That is a faster
-route to credibility in an engineering community than any amount of
-marketing, and it invites the correction rather than defending against it.
-
-**Through the pricing argument, with a number attached.** Where a shared
-environmental resource is under-priced, individually rational decisions
-overload it, and the fix is a price rather than a schedule. Most submissions
-stop at that sentence. This one names the price: about EUR 21 a tonne of CO2e,
-or a 12% fall in the dye premium. A tariff-setter can act on a number and
-cannot act on a principle, and the engine behind it is open for anyone to
-re-run.
-
-**Through being wrong in public.** This submission names its own largest gaps.
-That is a diffusion strategy as much as an honesty one — in a field full of
-unverifiable impact claims, the system that publishes its own weak points is
-the one an engineer will actually try.
+That is what stage 1 is for. Better to find out in week six than after a whole
+cluster has paid for it.
 
 ---
 
-## 7. Future Scope
+## 6. The pitch, and how it spreads
 
-### Near term — make it measured
+### The pitch in three sentences
 
-The single biggest upgrade is two instruments: evaporator steam flow, and
-reject conductivity. Those two readings promote the two coefficients carrying
-the most weight in the result from PUBLISHED to MEASURED. Nothing else moves
-the credibility of this system as far for as little. They also need
-calibration and health monitoring, because a drifting sensor is worse than no
-sensor, and the existing rule — missing or implausible data means hold and
-credit zero — has to survive scale rather than being relaxed for throughput.
+ZLD saved the Noyyal river and left the cluster with a coal bill. That bill is
+set by salt, not water, so most of the water-saving work in Tirupur is aimed at
+the wrong thing. ChangeLoop shows the planner what their choice actually costs,
+at the moment they make it.
 
-### Medium term — the cluster
+### Five ways it spreads
 
-The current plant solver is exhaustive. It optimises each machine's queue
-within every strategy, then checks all 256 combinations against capacity and
-returns the cheapest that fits, so the answer is proven rather than
-approximated. That stops being possible at a CETP with hundreds of member
-units, and the method has to change. This is a real limit and not a detail:
-cluster-scale coordination is a different optimisation problem, not a bigger
-version of the same one.
+**Through the treatment plant, not factory by factory.** One commercial
+relationship reaches many members, and their own economics already favour less
+salt coming in.
 
-The commercial question underneath it is harder than the mathematics. If the
-cheapest plant-wide plan requires one unit to accept a worse outcome, somebody
-has to pay them. The engine can already compute what that transfer should be —
-₹4,123 a day in the modelled site, attributable per machine. Whether a CETP
-can actually administer it is an institutional question, and it is open.
+**By running silently first.** Four weeks of being right while changing nothing
+is how a tool earns the right to influence a factory's decisions. It costs the
+factory nothing and it is the cheapest trust I can buy.
 
-### Longer term — the same identity elsewhere
+**By showing the working.** Every input number, its source and its arithmetic
+can be read in the running system. An engineer who thinks one of my numbers is
+wrong can see exactly what it is and what it changes. In an engineering
+community that gets you taken seriously faster than any amount of marketing,
+and it invites the argument rather than avoiding it.
 
-The physics ChangeLoop runs on is not specific to textiles. Any closed-loop
-water system that concentrates dissolved solids and removes them thermally
-obeys the same relation: the volume you must evaporate is set by the dissolved
-mass divided by the concentration ceiling, not by the water you circulated.
+**With a price attached.** When a shared resource is under-priced, sensible
+individual decisions add up to overloading it, and the fix is a price rather
+than a schedule. Most submissions stop at that sentence. Mine names the price:
+about 21 euro a tonne of CO2, or 12% off the dye premium. A regulator can act
+on a number. They cannot act on a principle.
 
-Evaporative data centre cooling has exactly this shape. Makeup water equals
-evaporation plus blowdown; blowdown volume is set by the cycles of
-concentration the water chemistry permits; and cycles of concentration are
-limited by dissolved solids. The same structural blind spot should therefore
-exist — operators optimising water withdrawal while the dissolved-solids
-ceiling quietly sets the thermal and chemical load.
+**By being wrong in public.** This document lists the biggest holes in my own
+project. In a field full of impact claims nobody can check, the one that
+publishes its own weak points is the one an engineer will try.
 
-Stated carefully: that is a structural argument, not a validated finding. No
-data centre has run this and the coefficients would all need re-sourcing.
-Cooling towers, boiler blowdown and mine water management share the same
-structure. It would be dishonest to present any of them as solved, and the
-textile case has to be proven on a real site first.
+---
+
+## 7. What comes next
+
+### First: measure something
+
+The biggest single upgrade is two instruments. A steam flow meter on the
+evaporator, and a conductivity probe on the leftover stream. Those two readings
+turn the two most important numbers in the model from published figures into
+measured ones. Nothing else buys as much credibility for as little money.
+
+They need calibration and health checks too, because a sensor drifting quietly
+is worse than no sensor. The rule I already built, that missing or odd data
+means stop and claim nothing, has to survive being scaled up rather than
+getting relaxed to keep throughput.
+
+### Then: the cluster
+
+Right now the shared-evaporator solver checks every combination. It works out
+each machine's best plan under each method, then tests all 256 combinations
+against capacity and returns the cheapest that fits. The answer is proved, not
+estimated.
+
+That stops being possible at a treatment plant with hundreds of member
+factories. The method has to change. This is a real limit and I am not going to
+call it a detail. Coordinating a whole cluster is a different problem, not a
+bigger version of the same one.
+
+The harder part is not the maths. If the cheapest plan for the whole plant
+needs one factory to accept a worse result, somebody has to pay them for it. My
+tool can already work out what that payment should be, Rs 4,123 a day in the
+model, and which machine it belongs to. Whether a treatment plant could
+actually run such a scheme is an open question.
+
+### Later: the same idea elsewhere
+
+The physics is not specific to textiles. Any closed water loop that
+concentrates dissolved solids and then boils them off follows the same rule.
+What you have to evaporate is set by the dissolved mass divided by the
+concentration limit, not by how much water went round.
+
+Data centre cooling has this shape. The make-up water equals what evaporates
+plus what gets bled off. How much gets bled off depends on how many times the
+water can be cycled, and that is limited by dissolved solids. So the same blind
+spot should exist, with operators watching water withdrawal while the dissolved
+solids quietly set the load.
+
+I want to be careful here. That is an argument from structure, not a result. No
+data centre has run this and every input number would need re-sourcing. Cooling
+towers, boiler blowdown and mine water have the same shape too. None of them is
+solved, and the textile case has to be proven on a real site first.
+
+---
+
+## What I can and cannot claim
+
+This section is here so you can stop reading and still know how much to trust
+everything above.
+
+The system runs on 25 input numbers. Each one is labelled in the product, with
+its source and its arithmetic.
+
+| Label | How many | What it means |
+|---|---|---|
+| Published | 17 | Taken from CPCB, the Central Electricity Authority, Tamil Nadu tariff orders, state pollution board plant data, the EU reference document, and steam tables. |
+| Derived | 4 | Worked out from those by arithmetic that a test re-checks. |
+| Assumed | 4 | My assumptions, labelled as such. They stay that way because they are commercial prices that public sources do not settle. |
+| Measured | 0 | No instrument on a real factory has fed this system. A test enforces this. |
+
+That makes 17 published, 4 derived, 4 assumed out of 25, so 84% of the inputs
+are sourced. I did not relabel anything I could not back up.
+
+### Things this project has not done
+
+- No deployment, no customer, no pilot, no measured result.
+- The cluster number is a projection. It is not achieved impact and the system
+  refuses to display it as one.
+- The switching prices say what would change my tool's answer. They are not a
+  forecast of what a real factory's accountant would decide.
+- The carbon price assumes the full cost reaches the factory as a higher steam
+  price. If it does not, the real price needed is higher.
+- The shared-evaporator work does not scale to a treatment plant yet. Checking
+  every combination will not survive hundreds of members.
+- The 60,000 mg/L limit is one modelled figure inside a published range of
+  15,000 to 80,000. Whether it holds in real running conditions, I do not know.
+- The tool handles machines inside one factory. It does not schedule them
+  against each other in time.
+- The data centre idea is an argument from structure. It is not a result.
+- There is no trained model in here and I do not call it AI-powered. The
+  decision record is a hash chain, not a blockchain, and the system says so.
+
+### What would make this credible
+
+One site visit and two instrument readings. Steam flow to the evaporator, and
+conductivity of the leftover. Those two promote the numbers that carry the most
+weight in everything above.
+
+Until then, the fair reading is this. The physics is proved and checked against
+published measurements. The money is modelled from published tariffs. The
+decision logic works and is tested. And nothing here describes a real factory
+yet.
 
 ---
 
 ## Sources
 
-The authoritative, per-coefficient sourcing is not in this document. It is in
-the running system, where every one of the 25 coefficients carries its own
-source text and arithmetic and can be read without asking us:
+The real sourcing is not in this document. It is in the running system, where
+all 25 input numbers carry their own source text and arithmetic and can be read
+without asking me:
+
 https://changeloop-water-intelligence.onrender.com/api/evidence
 
-That is deliberate. A bibliography in a concept note can drift from the model;
-a registry the model reads at runtime cannot.
+I did it that way on purpose. A reading list in a document can drift away from
+the model. A list the model itself reads cannot.
 
-The external reading behind the figures quoted above:
+The outside reading behind the figures above:
 
-| Figure | Source |
+| Figure | Where it comes from |
 |---|---|
-| Grid emission factor, 0.705 kg CO2e/kWh | CO2 Baseline Database for the Indian Power Sector, Central Electricity Authority (cea.nic.in). The registry uses the version current at the time of writing. |
-| Carbon price benchmark, EUR 82.40/tonne, 5 October 2026 | European carbon prices, S&P Global Commodity Insights. A market price, so it goes stale; the system stores it with its date. |
-| Tirupur ZLD mandate, CETP capacity and water recovery | "Towards zero discharge", Down To Earth. |
-| Tirupur cluster effluent load and disposal practice | "Study of Tirupur textile industry cluster", India Water Portal. |
-| Inlet TDS of 18,340 mg/L; RO reject at 20-30% of inlet; MEE steam use of 0.25-0.35 kg steam per kg evaporated | Central Pollution Control Board assessment of textile dyeing units and ZLD at Tirupur. Quoted in full in the registry entry for each coefficient. |
-| Water and steam tariffs | Tamil Nadu Electricity Regulatory Commission tariff orders and Tamil Nadu pollution board plant data, as cited per coefficient in the registry. |
-| Latent heat of vaporisation, 0.62694 kWh/kg | Standard steam tables: 2,257 kJ/kg at 100 C and 1 atm, divided by 3,600. |
-| Evaporator section energy band, 150-250 kWh/m3 | EU Best Available Techniques reference document for the textiles industry, used only as an independent check and never as an input. |
+| Grid emissions, 0.705 kg CO2 per kWh | CO2 Baseline Database for the Indian Power Sector, Central Electricity Authority (cea.nic.in) |
+| Carbon price, 82.40 euro a tonne on 5 October 2026 | European carbon prices, S&P Global Commodity Insights. A market price, so it goes out of date. The system stores it with its date. |
+| Tirupur ZLD rule, treatment plant capacity, water recovery | "Towards zero discharge", Down To Earth |
+| Tirupur cluster effluent load and disposal | "Study of Tirupur textile industry cluster", India Water Portal |
+| Water strength of 18,340 mg/L, reject at 20-30%, evaporator steam use | Central Pollution Control Board assessment of textile dyeing units and ZLD at Tirupur. Quoted in full in the system against each number it feeds. |
+| Water and steam tariffs | Tamil Nadu Electricity Regulatory Commission tariff orders and state pollution board plant data, cited per number in the system |
+| Latent heat, 0.62694 kWh/kg | Steam tables: 2,257 kJ/kg at 100 C and one atmosphere, divided by 3,600 |
+| Evaporator energy band, 150-250 kWh/m3 | EU Best Available Techniques reference document for textiles. Used only as a check, never as an input. |
 
-Where a source gives a range, the registry stores the range and the model takes
-a stated point inside it. Where public literature could not settle a figure, it
-is labelled ASSUMED rather than attributed to a source that does not say it.
-Four coefficients are in that state and all four are commercial prices.
+Where a source gives a range, the system stores the range and takes a stated
+point inside it. Where I could not find a public figure, the number is labelled
+as an assumption rather than attached to a source that does not actually say
+it. Four numbers are in that state and all four are commercial prices.
 
 ---
 
 ## Closing
 
-ChangeLoop is a working system, publicly reachable, with 178 tests, 25
-classified coefficients, external validation against CPCB measurements, and
-zero measured data — and it tells you that last part itself, in every view.
+ChangeLoop is a working system anyone can open, with 178 tests, 25 labelled
+input numbers, a check against CPCB measurements, and no measured data at all.
+It tells you that last part itself, on every screen.
 
-The core claim is small enough to check and large enough to matter: in a
-closed loop, salt sets the coal bill. The person who controls salt is a
-planner who cannot see the consequence. We built the thing that shows them,
-proved the physics, priced the gap, and found that at plant scale the problem
-is not that anyone is deciding badly — it is that water is too cheap for good
-decisions to add up.
+The claim is small enough to check and big enough to matter. In a closed loop,
+salt sets the coal bill. The person who controls the salt cannot see what it
+costs. I built the thing that shows them, proved the physics, and then worked
+out what the saving is actually waiting on.
+
+It is waiting on a price. About 21 euro a tonne of CO2, or 12% off a dye
+premium. That is a much smaller problem than it looked like at the start.
 
 **https://changeloop-water-intelligence.onrender.com**
