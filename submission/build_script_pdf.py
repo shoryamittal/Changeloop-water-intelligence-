@@ -665,7 +665,7 @@ def render(src=None, out=None, title=None, subject=None,
         out, pagesize=A4,
         leftMargin=M_L, rightMargin=M_R, topMargin=M_T, bottomMargin=M_B,
         title=title or "ChangeLoop \u2014 Video Script",
-        author="Shorya Mittal",
+        author="Shorya Ashish Mittal",
         subject=subject or "SANKALP 2026 submission narration script")
 
     def footer(c, d):

@@ -7,7 +7,7 @@
 | **Startup name** | ChangeLoop |
 | **Tagline** | Cut the water by a fifth. The evaporator burns exactly the same fuel. |
 | **Date** | 9 October 2026 |
-| **Prepared by** | Shorya Mittal, project lead and sole developer |
+| **Prepared by** | Shorya Ashish Mittal, project lead and sole developer |
 | **Contact** | shoryamittal9653@gmail.com |
 | **Working prototype** | https://changeloop-water-intelligence.onrender.com |
 
@@ -244,7 +244,7 @@ anyone buys the software.
 
 | Objective | Target | Why it has leverage |
 |---|---|---|
-| **Get treatment plants to charge by salt, not by volume** | One CETP piloting a salt-indexed tariff for its members | As far as I can find, CETP charges are set by the volume a member sends, not by how salty it is, so the cost of the salt a unit creates lands on the plant. Change that and every member has the incentive on day one, whether or not anyone buys my software. This is the single highest-leverage outcome in the project |
+| **Get treatment plants charging by salt, not by volume** | Two CETPs running a salt-indexed tariff for their members | As far as I can find, CETP charges are set by the volume a member sends, not by how salty it is, so the cost of the salt a unit creates lands on the plant. Change that and every member has the incentive on day one. This is the highest-leverage outcome in the project, and since section 6 it is also what I sell rather than something I hope somebody does |
 | **Make salt load per lot a number the industry reports** | Salt per lot metered and reported at 40 units, the way water already is | Water got managed once it got metered. Nothing gets managed until it is measured, and right now nobody measures the variable that drives the cost |
 | Close the dye premium gap by buying together | A joint procurement approach across CETP members, aimed at the 12% gap my engine computes | 12% is small enough that aggregated demand across a few hundred units could close it. Then the 47% plan becomes the cheap plan and nobody has to be persuaded |
 | Solve cluster coordination properly | A method that works for hundreds of member units, not the 256 combinations the current solver checks exhaustively | The current approach is proven but will not scale, and I would rather say that than imply it will |
@@ -255,48 +255,74 @@ anyone buys the software.
 
 ## 6. Business model
 
+### Who actually pays for salt
+
+My first business model billed the factory a share of its savings, and the
+arithmetic talked me out of it. A dyeing unit buys salt at about Rs 9 a
+kilogram and buys water by volume. Salt is cheap to a factory. That is
+precisely why nobody acts on it, and charging the party with the weakest
+incentive is a hard way to build a business.
+
+Then I worked out who does carry the cost.
+
+Every tonne of salt that reaches a treatment plant forces about 17 cubic
+metres of reject to be boiled. Using my own coefficients, that is Rs 6,363 of
+steam, Rs 3,000 of evaporator operating cost and Rs 527 of power:
+**Rs 9,891 a tonne**.
+
+A single CETP in Tirupur handles roughly a sixth of the cluster's 100 million
+litres a day. At the recovery rates these plants report, that is about
+**7,700 tonnes of salt a year, costing it around Rs 7.62 crore** to deal with.
+
+It chose none of it. Its seventeen member factories did. And because the plant
+bills members by the volume they send rather than how salty it is, it has no
+way to charge for any of it. The dyers' association says the 18 plants together
+spend around Rs 30 crore a month on electricity, and this is a large part of
+why.
+
+That is the same misaligned incentive as section 2, one level up. The factory
+decides, somebody else pays, and nobody can see the link.
+
 ### How it makes money
 
-A share of the saving the system can prove, plus a small one-off fee to
-connect it.
+So I sell to the plant, and give the planner to the factory cheaply enough that
+adopting it is not a decision anyone has to defend.
 
-| Item | Amount |
-|---|---|
-| Share of verified saving | 25% |
-| One-off setup | Rs 75,000 per unit |
+| Who pays | What for | Price |
+|---|---|---|
+| **Treatment plant** | Salt attribution: how much salt each member sent, what it cost the plant, and a tariff engine to bill for it | Rs 12,00,000 a year, plus 20% of the verified reduction |
+| **Treatment plant, once** | Onboarding: conductivity meters on member discharge lines, attribution set up against the plant's own costs | Rs 2,50,000 |
+| **Member factory** | The planner itself, priced per lot so it scales with use | Rs 15 a lot, about Rs 75,000 a year |
 
-No licence fee and no charge for the software itself. If the tool saves a
-factory nothing, it costs that factory nothing beyond the setup.
+A 3% cut in salt arriving saves a plant about Rs 22,80,000 a year, so the
+platform pays for itself in the first year at a reduction small enough to be
+plausible. At 10% it saves about Rs 76,20,000.
 
-The setup fee is engineering time, not margin. Roughly six to eight days of
-work at Indian specialist rates:
+### Why this way round
 
-| What the setup fee pays for | Amount |
-|---|---|
-| Getting the lot schedule out of the planning system and into a usable feed | Rs 25,000 |
-| Interfacing the existing meters and tagging which stream is which | Rs 20,000 |
-| Setting the coefficient registry to the site's own tariffs, machines and shade book | Rs 15,000 |
-| Training the planner and the quality supervisor, and sitting with them for the first week | Rs 15,000 |
-| **Total** | **Rs 75,000** |
+**The factory ask becomes signable.** Rs 75,000 a year is an operating expense
+a dyeing-unit owner approves without a board meeting. A share of savings on my
+earlier model would have been Rs 19,65,000, and no owner signs that for
+software against a saving nobody has measured yet.
 
-It does not include instruments. A site that already meters steam and reject
-conductivity needs none. A site that does not can either add them, at about
-Rs 1,75,000 as broken down in section 9, or run on published coefficients and
-accept that the saving is estimated rather than measured. I would rather be
-clear about that than bundle hardware into a software price.
+**Eighteen conversations instead of three hundred and sixty.** One plant
+relationship reaches about seventeen factories. That is the difference between
+a business one person can start and one that needs a sales team on day one.
 
-### Why charge this way
+**It creates pull instead of push.** Once a plant bills by salt load, its
+members suddenly need a way to manage salt, and the planner is that way. I stop
+having to persuade anyone that the problem is real; their invoice does it.
 
-A flat subscription was my first instinct and I dropped it. A fixed fee charges
-the same whether the system saves a factory a lot or nothing at all, and asks a
-thin-margin dyeing unit to take that risk on a saving that is modelled rather
-than measured. No one should sign that, and I would not pitch it.
+**It is what the system is uniquely able to do.** Plenty of software can
+schedule a dyehouse. Attributing a plant's salt load back to the member and the
+lot that caused it is the thing only this engine does, because it is the thing
+the whole model was built to compute.
 
-The share model fits what is already built. The system computes every saving on
-the server, counts only what a named person actually approved, and writes it to
-a tamper-evident ledger. That ledger is a billing basis, not just an audit
-trail. It also turns the project's weakest point into the mechanism: nothing
-has been measured yet, so nothing is owed yet.
+**I am paid on what was measured and approved.** Savings are computed on the
+server, counted only when a named person approved the plan, and written to a
+tamper-evident ledger. That ledger is the billing basis, which turns the
+project's weakest point into the mechanism: nothing is measured yet, so nothing
+is owed yet.
 
 ### What a factory actually gets
 
@@ -316,10 +342,14 @@ the wood is wet. I use 5,000.
 | Net saving per lot | Rs 1,572 | Rs 783 |
 | Lots a year, mid-size unit | 5,000 | 5,000 |
 | Net saving a year | **Rs 78,60,000** | **Rs 39,14,000** |
-| My 25% share | Rs 19,65,000 | Rs 9,78,000 |
+| My fee at Rs 15 a lot | Rs 75,000 | Rs 75,000 |
+| Factory keeps | **Rs 77,85,000** | **Rs 38,39,000** |
 | Water and steam cut | 6% | 47% |
 
 Read that table carefully, because it is the point of the whole project.
+
+The fee is the same in both columns because it is charged per lot, not per
+rupee saved. The factory keeps essentially all of the benefit.
 
 The plan the optimiser recommends today saves **more money** but only 6% of
 the fresh water. The low-salt plan saves **less money** and nearly half the
@@ -364,14 +394,14 @@ amounts.
 
 ### How customers are reached
 
-**Through the shared treatment plants.** Tirupur has 18 of them serving about
-300 units. One conversation with a treatment plant reaches about 17 factories
-instead of one, which is the difference between a sales effort a student can
-run and one that needs a team.
+**Through the shared treatment plants, which are the customer.** Tirupur has
+18 of them serving about 300 units. One conversation reaches about seventeen
+factories instead of one, which is the difference between a sales effort one
+person can run and one that needs a team from the start.
 
-The treatment plants also want this for their own reasons. Less salt arriving
-means less steam bought and less salt stored. That makes them a partner rather
-than just a channel.
+They are not only a channel. The Rs 7.62 crore a year of salt-driven cost is
+theirs, so the attribution platform is bought for their own reasons, not as a
+favour to their members.
 
 **Through running silently first.** Four weeks of being right while changing
 nothing is how a tool earns the right to influence a factory's decisions. It
@@ -398,7 +428,7 @@ the problem this addresses.
 
 | Level | Size | Basis |
 |---|---|---|
-| Tirupur, immediate | 360 dyeing units. A 25% share of the modelled saving would be of the order of **Rs 70 crore a year** across the cluster | 360 units operating in 2025, 300 of them on 18 CETPs, per the Dyers Association of Tiruppur. This rests entirely on the modelled per-lot saving holding at real sites, which no pilot has yet tested. Treat it as an order of magnitude, not a forecast |
+| Tirupur, immediate | 18 treatment plants at about Rs 20,00,000 a year is Rs 3.6 crore, and 360 factories at Rs 75,000 is Rs 2.7 crore. Together of the order of **Rs 6.3 crore a year** | 360 units operating in 2025, 300 of them on 18 CETPs, per the Dyers Association of Tiruppur. The plant fee is anchored on a cost I can derive, not on a saving nobody has measured, which is why this is far below what a share-of-savings model would have claimed |
 | Indian textile ZLD, wider | Tirupur is one of several clusters under ZLD rules. Surat, Erode, Karur, Ludhiana, Panipat and Jetpur have similar processing bases. The whole Indian ZLD equipment market across all industries is put at about **USD 1.33 billion in 2025**, growing to USD 2.52 billion by 2032 | The dollar figure is a commercial market estimate covering all ZLD, not textile software. I have not counted dyeing units outside Tirupur and will not present a number I cannot source |
 | Adjacent closed loops, later | Evaporative cooling, boiler blowdown and mine water share the same physics | Unvalidated. Listed as direction, not as market |
 
@@ -463,14 +493,14 @@ one question: did the tool cause the saving, or would it have happened anyway?
 
 ### Key milestones
 
-| Milestone | When |
-|---|---|
-| First pilot site signed | Month 1 |
-| First measured coefficient, replacing a published one | Month 2 |
-| First saving measured with a confidence interval | Month 6 |
-| First paying customer beyond the pilot | Month 10 |
-| Cluster coordination working across one CETP | Month 18 |
-| 40 paying units | Month 36 |
+| Milestone | When | Why this date |
+|---|---|---|
+| First pilot site agreed | Month 4 | Three months of introductions, site visits and a safety review before anyone lets a student near a steam header |
+| First measured coefficient replacing a published one | Month 6 | Instruments in, 28 days of clean data |
+| First saving measured with a confidence interval | Month 10 | Needs alternate on and off weeks through stage 3 |
+| First treatment plant signs for attribution | Month 15 | After the pilot has a measured result to show |
+| Salt-indexed tariff piloted at one plant | Month 24 | The plant's members have to agree to it, which is a governance step, not a technical one |
+| 3 plants and 30 factories live | Month 36 | About the ceiling for one person without hiring |
 
 ---
 
@@ -529,49 +559,55 @@ I am not putting a funding request in this note. The number above is here so
 the cost of the next step is visible, and because a plan that cannot say what
 it costs is not a plan.
 
-### Unit economics, once it is selling
+### Unit economics
 
 | Item | Amount |
 |---|---|
-| Share of verified saving | 25% |
-| One-off setup | Rs 75,000 per unit |
-| Share per unit at the modelled saving | of the order of Rs 20,00,000 a year |
-| Share per unit from re-ordering alone | about Rs 7,59,000 a year |
+| Treatment plant platform | Rs 12,00,000 a year |
+| Treatment plant onboarding, once | Rs 2,50,000 |
+| Share of the plant's verified reduction | 20% |
+| Member factory planner | Rs 15 a lot, about Rs 75,000 a year |
 
-The full figure is large and rests on a modelled order book. The re-ordering
-figure is the one every unit can reach, whatever rinse it already uses. I am
-carrying it forward because it is what my own engine says, not because I
-believe it to the rupee. The first pilot replaces it with a measured number,
-and the share model means I am paid on that measured number rather than on
-this one.
+The plant fee is anchored on a cost I can derive rather than a saving nobody
+has measured. A plant carries about Rs 7.62 crore a year of salt-driven cost,
+so Rs 12,00,000 is about 1.6% of it, and a 3% reduction returns about
+Rs 22,80,000. That is a case a plant manager can check without trusting my
+model.
+
+The factory fee deliberately does not scale with savings. At Rs 15 a lot it is
+roughly 1% of what the engine says the plan saves, which means I am never
+arguing with an owner about whether the saving was real.
 
 ### Revenue projections
 
-These assume the pilot succeeds, the treatment plant channel works, and the
-modelled per-lot saving survives contact with a real site. All three are
-assumptions, and the third is the weakest. A unit already running
-counter-current rinsing only has the re-ordering part to gain, and I do not yet
-know how many of Tirupur's units that is. To keep the projection cautious I
-have priced the share at about Rs 4,00,000 a unit a year, roughly half of what
-re-ordering alone would earn, because I would rather under-promise a number no
-instrument has confirmed.
+The binding constraint on these is not demand. It is that I am one person.
 
 | | Year 1 | Year 2 | Year 3 |
 |---|---|---|---|
-| Live units | 2, pilot | 12 | 40 |
-| Setup revenue, new units only | Rs 1,50,000 | Rs 7,50,000 | Rs 21,00,000 |
-| Share of verified saving, at Rs 4,00,000 a unit | waived during pilot | Rs 48,00,000 | Rs 1,60,00,000 |
-| **Total revenue** | **Rs 1,50,000** | **Rs 55,50,000** | **Rs 1,81,00,000** |
+| Treatment plants live | 0, pilot only | 1 | 3 |
+| Member factories live | 2, pilot | 10 | 30 |
+| Plant platform fees | none | Rs 12,00,000 | Rs 36,00,000 |
+| Plant onboarding, new plants only | none | Rs 2,50,000 | Rs 5,00,000 |
+| Factory planner fees | waived during pilot | Rs 7,50,000 | Rs 22,50,000 |
+| **Total revenue** | **nil** | **Rs 22,00,000** | **Rs 63,50,000** |
 
-Year 1 is a pilot year and is not meant to make money; the share is waived
-while the baseline is still being established. Years 2 and 3 assume one CETP
-relationship in year 2 and two or three by year 3, at about 17 member units
-each.
+Year 1 earns nothing on purpose. The two pilot factories pay nothing while
+their baseline is being established, because the whole point of that year is to
+find out whether the saving is real, and charging for it would bias the answer.
 
-Setup is billed once per unit, on new units only, so year 2 bills ten and year
-3 bills twenty-eight, not forty. The share is billed on every live unit against
-what the ledger says was actually saved, so if the measured saving comes in
-below the model, the revenue falls with it automatically.
+Year 2 assumes one plant signs after seeing pilot results, bringing about ten
+of its members. Year 3 assumes two more plants. Onboarding is billed once per
+plant, so year 3 bills two, not three.
+
+The 20% share of verified reduction is deliberately left out of these totals. I
+can compute what it would be, but it rests on a reduction no instrument has
+confirmed, and a projection that depends on my own model being right is not a
+projection.
+
+Three plants and thirty factories by year three is roughly the ceiling for one
+person doing integration, training and support. Past that I would need to hire,
+and I would rather show a number I could deliver alone than one that quietly
+assumes a team I do not have.
 
 ## 10. Impact assessment
 
@@ -662,10 +698,12 @@ in Tirupur is aimed at the wrong number. ChangeLoop shows the planner what
 their choice actually costs, at the moment they make it.
 
 The prototype is built, running and open to inspection. The physics is checked
-against published plant measurements. A factory pays Rs 75,000 to connect and
-keeps three quarters of whatever the system can prove it saved, so it carries
-almost no risk and I carry the rest. The route to the cluster runs through 18
-shared treatment plants whose own economics already point the same way.
+against published plant measurements. The business model follows the money
+rather than the obvious buyer: a treatment plant carries about Rs 7.62 crore a
+year of cost created by salt it never chose, so it buys the attribution that
+lets it charge for it, and its member factories get the planner for about
+Rs 75,000 a year. Eighteen plants, not three hundred and sixty factories, is a
+cluster one person can actually reach.
 
 What it does not have is a single measured number from a real factory, and I
 would rather say that plainly than let a reviewer discover it. Closing that gap

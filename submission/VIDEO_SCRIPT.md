@@ -372,7 +372,7 @@ cut — if your limit is a hard 3:30, drop B0 and start straight at B1.
 
 **B0. The greeting** — *Command page, mouse still, before anything else*
 
-> Good morning everyone. My name is Shorya Mittal, and I am going to show
+> Good morning everyone. My name is Shorya Ashish Mittal, and I am going to show
 > you something that surprised me while I was building this project.
 >
 > Before I explain how my system works, let me tell you why it needed to

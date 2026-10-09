@@ -320,7 +320,7 @@ def render(src, out, subtitle=None, title=None):
         out, pagesize=A4,
         leftMargin=MARGIN_L, rightMargin=MARGIN_R,
         topMargin=PAGE_H - BODY_TOP, bottomMargin=BODY_BOTTOM,
-        title=title or "Concept Note", author="Shorya Mittal",
+        title=title or "Concept Note", author="Shorya Ashish Mittal",
         subject="Concept note")
     frame = Frame(MARGIN_L, BODY_BOTTOM, CONTENT_W,
                   BODY_TOP - BODY_BOTTOM, id="body",

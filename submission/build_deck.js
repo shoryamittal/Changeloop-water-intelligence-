@@ -19,7 +19,7 @@ const F = JSON.parse(fs.readFileSync(
 
 /* ---------- team: edit these four entries ---------- */
 const TEAM = [
-  { name: 'Shorya Mittal', role: 'Team leader', does: 'Engine, water accounting and interface' },
+  { name: 'Shorya Ashish Mittal', role: 'Team leader', does: 'Engine, water accounting and interface' },
   { name: 'Member two',    role: 'Role',        does: 'Contribution' },
   { name: 'Member three',  role: 'Role',        does: 'Contribution' },
   { name: 'Member four',   role: 'Role',        does: 'Contribution' }
@@ -50,7 +50,7 @@ const THEME = {
 const pres = new pptxgen();
 pres.layout = 'LAYOUT_WIDE';            // 13.3 x 7.5 in
 pres.theme = { headFontFace: THEME.headFontFace, bodyFontFace: THEME.bodyFontFace };
-pres.author = 'Shorya Mittal';
+pres.author = 'Shorya Ashish Mittal';
 pres.title = 'ChangeLoop - Resource Decision Intelligence';
 pres.subject = 'SANKALP 2026 Students Track';
 const C = pres.SchemeColor;

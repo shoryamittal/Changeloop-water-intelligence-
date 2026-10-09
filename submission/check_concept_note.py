@@ -38,7 +38,17 @@ HABIT = os.path.join(HERE, "concept_note", "CONCEPT_NOTE_HABIT.md")
 # The commercial terms quoted in the 12-section note. They are business
 # decisions rather than engine outputs, so they live here and feed the
 # business case, which keeps the note and the arithmetic in step.
-SHARE_OF_SAVING = 0.25
+# Plant-led pricing. The factory fee is per lot, so it does not move
+# with the saving; the plant fee is anchored on the plant's own cost.
+FEE_PER_LOT = 15.0
+PLANT_PLATFORM_INR = 1200000.0
+PLANT_ONBOARD_INR = 250000.0
+PLANT_SHARE = 0.20
+CETP_SALT_T_PER_YEAR = 7700.0
+REJECT_FRACTION = 0.07
+CLUSTER_MLD_ON_CETPS = 100.0
+N_CETPS = 18
+N_UNITS = 360
 SETUP_INR = 75000.0
 LOTS_PER_YEAR = 5000
 LOTS_PER_SHIFT = 5
@@ -366,10 +376,20 @@ def habit_expectations():
          "| Net saving a year | **Rs %s** | **Rs %s** |"
          % (lakh(round(per_lot_t * LOTS_PER_YEAR, -3)),
             lakh(round(per_lot_l * LOTS_PER_YEAR, -3))))
-    need("share row",
-         "| My 25%% share | Rs %s | Rs %s |"
-         % (lakh(round(per_lot_t * LOTS_PER_YEAR * SHARE_OF_SAVING, -3)),
-            lakh(round(per_lot_l * LOTS_PER_YEAR * SHARE_OF_SAVING, -3))))
+    fee_year = FEE_PER_LOT * LOTS_PER_YEAR
+    need("fee row",
+         "| My fee at Rs %d a lot | Rs %s | Rs %s |"
+         % (FEE_PER_LOT, lakh(fee_year), lakh(fee_year)))
+    need("factory keeps row",
+         "| Factory keeps | **Rs %s** | **Rs %s** |"
+         % (lakh(round(per_lot_t * LOTS_PER_YEAR - fee_year, -3)),
+            lakh(round(per_lot_l * LOTS_PER_YEAR - fee_year, -3))))
+    # the fee must stay a small slice of the saving, or the pitch changes
+    _slice = fee_year / (per_lot_t * LOTS_PER_YEAR) * 100
+    if _slice > 3.0:
+        raise SystemExit(
+            "The per-lot fee is now %.1f%% of the modelled saving. Section 9 "
+            "calls it roughly 1%%." % _slice)
     need("water steam row",
          "| Water and steam cut | %d%% | %d%% |"
          % (round((base_fw - nrm["freshwater_intake_l"]) / base_fw * 100),
@@ -421,9 +441,6 @@ def habit_expectations():
     need("split row total",
          "| **Both together, the plan it recommends** | **Rs %s** | **Rs %s** |"
          % (thousands(per_lot_t), lakh(round(per_lot_t * LOTS_PER_YEAR, -3))))
-    need("reorder share",
-         "| Share per unit from re-ordering alone | about Rs %s a year |"
-         % lakh(round(seq_lot * LOTS_PER_YEAR * SHARE_OF_SAVING, -3)))
     need("rinse lot in limits", "about Rs %s\n  a lot" % thousands(rinse_lot)
          if False else "about Rs %s" % thousands(rinse_lot))
     _proc_cut = 1 - (_cc.consequence["water"]["process_demand_l"]
@@ -441,36 +458,90 @@ def habit_expectations():
     need("fuel sensitivity",
          "fall about %d%% instead of 12%%" % round(abs(_sw["percent_change"])))
 
-    # the cautious share used in the projection is a fifth of the
-    # modelled one, rounded to a lakh
-    full_share = per_lot_t * LOTS_PER_YEAR * SHARE_OF_SAVING
-    cautious = round(full_share / 5, -5)
-    need("unit economics share",
-         "of the order of Rs %s a year" % lakh(round(full_share, -6)))
+    # --- what salt costs a treatment plant, from the registry ---------
+    C = factors.get("ro_max_reject_tds_mg_l")
+    m3_per_t = 1000.0 / (C / 1000.0)
+    cost_per_t = m3_per_t * (
+        factors.get("mee_specific_thermal_kwh_per_m3")
+        * factors.get("steam_cost_inr_per_kwh_th")
+        + factors.get("mee_opex_inr_per_m3_reject")
+        + factors.get("mee_specific_electrical_kwh_per_m3")
+        * factors.get("electricity_cost_inr_per_kwh"))
+    need("salt m3", "about %d cubic\nmetres of reject" % round(m3_per_t))
+    need("salt steam", "Rs %s of\nsteam" % thousands(
+        m3_per_t * factors.get("mee_specific_thermal_kwh_per_m3")
+        * factors.get("steam_cost_inr_per_kwh_th")))
+    need("salt opex", "Rs %s of evaporator operating cost" % thousands(
+        m3_per_t * factors.get("mee_opex_inr_per_m3_reject")))
+    need("salt power", "Rs %s of power" % thousands(
+        m3_per_t * factors.get("mee_specific_electrical_kwh_per_m3")
+        * factors.get("electricity_cost_inr_per_kwh")))
+    need("salt per tonne", "**Rs %s a tonne**" % thousands(cost_per_t))
+
+    plant_cost = CETP_SALT_T_PER_YEAR * cost_per_t
+    need("plant salt tonnes",
+         "**%s tonnes of salt a year" % thousands(CETP_SALT_T_PER_YEAR))
+    need("plant cost", "costing it around Rs %.2f crore**" % (plant_cost / 1e7))
+    for pct, label in ((3, "3%"), (10, "10%")):
+        need("plant saving %s" % label,
+             "Rs %s" % lakh(round(CETP_SALT_T_PER_YEAR * pct / 100
+                                  * cost_per_t, -4)))
+
+    # The plant fee has to stay a small share of the plant's own cost,
+    # or the "a manager can check this without trusting my model" claim
+    # stops being true.
+    _pf = PLANT_PLATFORM_INR / plant_cost * 100
+    if _pf > 4.0:
+        raise SystemExit(
+            "The plant platform fee is now %.1f%% of the plant's salt-driven "
+            "cost. Section 9 calls it about 1.6%%." % _pf)
+    need("plant fee pct", "about %.1f%% of it" % _pf)
+
+    need("platform fee", "| Treatment plant platform | Rs %s a year |"
+         % lakh(PLANT_PLATFORM_INR))
+    need("onboard fee", "| Treatment plant onboarding, once | Rs %s |"
+         % lakh(PLANT_ONBOARD_INR))
+    need("plant share", "| Share of the plant's verified reduction | %d%% |"
+         % round(PLANT_SHARE * 100))
+    need("factory fee", "| Member factory planner | Rs %d a lot, about Rs %s "
+         "a year |" % (FEE_PER_LOT, lakh(fee_year)))
+
     need("tirupur market",
-         "of the order of **Rs %d crore a year**"
-         % round(360 * full_share / 1e7, -1))
+         "%d treatment plants at about Rs %s a year is Rs %.1f crore, and "
+         "%d factories at Rs %s is Rs %.1f crore. Together of the order of "
+         "**Rs %.1f crore a year**"
+         % (N_CETPS, lakh(2000000), N_CETPS * 2000000 / 1e7,
+            N_UNITS, lakh(fee_year), N_UNITS * fee_year / 1e7,
+            (N_CETPS * 2000000 + N_UNITS * fee_year) / 1e7))
 
-    need("share", "| Share of verified saving | %d%% |"
-         % round(SHARE_OF_SAVING * 100))
-    need("setup cost", "| One-off setup | Rs %s per unit |" % lakh(SETUP_INR))
-
-    live = {1: 2, 2: 12, 3: 40}
-    new_units = {1: 2, 2: 10, 3: 28}
-    need("setup revenue row",
-         "| Setup revenue, new units only | Rs %s | Rs %s | Rs %s |"
-         % (lakh(new_units[1] * SETUP_INR), lakh(new_units[2] * SETUP_INR),
-            lakh(new_units[3] * SETUP_INR)))
-    need("share revenue row",
-         "| Share of verified saving, at Rs %s a unit | waived during pilot "
-         "| Rs %s | Rs %s |"
-         % (lakh(cautious), lakh(live[2] * cautious),
-            lakh(live[3] * cautious)))
+    # --- revenue projection -------------------------------------------
+    plants = {1: 0, 2: 1, 3: 3}
+    new_plants = {1: 0, 2: 1, 3: 2}
+    facts = {1: 2, 2: 10, 3: 30}
+    y2 = (plants[2] * PLANT_PLATFORM_INR + new_plants[2] * PLANT_ONBOARD_INR
+          + facts[2] * fee_year)
+    y3 = (plants[3] * PLANT_PLATFORM_INR + new_plants[3] * PLANT_ONBOARD_INR
+          + facts[3] * fee_year)
+    need("plants live row",
+         "| Treatment plants live | 0, pilot only | %d | %d |"
+         % (plants[2], plants[3]))
+    need("factories live row",
+         "| Member factories live | 2, pilot | %d | %d |"
+         % (facts[2], facts[3]))
+    need("platform fees row",
+         "| Plant platform fees | none | Rs %s | Rs %s |"
+         % (lakh(plants[2] * PLANT_PLATFORM_INR),
+            lakh(plants[3] * PLANT_PLATFORM_INR)))
+    need("onboarding row",
+         "| Plant onboarding, new plants only | none | Rs %s | Rs %s |"
+         % (lakh(new_plants[2] * PLANT_ONBOARD_INR),
+            lakh(new_plants[3] * PLANT_ONBOARD_INR)))
+    need("planner fees row",
+         "| Factory planner fees | waived during pilot | Rs %s | Rs %s |"
+         % (lakh(facts[2] * fee_year), lakh(facts[3] * fee_year)))
     need("revenue totals",
-         "| **Total revenue** | **Rs %s** | **Rs %s** | **Rs %s** |"
-         % (lakh(new_units[1] * SETUP_INR),
-            lakh(new_units[2] * SETUP_INR + live[2] * cautious),
-            lakh(new_units[3] * SETUP_INR + live[3] * cautious)))
+         "| **Total revenue** | **nil** | **Rs %s** | **Rs %s** |"
+         % (lakh(y2), lakh(y3)))
 
     per_site = 60000 + 50000 + 35000 + 15000 + 15000
     need("per site", "| **Per site** | **Rs %s** | |" % lakh(per_site))
