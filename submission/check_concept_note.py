@@ -18,6 +18,7 @@ quietly passing because a regex stopped matching.
 Runs in-process - no server needed - so it can go in CI.
 """
 import io
+import math
 import os
 import re
 import sys
@@ -27,7 +28,8 @@ ROOT = os.path.dirname(HERE)
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
-from core import factors, basin, plant, scenarios, economics   # noqa: E402
+from core import factors, basin, plant, policy, scenarios   # noqa: E402
+from core import economics                                   # noqa: E402
 from core import narrative, session as session_mod             # noqa: E402
 
 NOTE = os.path.join(HERE, "concept_note", "CONCEPT_NOTE.md")
@@ -178,6 +180,68 @@ def build_expectations():
     need("test count", "| Tests | %d," % fg["tests"])
     need("endpoint count", "| %d REST endpoints" % fg["endpoints"])
     need("closing test count", "with %d tests" % fg["tests"])
+
+    # --- switching prices ---------------------------------------------
+    pol = policy.policy_levers()
+    lv = {l["coefficient"]: l for l in pol["levers"]}
+
+    def money(key, fmt):
+        l = lv[key]
+        if l["status"] != "FOUND":
+            raise SystemExit(
+                "No switching price found for %s any more. The note quotes "
+                "one in a table and in prose; both must be rewritten, not "
+                "renumbered." % key)
+        return l
+
+    dye = money("low_salt_chemistry_cost_inr_per_kg_fabric", None)
+    steam = money("steam_cost_inr_per_kwh_th", None)
+    water = money("freshwater_cost_inr_per_m3", None)
+
+    # Quote each threshold on the side where the lever is actually
+    # bought - rounding a "rise to" figure down, or a "fall to" figure
+    # up, prints a price that does not flip the decision. The engine
+    # already rounds this way; the note has to agree with it.
+    def quoted(lever, dp):
+        scale = 10 ** dp
+        v = lever["switching_value"]
+        v = (math.ceil(v * scale) if lever["direction"] == "up"
+             else math.floor(v * scale)) / scale
+        return ("%%.%df" % dp) % v
+
+    need("dye premium row",
+         "| Low-salt dye premium | Rs %.2f/kg fabric | Rs %s/kg fabric | "
+         "**%.1f%%** |" % (dye["current_value"], quoted(dye, 2),
+                           dye["percent_change"]))
+    need("steam row",
+         "| Boiler steam cost | Rs %.2f/kWh thermal | Rs %s/kWh thermal "
+         "| +%.1f%% |" % (steam["current_value"], quoted(steam, 2),
+                          steam["percent_change"]))
+    need("water row",
+         "| Freshwater tariff | Rs %.0f/m3 | Rs %s/m3 | +%.0f%% |"
+         % (water["current_value"], quoted(water, 0),
+            water["percent_change"]))
+
+    if dye["coefficient"] != pol["smallest_move"]:
+        raise SystemExit(
+            "The dye premium is no longer the smallest move. The note says "
+            "it is, twice, and builds the procurement argument on it.")
+
+    carbon = pol["implied_carbon_price"]
+    need("carbon price",
+         "**Rs %s per tonne, about EUR %.0f**"
+         % (thousands(carbon["inr_per_tonne_co2e"]),
+            round(float(
+                carbon["benchmark"]["implied_price_eur_per_tonne"]
+                .split(" to ")[0]))))
+    need("steam increase",
+         "rise by Rs %.2f per kWh of heat"
+         % carbon["steam_increase_inr_per_kwh_th"])
+    need("boiler factor",
+         "emits %.3f kg of CO2e" % carbon["boiler_co2e_kg_per_kwh_th"])
+    bm = carbon["benchmark"]
+    need("eu benchmark",
+         "EUR %.2f a tonne on 5 October 2026" % bm["benchmark_eur_per_tonne"])
 
     # --- pilot --------------------------------------------------------
     need("pilot length", "32-week staged pilot")

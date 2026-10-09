@@ -186,9 +186,9 @@ A working system, publicly reachable, not a mockup.
 | | |
 |---|---|
 | Backend | Python standard library only — no framework, no install step |
-| API | 33 REST endpoints, every impact figure computed server side |
-| Tests | 163, covering physics, safety interlocks, concurrency and the UI |
-| Front end | Dependency-free; nine operating views |
+| API | 34 REST endpoints, every impact figure computed server side |
+| Tests | 178, covering physics, safety interlocks, concurrency, switching-price search and the UI |
+| Front end | Dependency-free; ten operating views |
 | Ledger | HMAC-SHA256 append-only hash chain, verified on every health check |
 
 ### What you can do in it
@@ -282,6 +282,37 @@ buying it, because the price signal does not reach the person deciding.** Price
 water and carbon properly and the same engine, unchanged, recommends the 47%
 plan. We did not hide this behind the better number.
 
+### What price would change the answer
+
+Saying "price water properly" is easy. The engine computes what that would
+actually take. It walks each price across a range, re-running the full
+optimiser at every step, and finds the first value at which a profit-seeking
+mill picks the 47% plan on its own account.
+
+| Price | Today | Switches at | Change needed |
+|---|---|---|---|
+| Low-salt dye premium | Rs 6.50/kg fabric | Rs 5.74/kg fabric | **-11.6%** |
+| Boiler steam cost | Rs 2.03/kWh thermal | Rs 3.13/kWh thermal | +53.9% |
+| Freshwater tariff | Rs 45/m3 | Rs 251/m3 | +457% |
+
+The dye premium needs to fall by under 12%. That is the distance between the
+plan the cluster runs today and a plan that cuts freshwater and evaporator
+steam nearly in half. It is a procurement question, not a research question.
+
+The steam lever converts straight into a carbon price. Steam would have to rise
+by Rs 1.09 per kWh of heat; delivering that heat emits 0.452 kg of CO2e; so the
+carbon price that produces the rise is **Rs 2,423 per tonne, about EUR 21**.
+
+The EU Emissions Trading System was charging EUR 82.40 a tonne on 5 October
+2026, roughly four times more. This abatement is not waiting on an unreachable
+price. It is waiting on any price at all.
+
+Two caveats travel with that figure and the system states both. It assumes the
+whole carbon cost reaches the mill as a higher steam price, which is the
+optimistic case; where it does not, the price needed is higher. And it is the
+level at which this particular decision flips in this modelled mill, not a
+proposal for what a carbon price should be.
+
 ### At cluster scale
 
 A linear projection across 400 units, 900 lots each per year. This is a
@@ -361,11 +392,13 @@ coefficient can see exactly what it is and what it changes. That is a faster
 route to credibility in an engineering community than any amount of
 marketing, and it invites the correction rather than defending against it.
 
-**Through the pricing argument.** The plant result generalises past one
-cluster: where a shared environmental resource is under-priced, individually
-rational decisions overload it, and the fix is a price rather than a
-schedule. That argument is aimed at regulators and tariff-setters, and it
-arrives with an engine behind it that anyone can re-run.
+**Through the pricing argument, with a number attached.** Where a shared
+environmental resource is under-priced, individually rational decisions
+overload it, and the fix is a price rather than a schedule. Most submissions
+stop at that sentence. This one names the price: about EUR 21 a tonne of CO2e,
+or a 12% fall in the dye premium. A tariff-setter can act on a number and
+cannot act on a principle, and the engine behind it is open for anyone to
+re-run.
 
 **Through being wrong in public.** This submission names its own largest gaps.
 That is a diffusion strategy as much as an honesty one — in a field full of
@@ -424,9 +457,39 @@ textile case has to be proven on a real site first.
 
 ---
 
+## Sources
+
+The authoritative, per-coefficient sourcing is not in this document. It is in
+the running system, where every one of the 25 coefficients carries its own
+source text and arithmetic and can be read without asking us:
+https://changeloop-water-intelligence.onrender.com/api/evidence
+
+That is deliberate. A bibliography in a concept note can drift from the model;
+a registry the model reads at runtime cannot.
+
+The external reading behind the figures quoted above:
+
+| Figure | Source |
+|---|---|
+| Grid emission factor, 0.705 kg CO2e/kWh | CO2 Baseline Database for the Indian Power Sector, Central Electricity Authority (cea.nic.in). The registry uses the version current at the time of writing. |
+| Carbon price benchmark, EUR 82.40/tonne, 5 October 2026 | European carbon prices, S&P Global Commodity Insights. A market price, so it goes stale; the system stores it with its date. |
+| Tirupur ZLD mandate, CETP capacity and water recovery | "Towards zero discharge", Down To Earth. |
+| Tirupur cluster effluent load and disposal practice | "Study of Tirupur textile industry cluster", India Water Portal. |
+| Inlet TDS of 18,340 mg/L; RO reject at 20-30% of inlet; MEE steam use of 0.25-0.35 kg steam per kg evaporated | Central Pollution Control Board assessment of textile dyeing units and ZLD at Tirupur. Quoted in full in the registry entry for each coefficient. |
+| Water and steam tariffs | Tamil Nadu Electricity Regulatory Commission tariff orders and Tamil Nadu pollution board plant data, as cited per coefficient in the registry. |
+| Latent heat of vaporisation, 0.62694 kWh/kg | Standard steam tables: 2,257 kJ/kg at 100 C and 1 atm, divided by 3,600. |
+| Evaporator section energy band, 150-250 kWh/m3 | EU Best Available Techniques reference document for the textiles industry, used only as an independent check and never as an input. |
+
+Where a source gives a range, the registry stores the range and the model takes
+a stated point inside it. Where public literature could not settle a figure, it
+is labelled ASSUMED rather than attributed to a source that does not say it.
+Four coefficients are in that state and all four are commercial prices.
+
+---
+
 ## Closing
 
-ChangeLoop is a working system, publicly reachable, with 163 tests, 25
+ChangeLoop is a working system, publicly reachable, with 178 tests, 25
 classified coefficients, external validation against CPCB measurements, and
 zero measured data — and it tells you that last part itself, in every view.
 
