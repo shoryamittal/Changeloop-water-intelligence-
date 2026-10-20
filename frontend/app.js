@@ -1098,8 +1098,12 @@ function vCommand() {
     : null;
 
   return phead('Command', 'Current resource state',
-    'Freshwater draw in a closed-loop plant equals what the evaporator ' +
-    'destroyed, and that is set by <strong>salt</strong> — not by water volume.',
+    /* The band directly below states the salt-not-water claim in full,
+       in the engine's own words. Saying it here too was the same
+       sentence twice, stacked. A page subtitle should say what the
+       screen is for. */
+    'This shift&rsquo;s draw, what it costs downstream, and the decision ' +
+    'waiting on it.',
     (o ? '<button class="btn btn-pri" data-go="decisions">Open decision</button>'
        : '<button class="btn btn-pri" data-act="optimise">Run optimiser</button>') +
     '<button class="btn" data-go="forecast">Forecast</button>'
