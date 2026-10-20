@@ -248,7 +248,7 @@ def plant_plan(site_id: str = DEFAULT_SITE,
         "machine_shifts_per_day": machines * shifts,
         "evaporator_capacity_m3_per_day": round(capacity_m3, 1),
         "capacity_basis": (
-            "The site's daily freshwater abstraction allowance of "
+            "It is the site's daily freshwater abstraction allowance, "
             "{:,.0f} L. In a closed loop the makeup water is the "
             "evaporative loss is the reject volume, so the same figure is "
             "both the abstraction limit and the volume the shared "

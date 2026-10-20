@@ -193,6 +193,12 @@ def build() -> dict:
              "share": _r(a.get("reported_vs_full_pct"))}
             for a in scenarios.ablation()["variants"]
         ],
+        # The water-only share only falls under scarcity pricing; under
+        # Normal it equals the full system. The deck quotes it with its mode.
+        "ablation_drought_water_only_share": _r(next(
+            a["reported_vs_full_pct"]
+            for a in scenarios.ablation(mode_id="DROUGHT")["variants"]
+            if a["variant"] == "no_zld_coupling")),
         "cluster": economics.cluster_projection(
             units=400, lots_per_unit_per_year=900,
             salt_avoided_per_lot_kg=12.5),

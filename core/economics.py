@@ -38,7 +38,11 @@ REQUIRED_INPUTS = [
 
 INPUT_HELP = {
     "lots_per_year": "Dye lots run per year on the machines in scope.",
-    "freshwater_avoided_per_lot_l": "From the ChangeLoop ledger for your own "
+    "freshwater_avoided_per_lot_l": "Process water avoided per lot: rinse and "
+                                    "cleaning water no longer drawn. In a "
+                                    "closed loop it displaces recycled "
+                                    "water, so it is priced at that rate. "
+                                    "From the ChangeLoop ledger for your own "
                                     "order book, or from a pilot.",
     "salt_avoided_per_lot_kg": "Electrolyte and cleaning chemical avoided per "
                                "lot. This is what drives the evaporator "
@@ -55,6 +59,55 @@ INPUT_HELP = {
     "annual_subscription_inr": "Annual ChangeLoop licence for the machines in "
                                "scope.",
 }
+
+# Optional, because a plan that only re-orders lots has no running cost.
+# A plan that also changes the process does: counter-current rinsing costs
+# pumping and tank turnover, low-salt dye costs a premium. Leaving it out
+# overstates the saving, which is the one error this calculator must not
+# make.
+OPTIONAL_INPUTS = {
+    "process_cost_per_lot_inr": "Running cost per lot of the process change "
+                                "the plan adopts. Zero if it only re-orders "
+                                "lots.",
+}
+
+
+def reference_inputs(optimisation: Dict[str, Any],
+                     lot_count: int) -> Dict[str, Any]:
+    """Per-lot figures from the engine's own recommended plan.
+
+    Offered as a worked example the user overwrites, never as a result:
+    the calculator still computes only from whatever is submitted.
+    """
+    out: Dict[str, Any] = {
+        "lots_per_year": 5000,
+        "freshwater_cost_inr_per_m3": factors.get("freshwater_cost_inr_per_m3"),
+        "recycled_water_cost_inr_per_m3": factors.get(
+            "recycled_water_cost_inr_per_m3"),
+        "steam_cost_inr_per_kwh_th": factors.get("steam_cost_inr_per_kwh_th"),
+        "salt_cost_inr_per_kg": factors.get("salt_cost_inr_per_kg"),
+        "implementation_cost_inr": 0,
+        "annual_subscription_inr": 15 * 5000,
+    }
+    opts = {o["option_id"]: o
+            for o in (optimisation or {}).get("options", [])}
+    a, b = opts.get("OPTION_A"), opts.get("OPTION_B")
+    n = max(1, int(lot_count))
+    if a and b:
+        def demand(o):
+            return o["freshwater_intake_l"] + o["permeate_reuse_l"]
+        out["freshwater_avoided_per_lot_l"] = round(
+            (demand(a) - demand(b)) / n, 1)
+        out["salt_avoided_per_lot_kg"] = round(
+            b["delta_vs_baseline"]["salt_kg"] / n, 2)
+        out["process_cost_per_lot_inr"] = round(
+            (b["strategy_cost_inr"] - a["strategy_cost_inr"]) / n, 1)
+    out["basis"] = (
+        "Per-lot figures from this shift's recommended plan; tariffs from "
+        "the coefficient registry; 5,000 lots a year and Rs 15 a lot, as in "
+        "the concept note. No factory setup fee: onboarding is charged to "
+        "the treatment plant. Replace every figure with your own.")
+    return out
 
 
 def business_case(body: Dict[str, Any]) -> Dict[str, Any]:
@@ -115,19 +168,37 @@ def business_case(body: Dict[str, Any]) -> Dict[str, Any]:
                         * factors.get("rinse_delta_t_k"))
 
     # --- benefit lines, each priced once ------------------------------
-    # In a closed-loop plant the avoided litre displaces the RECYCLED litre,
-    # which is the expensive one. Pricing it at the freshwater rate would
-    # understate the saving roughly threefold.
-    water_benefit = (water_l / 1000.0) * vals["recycled_water_cost_inr_per_m3"]
+    # The avoided demand is met from two sources at two prices. The fresh
+    # makeup is the water the evaporator boiled off, so the fresh share of
+    # the saving equals the reject avoided - set by salt, as everywhere
+    # else. Everything else the plant no longer draws is recycled permeate,
+    # the expensive litre someone paid to treat.
+    fresh_l = min(water_l, reject_avoided_l)
+    recycled_l = water_l - fresh_l
+    fresh_benefit = (fresh_l / 1000.0) * vals["freshwater_cost_inr_per_m3"]
+    water_benefit = ((recycled_l / 1000.0)
+                     * vals["recycled_water_cost_inr_per_m3"])
     salt_benefit = salt_kg * vals["salt_cost_inr_per_kg"]
     mee_benefit = mee_kwh_avoided * vals["steam_cost_inr_per_kwh_th"]
     heat_benefit = heat_kwh_avoided * vals["steam_cost_inr_per_kwh_th"]
     mee_opex_benefit = ((reject_avoided_l / 1000.0)
                         * factors.get("mee_opex_inr_per_m3_reject"))
 
-    gross = (water_benefit + salt_benefit + mee_benefit + heat_benefit
-             + mee_opex_benefit)
-    net = gross - vals["annual_subscription_inr"]
+    gross = (fresh_benefit + water_benefit + salt_benefit + mee_benefit
+             + heat_benefit + mee_opex_benefit)
+    try:
+        per_lot_cost = float(body.get("process_cost_per_lot_inr", 0) or 0)
+    except (TypeError, ValueError):
+        per_lot_cost = -1.0
+    if not math.isfinite(per_lot_cost) or per_lot_cost < 0:
+        return {
+            "status": "INVALID_INPUT",
+            "invalid": ["process_cost_per_lot_inr"],
+            "notice": "Every input must be a finite, non-negative number.",
+        }
+    process_cost = n * per_lot_cost
+
+    net = gross - process_cost - vals["annual_subscription_inr"]
     capex = vals["implementation_cost_inr"]
 
     payback_years = None if net <= 0 else round(capex / net, 2)
@@ -139,7 +210,7 @@ def business_case(body: Dict[str, Any]) -> Dict[str, Any]:
     for label, fac in (("Conservative", 0.6), ("Base", 1.0),
                        ("Optimistic", 1.3)):
         g = gross * fac
-        nt = g - vals["annual_subscription_inr"]
+        nt = g - process_cost - vals["annual_subscription_inr"]
         scenarios.append({
             "scenario": label,
             "benefit_factor": fac,
@@ -150,9 +221,10 @@ def business_case(body: Dict[str, Any]) -> Dict[str, Any]:
 
     return {
         "status": "CALCULATED",
-        "inputs": vals,
+        "inputs": dict(vals, process_cost_per_lot_inr=per_lot_cost),
         "annual_quantities": {
-            "freshwater_avoided_m3": round(water_l / 1000.0, 2),
+            "process_water_avoided_m3": round(water_l / 1000.0, 2),
+            "freshwater_avoided_m3": round(fresh_l / 1000.0, 2),
             "salt_avoided_kg": round(salt_kg, 1),
             "ro_reject_avoided_m3": round(reject_avoided_l / 1000.0, 2),
             "evaporator_steam_avoided_kwh_th": round(mee_kwh_avoided, 1),
@@ -160,12 +232,14 @@ def business_case(body: Dict[str, Any]) -> Dict[str, Any]:
         },
         "benefit_breakdown_inr": {
             "water_displaced_at_recycled_rate": round(water_benefit, 2),
+            "freshwater_makeup": round(fresh_benefit, 2),
             "electrolyte_and_chemical": round(salt_benefit, 2),
             "evaporator_steam": round(mee_benefit, 2),
             "dyehouse_heating": round(heat_benefit, 2),
             "evaporator_non_energy_opex": round(mee_opex_benefit, 2),
         },
         "annual_gross_benefit_inr": round(gross, 2),
+        "annual_process_cost_inr": round(process_cost, 2),
         "annual_subscription_inr": vals["annual_subscription_inr"],
         "annual_net_benefit_inr": round(net, 2),
         "implementation_cost_inr": capex,

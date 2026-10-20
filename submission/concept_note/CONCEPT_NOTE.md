@@ -30,7 +30,7 @@ What I can show, and what I cannot:
 | | |
 |---|---|
 | The physics holds up | I fed it the water strength that CPCB measured at a real Tirupur factory. It predicted 30.6% reject. Indian plants report 20 to 30%. I did not tune it to land there. |
-| The tool works | 34 API endpoints, 180 tests, 25 input numbers each labelled with where it came from, and a tamper-proof record of every decision. |
+| The tool works | 34 API endpoints, 190 tests, 25 input numbers each labelled with where it came from, and a tamper-proof record of every decision. |
 | It found something I did not expect | The better plan is blocked by a small price gap, not by technology. About 12% off the price of low-salt dye would be enough. |
 | Nothing has been measured | No sensor on any real factory has ever fed this system. A test checks that I never quietly claim otherwise. |
 
@@ -202,7 +202,7 @@ screenshots.
 |---|---|
 | Backend | Plain Python, no framework, nothing to install |
 | API | 34 endpoints. Every saving is worked out on the server, so the browser cannot claim one |
-| Tests | 180, covering the physics, the safety rules, concurrency and the interface |
+| Tests | 190, covering the physics, the safety rules, concurrency and the interface |
 | Front end | No libraries. Ten screens |
 | Record of decisions | A chained hash of every entry, re-checked on every health check. It is not a blockchain and the system says so |
 
@@ -328,7 +328,7 @@ my four assumed coefficients, so the 12% is a computed result on an assumed
 input. And it is computed against a coal-based steam price: where steam is a
 quarter cheaper, the premium would need to fall about 17% instead.
 
-The steam row turns into a carbon price. Steam would need to go up Rs 1.09 per
+The steam row turns into a carbon price. Steam would need to go up Rs 1.095 per
 kWh of heat. Making that heat gives off 0.452 kg of CO2. Divide one by the
 other and you get **Rs 2,423 a tonne, about 21 euro**.
 
@@ -584,7 +584,7 @@ it. Four numbers are in that state and all four are commercial prices.
 
 ## Closing
 
-ChangeLoop is a working system anyone can open, with 180 tests, 25 labelled
+ChangeLoop is a working system anyone can open, with 190 tests, 25 labelled
 input numbers, a check against CPCB measurements, and no measured data at all.
 It tells you that last part itself, on every screen.
 

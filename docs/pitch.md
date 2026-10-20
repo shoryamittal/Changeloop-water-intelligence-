@@ -82,7 +82,7 @@ you say.
 | **1:50–2:05** | **2 Decision** | Click **Approve recommendation** | "Approve. Recorded against a named planner. If I reject it instead, it credits exactly zero and the rejection is on the record too." |
 | **2:05–2:30** | **3 Wash-off gate** | Click **Calibration drift**, then **Attempt release** | "Second decision: fixed-time wash-off wastes the tail. But get it wrong and the lot is re-processed, which costs more water than you saved. So — inject a probe fault. Gate locks. I try to release anyway. **Refused**, at the gate and at the API, and the refusal is written to the ledger. It never releases automatically." |
 | **2:30–2:45** | **3**, then **4 Consequence** | Click **No fault**, **Grant early release**, go to 4 | "Clean run, release granted. Now the chain: dyehouse, effluent, RO split, reject to the evaporator, coal, and freshwater back from the basin. Eight accounting invariants, all passing. Click any number and it tells you its formula and its coefficients." |
-| **2:45–2:55** | **8 Scale & proof** | Scroll to the ablation table | "We ablate our own system. A scheduler that optimises dyehouse water alone captures **13 percent** of the benefit. And two variants over-report their savings — we label that, because over-reporting is the defect." |
+| **2:45–2:55** | **8 Scale & proof** | Set the constraint to Carbon priority, then scroll to the ablation table | "We ablate our own system. Once carbon is priced, a scheduler that optimises dyehouse water alone captures **13 percent** of the benefit. And two variants over-report their savings — we label that, because over-reporting is the defect." |
 | **2:55–3:00** | **5 Evidence** | Land on the registry | "Nothing here is measured. Five published values, two derived, thirteen assumed, zero measured — a test enforces that. Zero Liquid Discharge gave India back its water. Nobody costed the coal. That's the decision we change." |
 
 ### Demo runbook
@@ -123,7 +123,7 @@ you say.
 | 5 | ChangeLoop: the decision layer | the consequence-chain diagram |
 | 6 | Two levers that pull opposite ways | counter-current vs low-salt table; why a water dashboard picks wrong |
 | 7 | The decision, live | the three-option table, with Option C refused |
-| 8 | We ablate our own system | 13% table; over-reporting flagged; basin weighting honestly inert at one site |
+| 8 | We ablate our own system | 13% table under Carbon priority; over-reporting flagged; basin weighting honestly inert at one site |
 | 9 | Pilot, business model, cluster scale | 6 phases with exit and stop conditions; CETP as channel; the projection, labelled |
 | 10 | What is modelled, and the hook | evidence mix 5/2/13/0; closing line |
 

@@ -68,13 +68,15 @@ LEVERS: Dict[str, Dict[str, Any]] = {
     "steam_cost_inr_per_kwh_th": {
         "direction": "up",
         "limit": 30.0,
+        "short": "the steam price",
         "question": "How much more would steam have to cost?",
-        "policy_instrument": "A carbon price on coal, or any fuel cost "
+        "policy_instrument": "A carbon price on boiler fuel, or any fuel cost "
                              "increase that reaches the boiler.",
     },
     "freshwater_cost_inr_per_m3": {
         "direction": "up",
         "limit": 3000.0,
+        "short": "the freshwater price",
         "question": "How much more would freshwater have to cost?",
         "policy_instrument": "A groundwater abstraction tariff, or "
                              "scarcity pricing in a stressed basin.",
@@ -82,6 +84,7 @@ LEVERS: Dict[str, Dict[str, Any]] = {
     "low_salt_chemistry_cost_inr_per_kg_fabric": {
         "direction": "down",
         "limit": 0.0,
+        "short": "the low-salt dye premium",
         "question": "How far would the low-salt dye premium have to fall?",
         "policy_instrument": "Market maturity, volume procurement, or a "
                              "subsidy on low-electrolyte chemistry.",
@@ -235,6 +238,10 @@ def switching_point(key: str,
     result.update({
         "status": "FOUND",
         "switching_value": crossing,
+        # What a reader sees. Rounded on the same side as the crossing, so
+        # a quoted price is never one that leaves the decision unchanged:
+        # 5.748 shows as 5.74, not 5.75; 3.125 as 3.13, not 3.12.
+        "switching_value_display": _display(crossing, spec["direction"]),
         "absolute_change": round(change, 3),
         "multiple_of_today": (round(crossing / current, 2)
                               if current else None),
@@ -244,7 +251,8 @@ def switching_point(key: str,
         "strategy_after": after["strategy_id"] if after else None,
         "plan_after": _plan_summary(after),
         "plan_before": _plan_summary(before),
-        "reading": _lever_reading(f, current, crossing, spec, after),
+        "reading": _lever_reading(f, current, crossing, spec, after,
+                                  before),
     })
     return result
 
@@ -301,21 +309,31 @@ def _fmt(v: float) -> str:
     return ("%.2f" % v).rstrip("0").rstrip(".")
 
 
-def _lever_reading(f, current, crossing, spec, after) -> str:
+def _display(value: float, direction: str) -> float:
+    """Two places (none above 100), rounded past the crossing."""
+    return _round_past(value, direction, 0 if abs(value) >= 100 else 2)
+
+
+def _lever_reading(f, current, crossing, spec, after, before=None) -> str:
     verb = "rise" if spec["direction"] == "up" else "fall"
     tail = ""
     if after:
         d = after["delta_vs_baseline"]
+        # today's figures come from today's plan, never typed in: they
+        # differ by site and by binding constraint
+        now = (before or {}).get("delta_vs_baseline") or {}
         tail = (" At that point the recommended plan avoids "
                 "{:,.0f} L of freshwater and {:,.0f} kWh of evaporator "
-                "steam a shift, against {} and {} today."
+                "steam a shift, against {:,.0f} L and {:,.0f} kWh today."
                 .format(d["freshwater_l"], d["mee_thermal_kwh"],
-                        "720 L", "135 kWh"))
+                        now.get("freshwater_l", 0.0),
+                        now.get("mee_thermal_kwh", 0.0)))
     return ("{label} would have to {verb} from {a} to {b} {unit} before a "
             "profit-seeking mill chooses the salt-reducing plan on its own "
             "account.{tail}".format(
                 label=f.label, verb=verb, a=_fmt(current),
-                b=_fmt(crossing), unit=f.unit, tail=tail))
+                b=_fmt(_display(crossing, spec["direction"])), unit=f.unit,
+                tail=tail))
 
 
 def implied_carbon_price(steam_lever: Dict[str, Any]) -> Dict[str, Any]:
@@ -350,7 +368,8 @@ def implied_carbon_price(steam_lever: Dict[str, Any]) -> Dict[str, Any]:
         "inr_per_tonne_co2e": round(per_tonne, 0),
         "arithmetic": ("{d} INR/kWh_th / {e} kg CO2e/kWh_th = {k} INR/kg "
                        "= {t:,.0f} INR/tonne CO2e"
-                       .format(d=_fmt(delta), e=e, k=round(per_kg, 3),
+                       .format(d="%.3f" % round(delta, 3), e=e,
+                               k=round(per_kg, 3),
                                t=per_tonne)),
         "what_it_assumes": (
             "That the entire carbon cost reaches the mill as a higher "
@@ -479,9 +498,11 @@ def _overall_reading(levers, carbon, cheapest) -> str:
             "A carbon price of about INR {t:,.0f} per tonne of CO2e, "
             "passed through to steam, is enough to flip it."
             .format(t=carbon["inr_per_tonne_co2e"]))
+    short = LEVERS.get(cheapest.get("coefficient"), {}).get(
+        "short", cheapest["label"].lower())
     parts.append(
-        "Of the three levers tested, {} needs the smallest move."
-        .format(cheapest["label"].lower()))
+        "Of the three prices tested, {} needs the smallest move."
+        .format(short))
     parts.append(
         "That is the whole argument for pricing in one number: the "
         "cheaper abatement already exists, and nobody buys it because "

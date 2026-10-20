@@ -228,7 +228,7 @@ pres.addSection({ title: 'Opening' });
     align: 'left', valign: 'top', lineSpacing: 44,
     objectName: 'title-hook' });
   s.addText([
-    { text: 'A scheduling choice this morning sets how much coal the evaporator burns tonight. ', options: { bold: true, color: 'FFFFFF' } },
+    { text: 'A scheduling choice this morning sets how much fuel the evaporator burns tonight. ', options: { bold: true, color: 'FFFFFF' } },
     { text: 'India already recycles its industrial water under Zero Liquid Discharge. Nobody has costed the energy it takes to keep doing so — and that cost is decided upstream, by a planner who never sees the evaporator.' }
   ], { placeholder: 'body', y: 4.78, h: 1.3 });
 
@@ -240,7 +240,7 @@ pres.addSection({ title: 'Opening' });
     value: '+25 to 30%', label: 'what that compliance costs', key: 'b' });
   stat(s, { x: M + 7.8, y: 5.75, w: 4, dark: true, size: 30, color: 'EF8373',
     value: '700 units', label: 'shut by court order in 2011', key: 'c' });
-  s.addNotes('Say the title sentence out loud, then pause. In February 2011 the Madras High Court shut around 700 dyeing units in Tirupur, on a contempt petition from the farmers whose river they had been discharging into. Exports fell about a thousand crore in a quarter. The cluster rebuilt and now recycles 130 million litres a day, which worked, and raised operating costs 25 to 30 percent. Nobody has costed the coal. Job-loss estimates for 2011 range from 15,000 by the exporters association to 200,000 in press reporting, so do not quote a single figure - say tens of thousands if asked.');
+  s.addNotes('Say the title sentence out loud, then pause. In February 2011 the Madras High Court shut around 700 dyeing units in Tirupur, on a contempt petition from the farmers whose river they had been discharging into. Exports fell about a thousand crore in a quarter. The cluster rebuilt and now recycles 130 million litres a day, which worked, and raised operating costs 25 to 30 percent. Nobody has costed the fuel. Job-loss estimates for 2011 range from 15,000 by the exporters association to 200,000 in press reporting, so do not quote a single figure - say tens of thousands if asked.');
 }
 
 /* ==========================================================================
@@ -416,7 +416,7 @@ pres.addSection({ title: 'Insight' });
     fontSize: 22, bold: true, color: '6EC4D6', fontFace: 'Courier New',
     valign: 'middle', objectName: 'formula-t'
   });
-  s.addText('Reject volume — and therefore evaporator steam, coal and CO₂ — is set by SALT MASS, not by water volume.', {
+  s.addText('Reject volume — and therefore evaporator steam, fuel and CO₂ — is set by SALT MASS, not by water volume.', {
     isTextBox: true, x: M, y: 3.65, w: 5.6, h: 0.9, margin: 0,
     fontSize: 14, color: 'E3EDEF', valign: 'top', objectName: 'formula-x'
   });
@@ -779,6 +779,10 @@ pres.addSection({ title: 'Impact' });
     { placeholder: 'body' });
 
   const I = F.impact;
+  // derived, never typed: the typed ones drifted when the ledger changed
+  const down = (av, base) => (av / base * 100).toFixed(1) + '%';
+  const coDown = down(I.co2_av, I.co2_base), costDown = down(I.cost_av, I.cost_base),
+        freshDown = down(I.fresh_av, I.fresh_base);
   stat(s, { x: M, y: 2.55, w: 2.7, value: n0(I.fresh_av) + ' L', size: 34,
     label: 'freshwater avoided', key: 'i1',
     note: n0(I.leq) + ' L-eq stress weighted, in a basin\nwith no dry-weather flow' });
@@ -789,8 +793,8 @@ pres.addSection({ title: 'Impact' });
     color: 'C2410C', label: 'evaporator steam avoided', key: 'i3',
     note: 'thermal, at the\ncommon treatment plant' });
   stat(s, { x: M + 8.85, y: 2.55, w: 2.95, value: n0(I.co2_av) + ' kg', size: 34,
-    color: '5B5470', label: 'CO₂e avoided, down 30.6%', key: 'i4',
-    note: inr(I.cost_av) + ' saved per shift,\ndown 28.7%' });
+    color: '5B5470', label: 'CO₂e avoided, down ' + coDown, key: 'i4',
+    note: inr(I.cost_av) + ' saved per shift,\ndown ' + costDown });
 
   s.addShape(pres.ShapeType.line, {
     x: M, y: 4.55, w: 11.8, h: 0, line: { color: 'DCE7E9', width: 1 },
@@ -827,7 +831,7 @@ pres.addSection({ title: 'Impact' });
     isTextBox: true, x: M + 6.5, y: 5.36, w: 5.0, h: 1.05, margin: 0,
     fontSize: 12, color: '5E4A1C', valign: 'top', objectName: 'h-b'
   });
-  s.addNotes('Our per-shift numbers are modest and we present them that way deliberately. A modest figure that survives scrutiny is worth more to us than an impressive one we cannot defend. Note freshwater falls 8.8 percent while cost falls 28.7 and carbon 30.6, because basin draw tracks salt while cost and carbon also pick up the rinse-water heat.');
+  s.addNotes('Our per-shift numbers are modest and we present them that way deliberately. A modest figure that survives scrutiny is worth more to us than an impressive one we cannot defend. Note freshwater falls ' + freshDown + ' while cost falls ' + costDown + ' and carbon ' + coDown + ', because basin draw tracks salt while cost and carbon also pick up the rinse-water heat.');
 }
 
 /* ==========================================================================
@@ -837,7 +841,7 @@ pres.addSection({ title: 'Impact' });
   const s = pres.addSlide({ masterName: 'CONTENT', sectionTitle: 'Impact' });
   s.addText('PROOF, NOT ASSERTION', { placeholder: 'eyebrow' });
   s.addText('We remove our own layers and publish what breaks', { placeholder: 'title' });
-  s.addText('Reproducible from the product’s own API. A scheduler that optimises dyehouse water alone captures 13 percent of the available benefit.',
+  s.addText('Reproducible from the product’s own API. At today’s prices, the layers that bind are the salt model and the ship-date rules. Price water scarcity and a scheduler that optimises dyehouse water alone captures ' + Math.round(F.ablation_drought_water_only_share) + ' percent of the available benefit.',
     { placeholder: 'body' });
 
   const AB = F.ablation;
@@ -1185,7 +1189,7 @@ pres.addSection({ title: 'Team' });
     fontSize: 12, color: 'B7CBD0', valign: 'top', objectName: 'ask'
   });
 
-  s.addText('Zero Liquid Discharge gave India back its water. Nobody costed the coal it takes to keep it — and that cost is decided by a scheduling choice nobody connects to it.', {
+  s.addText('Zero Liquid Discharge gave India back its water. Nobody costed the fuel it takes to keep it — and that cost is decided by a scheduling choice nobody connects to it.', {
     isTextBox: true, x: M, y: 6.62, w: 11.8, h: 0.52, margin: 0,
     fontSize: 15, bold: true, italic: true, color: 'FFFFFF', valign: 'top',
     objectName: 'hook'

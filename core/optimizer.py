@@ -374,6 +374,14 @@ def optimise(lots: List[DyeLot],
                                          - cw["zld"]["mee_thermal_kwh"], 1),
                 "co2e_kg": round(bw["carbon"]["total_co2e_kg"]
                                  - cw["carbon"]["total_co2e_kg"], 2),
+                "mee_co2e_kg": round(bw["carbon"]["mee_thermal_co2e_kg"]
+                                     - cw["carbon"]["mee_thermal_co2e_kg"], 2),
+                "dyehouse_thermal_kwh": round(
+                    bw["energy"]["dyehouse_thermal_kwh"]
+                    - cw["energy"]["dyehouse_thermal_kwh"], 1),
+                "dyehouse_co2e_kg": round(
+                    bw["carbon"]["dyehouse_thermal_co2e_kg"]
+                    - cw["carbon"]["dyehouse_thermal_co2e_kg"], 2),
                 "cost_inr": round(base_total - cand_total, 2),
                 "lateness_h": round(cand.sequence["total_late_h"]
                                     - baseline.sequence["total_late_h"], 2),
@@ -465,11 +473,21 @@ def _build_rationale(baseline: Candidate,
             "duty - a water saving alone would not."
             .format(delta["salt_kg"]))
 
+    # Carbon is reported by where it comes from. Most of it is usually the
+    # dyehouse heating less rinse water, not the evaporator - saying
+    # otherwise would contradict the finding this product rests on.
     if delta["mee_thermal_kwh"] > 0:
         reasons.append(
-            "Cuts {:,.0f} kWh of evaporator steam, avoiding {:,.0f} kg CO2e "
-            "at the boiler."
-            .format(delta["mee_thermal_kwh"], delta["co2e_kg"]))
+            "Cuts {:,.0f} kWh of evaporator steam, avoiding {:,.0f} kg CO2e. "
+            "This part follows the salt."
+            .format(delta["mee_thermal_kwh"], delta.get("mee_co2e_kg", 0.0)))
+    if delta.get("dyehouse_thermal_kwh", 0.0) > 0:
+        reasons.append(
+            "Heats less rinse and cleaning water in the dyehouse: {:,.0f} kWh "
+            "of boiler steam and {:,.0f} kg CO2e. This part follows the "
+            "water. Total carbon avoided: {:,.0f} kg CO2e."
+            .format(delta["dyehouse_thermal_kwh"],
+                    delta["dyehouse_co2e_kg"], delta["co2e_kg"]))
 
     if delta["freshwater_l"] > 0:
         reasons.append(

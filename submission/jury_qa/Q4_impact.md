@@ -11,7 +11,7 @@ more to me than a large one I cannot.
 
 On one machine, one shift, five lots, with both human decisions approved, the
 model credits 1,044 litres of fresh water avoided, 62.7 kg of salt kept out of
-the effluent, 196 kWh of evaporator heat not burned, and about ₹10,171 of cost
+the effluent, 196 kWh of evaporator heat not burned, and ₹9,709 of cost
 avoided. Every delivery still goes out on time.
 
 That comes from two separate decisions. One is choosing a better plan at the
@@ -82,7 +82,7 @@ the payback threshold for the chemistry switch actually sits.
 | Freshwater avoided, one shift | 1,044.2 L | `figures.json` → `impact.fresh_av` |
 | Salt avoided, one shift | 62.65 kg | `impact.salt_av` |
 | Evaporator heat avoided, one shift | 196.4 kWh | `impact.mee_av` |
-| Cost avoided, one shift | ₹10,171 | `impact.cost_av` |
+| Cost avoided, one shift | ₹9,709 | `impact.cost_av` |
 | Deliveries late in recommended plan | 0 | `options.OPTION_B.late` |
 | Annualisation assumption | 2 shifts/day × 300 days = 600 | stated assumption, not measured |
 | Annual, one machine | ~627,000 L, 37.6 t, 118 MWh | 600 × the per-shift figures |

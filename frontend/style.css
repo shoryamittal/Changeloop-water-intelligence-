@@ -30,9 +30,9 @@
 
   /* --- ink ------------------------------------------------------------- */
   --graphite:     #1e2927;
-  --slate:        #55635f;
-  --slate-2:      #65726f;
-  --slate-3:      #6d7774;
+  --slate:        #4a5753;
+  --slate-2:      #525f5b;
+  --slate-3:      #5a6662;
 
   /* --- structure: hairlines, never borders ---------------------------- */
   --hair:         #dfe4e2;
@@ -755,6 +755,13 @@ dl.defs dd { margin: 0; font-size: var(--t-small); line-height: 1.5; }
 .vz-val   { font-family: var(--mono); font-size: 11.5px; fill: var(--graphite); font-variant-numeric: tabular-nums; }
 .vz-val-l { font-family: var(--mono); font-size: 15px; fill: var(--graphite); font-variant-numeric: tabular-nums; }
 .vz-unit  { font-family: var(--mono); font-size: 8.5px; fill: var(--slate-3); }
+/* Labels that sit on a stream get a halo in the page colour, so the
+   ticks underneath never cut through the words. */
+.flow-viz .vz-lbl, .flow-viz .vz-lbl-k, .flow-viz .vz-val {
+  paint-order: stroke; stroke: var(--pearl); stroke-width: 4px;
+  stroke-linejoin: round;
+}
+.flow-viz .vz-unit { paint-order: stroke; stroke: var(--pearl); stroke-width: 3px; }
 
 /* nodes: thin technical geometry */
 .vz-node     { fill: var(--surface); stroke: var(--hair-2); stroke-width: 1; }
@@ -1548,20 +1555,25 @@ body { overflow-x: hidden; }
   outline-offset: 2px;
   border-radius: var(--r);
 }
+/* The page heading takes focus on a view change so a screen reader
+   announces it; it is not a control, so it draws no ring. */
+#view h1[tabindex="-1"]:focus { outline: none; }
 
 /* --- impact strip before any approval --------------------------------
    The zeros are correct and must stay visible, but they should not be
    the loudest thing on the page when the real message is that nobody
    has approved anything yet.
    -------------------------------------------------------------------- */
-.strip-pending .readout-v { opacity: .34; }
-.strip-pending .readout-k,
-.strip-pending .readout-f { opacity: .62; }
+/* Dimmed by colour, not opacity. Opacity took the labels to 2.3:1,
+   below the 4.5:1 that small text needs; the figures are large type,
+   which needs 3:1, and the hair-3 grey keeps them clearly secondary. */
+.strip-pending .readout-v,
+.strip-pending .readout-v .u { color: var(--slate-3); }
 .pending-note {
   margin-top: var(--s3); font-size: var(--t-small); line-height: 1.55;
   color: var(--slate); max-width: var(--measure);
   border-left: 2px solid var(--hair-2); padding-left: var(--s3);
 }
 @media (prefers-reduced-motion: no-preference) {
-  .strip-pending .readout-v { transition: opacity var(--m-slow) var(--ease); }
+  .strip-pending .readout-v { transition: color var(--m-slow) var(--ease); }
 }

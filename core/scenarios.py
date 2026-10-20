@@ -556,14 +556,17 @@ def _ablation_locked(site_id: str, mode_id: str) -> Dict[str, Any]:
         v["overstates"] = bool(full_fresh and f > full_fresh + 0.5
                                and v["variant"] != "full")
         if v["overstates"]:
-            v["overstatement_note"] = (
-                "This variant REPORTS a larger saving than the full system "
-                "while actually delivering less or breaching a constraint. "
-                "Over-reporting is the defect: a water-only ZLD model "
-                "mis-states how much freshwater a plan really avoids, and an "
-                "unconstrained optimiser books a saving from a plan nobody "
-                "would run."
-            )
+            # Say why THIS variant over-reports; one generic sentence under
+            # every row explained neither.
+            if v.get("firm_breaches"):
+                v["overstatement_note"] = (
+                    "Over-reports by breaching a firm ship date: the saving "
+                    "comes from a plan no planner would run.")
+            else:
+                v["overstatement_note"] = (
+                    "Over-reports: it treats reject as a fixed share of "
+                    "flow, so it credits freshwater the closed loop still "
+                    "has to make up.")
         # Does this layer bind in THIS mode? A layer binds if removing
         # it changes the plan or produces a constraint breach.
         if v["variant"] == "full":

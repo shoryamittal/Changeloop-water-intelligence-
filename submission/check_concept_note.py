@@ -310,7 +310,7 @@ def build_expectations():
                 carbon["benchmark"]["implied_price_eur_per_tonne"]
                 .split(" to ")[0]))))
     need("steam increase",
-         "go up Rs %.2f per kWh of heat"
+         "go up Rs %.3f per kWh of heat"
          % carbon["steam_increase_inr_per_kwh_th"])
     need("boiler factor",
          "gives off %.3f kg of CO2" % carbon["boiler_co2e_kg_per_kwh_th"])
@@ -657,7 +657,7 @@ def habit_expectations():
 
     carbon = pol["implied_carbon_price"]
     need("steam increase",
-         "rise Rs %.2f" % carbon["steam_increase_inr_per_kwh_th"])
+         "rise Rs %.3f" % carbon["steam_increase_inr_per_kwh_th"])
     need("boiler factor",
          "gives off %.3f kg of CO2" % carbon["boiler_co2e_kg_per_kwh_th"])
     need("carbon price",

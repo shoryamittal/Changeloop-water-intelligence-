@@ -39,7 +39,7 @@ instead of releasing, and credits zero saving.
 
 I tested it three ways.
 
-**Automated tests.** 180 of them, covering the calculations, the accounting
+**Automated tests.** 190 of them, covering the calculations, the accounting
 invariants, the safety interlocks, record integrity, fault behaviour and
 concurrency.
 
@@ -47,9 +47,10 @@ concurrency.
 measured 18,340 mg/L of dissolved solids entering evaporation at a Tirupur unit.
 Separately, operators report reject running at 20 to 30 percent of inlet volume.
 Those two facts come from different places and neither is an input to my engine.
-When I feed in the first, the model predicts 30.6 percent, which is inside the
-reported band. At 12,000 mg/L it gives exactly 20.0 percent, and at 15,000 it
-gives 25.0. Nothing was adjusted to make that line up.
+When I feed in the first, the model predicts 30.6 percent, just above the top
+of a band that is quoted to the nearest ten. At 12,000 mg/L it gives exactly
+20.0 percent, and at 15,000 it gives 25.0. Nothing was adjusted to make that
+line up.
 
 > It is a sanity check against published operating data. It is not field
 > validation, and I would not describe it as one.
@@ -90,7 +91,7 @@ rather than for a scoreboard.
 
 | Claim | Value | Where to verify |
 |---|---|---|
-| Automated tests | 180 | `python -m pytest tests/ -q` |
+| Automated tests | 190 | `python -m pytest tests/ -q` |
 | Candidate plans evaluated | 480 | `figures.json` → `candidates`; 120 orders × 4 strategies |
 | Membrane concentration ceiling | 60,000 mg/L | `core/factors.py` → `ro_max_reject_tds_mg_l`, inside a published 15,000–80,000 band |
 | CPCB measured inlet | 18,340 mg/L | CPCB Tirupur ZLD assessment |

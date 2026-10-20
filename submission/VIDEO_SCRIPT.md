@@ -336,7 +336,7 @@ moving when you click **Accept**.
 **Click Impact.**
 
 > On one machine, in one shift: sixty kilos less salt sent to the treatment
-> plant. About ten thousand rupees. Every delivery on time.
+> plant. Nearly ten thousand rupees. Every delivery on time.
 >
 > And a dyehouse runs many machines. Every shift. Every day.
 
@@ -453,7 +453,7 @@ cut — if your limit is a hard 3:30, drop B0 and start straight at B1.
 
 **B11. The ending** — **Impact**
 
-> One machine, one shift: sixty kilos less salt, about ten thousand rupees,
+> One machine, one shift: sixty kilos less salt, nearly ten thousand rupees,
 > every delivery on time.
 >
 > Every kilo in that shed started in a dye bath — decided at six in the
@@ -491,7 +491,7 @@ Keep this open in another window.
 | Do nothing / reuse rinse / low salt | **132.3% / 132.3% / 82.1%** | the engine |
 | Model predicts at CPCB inlet | **30.6%** vs published **20–30%** | the engine; CPCB |
 | Salt avoided, one machine, one shift | **about 60 kg** (62.6 kg) | the engine |
-| Cost avoided, same | **about ₹10,000** (₹10,171) | the engine |
+| Cost avoided, same | **nearly ₹10,000** (₹9,709) | the engine |
 
 **If the screen shows something different, the screen is correct.**
 

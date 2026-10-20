@@ -31,9 +31,9 @@ var VIEWS = [
   { id: 'decisions', label: 'Decisions', group: 'Operations', ico: 'decisions' },
   { id: 'water',     label: 'Water',     group: 'Operations', ico: 'water' },
   { id: 'plant',     label: 'Plant',     group: 'Operations', ico: 'plant' },
-  { id: 'impact',    label: 'Impact',    group: 'Evidence',   ico: 'impact' },
-  { id: 'evidence',  label: 'Evidence',  group: 'Evidence',   ico: 'evidence' },
-  { id: 'audit',     label: 'Audit',     group: 'Evidence',   ico: 'audit' },
+  { id: 'impact',    label: 'Impact',    group: 'Record',     ico: 'impact' },
+  { id: 'evidence',  label: 'Evidence',  group: 'Record',     ico: 'evidence' },
+  { id: 'audit',     label: 'Audit',     group: 'Record',     ico: 'audit' },
   { id: 'scenarios', label: 'Scenarios', group: 'Analysis',   ico: 'scenarios' },
   { id: 'policy',    label: 'Policy',    group: 'Analysis',   ico: 'policy' }
 ];
@@ -107,8 +107,8 @@ function down(v, unit, dp) {
   var n = Number(v);
   if (Math.abs(n) < 0.005) return '<span class="delta flat">no change</span>';
   return '<span class="delta ' + (n > 0 ? 'down' : 'up') + '">' +
-    (n > 0 ? '−' : '+') + num(Math.abs(n), dp) +
-    (unit ? ' ' + esc(unit) : '') + '</span>';
+    (n > 0 ? '−' : '+') + (unit === '₹' ? '₹' + num(Math.abs(n), dp)
+      : num(Math.abs(n), dp) + (unit ? ' ' + esc(unit) : '')) + '</span>';
 }
 
 function ev(kind) {
@@ -149,8 +149,9 @@ function flowBand(label, value, unit, frac, tone, foot) {
   var h = Math.max(3, Math.round(3 + 15 * Math.max(0, Math.min(1, frac))));
   return '<div class="flow"><div class="flow-hd">' +
     '<span class="flow-k">' + label + '</span>' +
-    '<span class="flow-v">' + num(value, 0) +
-    (unit ? ' <span class="u">' + esc(unit) + '</span>' : '') + '</span></div>' +
+    '<span class="flow-v">' + (unit === '₹' ? '₹' + num(value, 0)
+      : num(value, 0) + (unit ? ' <span class="u">' + esc(unit) + '</span>' : '')) +
+    '</span></div>' +
     '<div class="flow-band" style="height:' + h + 'px">' +
     '<div class="flow-fill ' + tone + '" style="width:' +
     (Math.max(0, Math.min(1, frac)) * 100).toFixed(1) + '%"></div></div>' +
@@ -221,7 +222,7 @@ function autoOptimise() {
   if (S.busy) return;
   S.busy = true;
   post('/api/optimise', { mode: S.mode })
-    .then(function (x) { S.state = x; return api('/api/forecast'); })
+    .then(function (x) { S.state = x; S.bcRef = null; return api('/api/forecast'); })
     .then(function (f) { S.forecast = f; })
     .catch(function () { /* the manual button remains */ })
     .then(function () {
@@ -246,6 +247,23 @@ function prefetch() {
     .catch(function () { S.narrative = null; });
 }
 function soft(v) { if (S.view === v) render(); }
+
+/* One request per key at a time; a failure clears the key so the next
+   visit retries instead of spinning forever. */
+var INFLIGHT = {};
+function fetchOnce(key, url, assign) {
+  if (INFLIGHT[url]) return;
+  var view = S.view, mode = S.mode, site = S.state && S.state.site_id;
+  INFLIGHT[url] = api(url).then(function (d) {
+    delete INFLIGHT[url];
+    // an answer for a mode or site the user has since left is dropped,
+    // and the re-render asks again for the current one
+    if (S.mode === mode && (S.state && S.state.site_id) === site) assign(d);
+    soft(view);
+  }).catch(function () {
+    delete INFLIGHT[url];   // no re-render: a failing call must not loop
+  });
+}
 
 function refreshState() {
   return api('/api/state').then(function (st) {
@@ -296,7 +314,7 @@ function renderChrome() {
     S.ablation = S.sensitivity = S.plant = S.policy = null;
     guard(function () {
       return post('/api/optimise', { mode: S.mode })
-        .then(function (x) { S.state = x; return api('/api/forecast'); })
+        .then(function (x) { S.state = x; S.bcRef = null; return api('/api/forecast'); })
         .then(function (f) {
           S.forecast = f;
           toast('Re-optimised under ' + S.modes[S.mode].name + '.');
@@ -309,7 +327,7 @@ function renderChrome() {
     guard(function () {
       return post('/api/session/reset', {})
         .then(function (x) {
-          S.state = x; S.businessCase = null; S.selectedStream = null;
+          S.state = x; S.businessCase = null; S.bcRef = null; S.selectedStream = null;
           S.view = 'command';
           return api('/api/forecast');
         })
@@ -404,6 +422,14 @@ function go(v) {
   S.view = v; renderNav(); render();
   document.querySelector('.page').scrollIntoView({ block: 'start' });
   window.scrollTo(0, 0);
+  // a screen reader hears nothing when innerHTML swaps; land focus on
+  // the new page's heading and name the tab after it.
+  var h = document.querySelector('#view h1');
+  if (h) {
+    h.setAttribute('tabindex', '-1');
+    h.focus({ preventScroll: true });
+    document.title = h.textContent.trim() + ' · ChangeLoop';
+  }
 }
 
 function guard(fn) {
@@ -427,10 +453,36 @@ function render() {
     water: vWater, plant: vPlant, impact: vImpact, evidence: vEvidence,
     audit: vAudit, scenarios: vScenarios, policy: vPolicy
   };
-  document.getElementById('view').innerHTML = (map[S.view] || vCommand)();
+  var view = document.getElementById('view');
+  view.innerHTML = (map[S.view] || vCommand)();
+  polish(view);
   wire();
   markChanges();
   updateCtx();
+}
+
+/* House typography for prose that arrives from the engine. The backend
+   writes plain ASCII ("CO2e", "INR 7,860", "degC", "m3", " - ") so its
+   strings stay greppable and testable; the screen shows them the way the
+   rest of the product writes them. Identifiers are untouched: the patterns
+   need a word boundary, which "_m3" or "co2e_kg" never give. */
+var POLISH = [
+  [/\bCO2e\b/g, 'CO₂e'], [/\bCO2\b/g, 'CO₂'],
+  [/\bdegC\b/g, '°C'], [/\bm3\b/g, 'm³'],
+  [/\bINR ?(?=\d)/g, '₹'], [/\bINR\//g, '₹/'],
+  [/ -> /g, ' → '], [/ - /g, ' — ']
+];
+function polish(root) {
+  if (!root || !document.createTreeWalker) return;
+  var w = document.createTreeWalker(root, 4 /* SHOW_TEXT */), t, v, i;
+  while ((t = w.nextNode())) {
+    var p = t.parentNode;
+    if (p && p.closest && p.closest('code, pre, .mono, script, style')) continue;
+    v = t.nodeValue;
+    if (!/CO2|degC|m3|INR| - | -> /.test(v)) continue;
+    for (i = 0; i < POLISH.length; i++) v = v.replace(POLISH[i][0], POLISH[i][1]);
+    if (v !== t.nodeValue) t.nodeValue = v;
+  }
 }
 
 /* marks what moved. never invents a movement. */
@@ -468,7 +520,7 @@ function flowField(sc, live) {
       '" stroke-width="' + T(v).toFixed(1) + '"' + (extra || '') + '/>';
   }
 
-  return '<div class="viz viz-wide"><svg viewBox="0 0 ' + W + ' ' + H + '" ' +
+  return '<div class="viz viz-wide flow-viz"><svg viewBox="0 0 ' + W + ' ' + H + '" ' +
     'role="img" aria-label="Water flow field: process demand through reverse ' +
     'osmosis, permeate returning to process and reject evaporated, with ' +
     'freshwater makeup replacing the evaporative loss">' +
@@ -654,7 +706,7 @@ function massBalance(sc) {
   var input = w.process_demand_l;
   var outs = [
     { k: 'Permeate recovered', v: z.permeate_l, tone: 'water',
-      f: 'returned to the RO outlet' },
+      f: 'clean water out of the RO' },
     { k: 'Reused in process', v: w.permeate_reuse_l, tone: 'emerald',
       f: 'bounded by both recovery and demand' },
     { k: 'Evaporated at the MEE', v: z.reject_l, tone: 'loss',
@@ -1040,10 +1092,15 @@ function plainBand() {
       'change in evaporator energy', 'move');
   }
   if (vl && vl.points && vl.points.length) {
-    var last = vl.points[vl.points.length - 1];
+    // the whole observed inlet range, not just its edge: the edge alone
+    // (30.6%) reads as a miss against a band quoted to the nearest ten.
+    var first = vl.points[0], last = vl.points[vl.points.length - 1];
     facts += fact('Model vs published',
-      last.predicted_reject_frac_pct.toFixed(1) + '%',
-      'predicted at CPCB\u2019s measured inlet; published band 20\u201330%',
+      first.predicted_reject_frac_pct.toFixed(0) + '\u2013' +
+        last.predicted_reject_frac_pct.toFixed(1) + '%',
+      'RO reject predicted across real CETP inlets (' +
+        num(first.inlet_tds_mg_l, 0) + '\u2013' + num(last.inlet_tds_mg_l, 0) +
+        ' mg/L); plants report 20\u201330%',
       'val');
   }
   if (ep) {
@@ -1222,7 +1279,7 @@ function vCommand() {
           'discards any plan that breaches a hard constraint.</p>' +
           '<button class="btn btn-pri" data-act="optimise">Run optimiser</button></div>') +
     '</div>' +
-    '<div>' + srule('Salt is water', 'live from mass conservation &nbsp;' + ev('DERIVED')) +
+    '<div>' + srule('Salt sets the reject', 'live from mass conservation &nbsp;' + ev('DERIVED')) +
       (S.insight
         ? '<div class="stack">' +
           '<div class="formula">V_reject = M_salt / C_reject_max</div>' +
@@ -1778,7 +1835,7 @@ function vImpact() {
   '<div class="sec"><div class="grid g-5-7">' +
     '<div>' + srule('Attribution', 'an unapproved decision credits zero') +
       '<div class="tw"><table class="t"><thead><tr><th>Decision</th>' +
-      '<th>Status</th><th class="n">Water</th><th class="n">Salt</th>' +
+      '<th>Status</th><th class="n">Process water</th><th class="n">Salt</th>' +
       '</tr></thead><tbody>' +
       '<tr><td class="t-k">Sequence &amp; strategy<div class="t-s">' +
         'changeover burden and rinse strategy</div></td>' +
@@ -1814,7 +1871,7 @@ function vImpact() {
    ========================================================================== */
 function vEvidence() {
   if (!S.evidence) {
-    api('/api/evidence').then(function (d) { S.evidence = d; soft('evidence'); });
+    fetchOnce('evidence', '/api/evidence', function (d) { S.evidence = d; });
     return phead('Evidence', 'Coefficient registry') +
       '<div class="sec"><div class="load"><div class="load-k">' +
       'Loading registry</div><div class="load-bar"><i></i></div></div></div>';
@@ -1915,9 +1972,10 @@ function vAudit() {
   '<div class="sec"><div class="status ' + (integ.intact ? 'ok' : 'fault') + '">' +
     '<span class="status-k">Chain</span>' +
     '<span class="status-v">' + (integ.intact ? 'Intact' : 'Broken') + '</span>' +
-    '<span class="status-t">' + esc(integ.detail) + ' ' +
-    '<span class="n">' + integ.records + '</span> records, every link ' +
-    'recomputed from its contents.</span>' +
+    '<span class="status-t">' + (integ.intact
+      ? '<span class="n">' + integ.records + '</span> records. Every link ' +
+        'recomputed from its contents and matched.'
+      : esc(integ.detail)) + '</span>' +
     '<button class="why" data-why="chain">What this proves</button>' +
   '</div>' +
   '<p class="micro muted mono" style="margin-top:8px;word-break:break-all">' +
@@ -1949,36 +2007,51 @@ function vAudit() {
    VIEW 8 - SCENARIOS
    ========================================================================== */
 function vScenarios() {
+  // Each panel fetched once. Without the in-flight guard every soft
+  // re-render fired the slow ones again, and they queued behind each other.
+  // The worked example goes first: it is the one a reader edits.
+  if (!S.bcRef) {
+    fetchOnce('bcRef', '/api/business-case', function (d) {
+      S.bcRef = d.reference_inputs || {};
+    });
+  }
   if (!S.ablation) {
-    api('/api/ablation?mode=' + encodeURIComponent(S.mode))
-      .then(function (d) { S.ablation = d; soft('scenarios'); });
+    fetchOnce('ablation', '/api/ablation?mode=' + encodeURIComponent(S.mode),
+      function (d) { S.ablation = d; });
   }
   if (!S.sensitivity) {
-    api('/api/sensitivity').then(function (d) { S.sensitivity = d; soft('scenarios'); });
+    fetchOnce('sensitivity', '/api/sensitivity', function (d) { S.sensitivity = d; });
   }
   if (!S.modeCompare) {
-    api('/api/modes/compare').then(function (d) { S.modeCompare = d; soft('scenarios'); });
+    fetchOnce('modeCompare', '/api/modes/compare', function (d) { S.modeCompare = d; });
   }
   if (!S.cluster) {
-    api('/api/cluster-projection').then(function (d) { S.cluster = d; soft('scenarios'); });
+    fetchOnce('cluster', '/api/cluster-projection', function (d) { S.cluster = d; });
   }
   if (!S.pilot) {
-    api('/api/pilot').then(function (d) { S.pilot = d; soft('scenarios'); });
+    fetchOnce('pilot', '/api/pilot', function (d) { S.pilot = d; });
   }
   var ab = S.ablation, se = S.sensitivity, mc = S.modeCompare,
       cl = S.cluster, pl = S.pilot, bc = S.businessCase;
 
+  // Values: what the user last entered, else the engine's own worked
+  // example for this shift. Never a hard-coded guess.
+  var given = S.bcInputs || S.bcRef || {};
   var fields = [
-    ['lots_per_year', 'Dye lots per year', 9000, ''],
-    ['freshwater_avoided_per_lot_l', 'Freshwater avoided per lot', 1108, 'L'],
-    ['salt_avoided_per_lot_kg', 'Salt avoided per lot', 12.5, 'kg'],
-    ['freshwater_cost_inr_per_m3', 'Freshwater cost', 45, '₹/m³'],
-    ['recycled_water_cost_inr_per_m3', 'Recycled water cost', 135, '₹/m³'],
-    ['steam_cost_inr_per_kwh_th', 'Steam cost', 2.4, '₹/kWh'],
-    ['salt_cost_inr_per_kg', 'Salt cost', 9, '₹/kg'],
-    ['implementation_cost_inr', 'Implementation', 450000, '₹'],
-    ['annual_subscription_inr', 'Annual subscription', 240000, '₹']
-  ];
+    ['lots_per_year', 'Dye lots per year', ''],
+    ['freshwater_avoided_per_lot_l', 'Process water avoided per lot', 'L'],
+    ['salt_avoided_per_lot_kg', 'Salt avoided per lot', 'kg'],
+    ['process_cost_per_lot_inr', 'Running cost of the process change', '₹/lot'],
+    ['freshwater_cost_inr_per_m3', 'Freshwater cost', '₹/m³'],
+    ['recycled_water_cost_inr_per_m3', 'Recycled water cost', '₹/m³'],
+    ['steam_cost_inr_per_kwh_th', 'Steam cost', '₹/kWh'],
+    ['salt_cost_inr_per_kg', 'Salt cost', '₹/kg'],
+    ['implementation_cost_inr', 'One-off setup', '₹'],
+    ['annual_subscription_inr', 'Annual fee', '₹']
+  ].map(function (f) {
+    var v = given[f[0]];
+    return [f[0], f[1], v == null ? '' : v, f[2]];
+  });
 
   return phead('Scenarios', 'Analysis and proof',
     'Three self-critical tests, all reproducible from the API, plus the ' +
@@ -2077,17 +2150,20 @@ function vScenarios() {
       }).join('') + '</div>' +
       '<div class="row" style="margin-top:var(--s4)">' +
       '<button class="btn btn-pri" data-act="calc">Calculate</button></div>' +
-      '<p class="micro muted" style="margin-top:9px">A projection built on a ' +
-      'vendor’s assumptions is not a business case. This refuses to ' +
-      'compute until you enter your own figures.</p>' +
+      '<p class="micro muted" style="margin-top:9px">Prefilled as a worked ' +
+      'example: per-lot figures from this shift’s recommended plan, ' +
+      'tariffs from the coefficient registry, and the ₹15-a-lot fee. ' +
+      'Replace each with your own; the case is computed from what is in ' +
+      'the boxes and nothing else.</p>' +
     '</div><div>' +
       (bc && bc.status === 'CALCULATED' ? caseResult(bc)
         : bc ? '<div class="status fault"><span class="status-k">' +
           esc(String(bc.status).replace(/_/g, ' ')) + '</span>' +
           '<span class="status-t">' + esc(bc.notice || '') + '</span></div>'
         : '<div class="empty"><div class="empty-k">No case computed</div>' +
-          '<h3>Enter your site figures</h3><p>Every benefit line is priced ' +
-          'from your own tariffs. Nothing is assumed on your behalf.</p></div>') +
+          '<h3>Check the figures, then calculate</h3><p>Every benefit line ' +
+          'is priced from the boxes on the left, and the running cost of ' +
+          'the process change is taken off before the fee.</p></div>') +
     '</div></div>' +
   '</div>' +
 
@@ -2133,6 +2209,15 @@ function modeName() {
   return (m && m.name) || S.mode || 'Normal operation';
 }
 
+var BC_LABEL = {
+  water_displaced_at_recycled_rate: 'Recycled water not drawn',
+  freshwater_makeup: 'Fresh makeup not drawn',
+  electrolyte_and_chemical: 'Salt not bought',
+  evaporator_steam: 'Evaporator steam',
+  dyehouse_heating: 'Rinse water not heated',
+  evaporator_non_energy_opex: 'Evaporator running cost'
+};
+
 function caseResult(bc) {
   var q = bc.annual_quantities, b = bc.benefit_breakdown_inr;
   var maxB = 0;
@@ -2140,28 +2225,36 @@ function caseResult(bc) {
   return '<div class="stack">' +
     '<div class="strip" style="grid-template-columns:1fr 1fr">' +
       readout({ label: 'Annual net benefit', raw: inr(bc.annual_net_benefit_inr),
-        value: bc.annual_net_benefit_inr, tone: 'good',
-        foot: 'after subscription' }) +
-      readout({ label: 'Payback', value: bc.payback_years, unit: 'yr',
-        foot: 'on ' + inr(bc.implementation_cost_inr) + ' capex' }) +
+        value: bc.annual_net_benefit_inr,
+        tone: bc.annual_net_benefit_inr > 0 ? 'good' : 'bad',
+        foot: 'after running cost and fee' }) +
+      (bc.implementation_cost_inr > 0
+        ? readout({ label: 'Payback', value: bc.payback_years, unit: 'yr',
+            foot: 'on ' + inr(bc.implementation_cost_inr) + ' setup' })
+        : readout({ label: 'Payback', raw: 'Immediate',
+            foot: 'no setup cost to recover' })) +
     '</div>' +
     '<div><div class="readout-k" style="margin-bottom:8px">' +
     'Benefit breakdown</div><div class="flows">' +
     Object.keys(b).map(function (k) {
       var tone = /water/.test(k) ? 'water' : /salt|electro/.test(k) ? 'salt'
         : /steam|heat/.test(k) ? 'amber' : 'emerald';
-      return flowBand(esc(k.replace(/_/g, ' ')), b[k], '₹',
+      return flowBand(esc(BC_LABEL[k] || k.replace(/_/g, ' ')), b[k], '₹',
         maxB > 0 ? b[k] / maxB : 0, tone);
     }).join('') + '</div></div>' +
     '<dl class="defs">' +
       row('Gross annual', inr(bc.annual_gross_benefit_inr)) +
+      row('Running cost of the process change',
+        '−' + inr(bc.annual_process_cost_inr || 0)) +
+      row('Annual fee', '−' + inr(bc.annual_subscription_inr)) +
       row('3-year NPV at 12%', inr(bc.npv_3yr_at_12pct_inr)) +
       row('Evaporator steam avoided', num(q.evaporator_steam_avoided_kwh_th / 1000, 1) +
         ' MWh/yr') +
       row('Salt avoided', num(q.salt_avoided_kg / 1000, 1) + ' t/yr') +
     '</dl>' +
-    '<p class="micro muted">The water line is priced at your <b>recycled</b> ' +
-    'rate, not your freshwater rate. In a closed loop the litre you avoid is ' +
+    '<p class="micro muted">Only the makeup is fresh water, and in a closed ' +
+    'loop it equals the reject avoided, which the salt sets. Every other ' +
+    'litre avoided is recycled water, priced at your <b>recycled</b> rate: ' +
     'the expensive one you would otherwise have had to treat.</p>' +
     disc('Deliberately excluded', '<ul style="margin:0;padding-left:18px">' +
       bc.excluded_from_this_calculation.map(function (x) {
@@ -2177,6 +2270,7 @@ function sheet(kind, title, html) {
   document.getElementById('sheetKind').textContent = kind;
   document.getElementById('sheetTitle').textContent = title;
   document.getElementById('sheetBody').innerHTML = html;
+  polish(document.getElementById('sheetBody'));
   document.getElementById('sheet').classList.add('open');
   document.getElementById('sheetBd').classList.add('open');
   document.getElementById('sheetClose').focus();
@@ -2335,7 +2429,7 @@ function openWhy(what) {
 
   if (what === 'salt' && S.insight) {
     var ins = S.insight;
-    sheet('Mechanism', 'Salt is water',
+    sheet('Mechanism', 'Salt sets the reject volume',
       '<div class="formula">V_reject = M_salt / C_reject_max</div>' +
       '<p class="small" style="margin-top:var(--s4)">Salt is conserved. ' +
       'Reverse osmosis, biology and evaporation do not destroy it, and the ' +
@@ -2758,7 +2852,7 @@ function act(a) {
   if (a === 'optimise') {
     return guard(function () {
       return post('/api/optimise', { mode: S.mode })
-        .then(function (x) { S.state = x; return api('/api/forecast'); })
+        .then(function (x) { S.state = x; S.bcRef = null; return api('/api/forecast'); })
         .then(function (f) {
           S.forecast = f;
           toast('Evaluated ' + S.state.optimisation.candidates_evaluated +
@@ -2841,8 +2935,10 @@ function act(a) {
       var body = {};
       Array.prototype.forEach.call(
         document.querySelectorAll('[id^="bc_"]'), function (el) {
-          body[el.id.slice(3)] = Number(el.value);
+          // an empty box is missing, not zero: let the engine say so
+          if (el.value.trim() !== '') body[el.id.slice(3)] = Number(el.value);
         });
+      S.bcInputs = body;   // a re-render must not put the defaults back
       return post('/api/business-case', body).then(function (r) {
         S.businessCase = r;
         toast('Case computed from your inputs.');
@@ -3050,16 +3146,16 @@ function plantBar(p) {
    ========================================================================== */
 function vPlant() {
   if (!S.plant) {
-    api('/api/plant?mode=' + encodeURIComponent(S.mode))
-      .then(function (d) { S.plant = d; soft('plant'); });
+    fetchOnce('plant', '/api/plant?mode=' + encodeURIComponent(S.mode),
+      function (d) { S.plant = d; });
   }
   /* The same plant under priced scarcity. Fetched alongside rather than
      described, because the claim it supports - that this breach is a
      pricing failure and not a scheduling failure - is the strongest
      thing this view has to say, and a reader should be able to check it. */
   if (!S.plantDrought) {
-    api('/api/plant?mode=DROUGHT')
-      .then(function (d) { S.plantDrought = d; soft('plant'); });
+    fetchOnce('plantDrought', '/api/plant?mode=DROUGHT',
+      function (d) { S.plantDrought = d; });
   }
   var p = S.plant, dr = S.plantDrought;
 
@@ -3141,7 +3237,7 @@ function vPlant() {
           '<td class="n">' + (b ? num(b.reject_l, 0) + ' L' : '&mdash;') + '</td>' +
           '<td class="n">' + (d == null ? '&mdash;'
             : Math.abs(d) < 0.5 ? '<span class="delta flat">no change</span>'
-            : '<span class="delta up">+' + num(d, 0) + '</span>') +
+            : '<span class="delta up">+\u20b9' + num(d, 0) + '</span>') +
           '</td></tr>';
       }).join('') + '</tbody></table></div>' +
     '<p class="small" style="margin-top:12px;max-width:var(--measure)">' +
@@ -3256,7 +3352,7 @@ function leverBars(p) {
         esc(l.label) + '</text>' +
       '<text x="0" y="' + (y + 31) + '" class="lv-lab lv-lab-2">' +
         esc(_fmtLv(l.current_value)) + ' &rarr; ' +
-        esc(_fmtLv(l.switching_value)) + ' ' + esc(l.unit) + '</text>' +
+        esc(_fmtLv(_swv(l))) + ' ' + esc(l.unit) + '</text>' +
       '<rect x="' + padL + '" y="' + (y + 4) + '" ' +
         'width="' + Math.max(2, w).toFixed(1) + '" height="26" rx="2" ' +
         'class="' + (smallest ? 'lv-near' : 'lv-far') + '">' +
@@ -3292,6 +3388,12 @@ function _pbLabelX(barEnd, capX) {
   return at.toFixed(1);
 }
 
+/* the crossing as displayed: rounded past it by the engine, so the price
+   shown always flips the decision */
+function _swv(l) {
+  return l.switching_value_display != null ? l.switching_value_display
+    : l.switching_value;
+}
 function _fmtLv(v) {
   if (v == null) return '—';
   return num(v, Math.abs(v) >= 100 ? 0 : 2);
@@ -3302,8 +3404,8 @@ function _fmtLv(v) {
    ========================================================================== */
 function vPolicy() {
   if (!S.policy) {
-    api('/api/policy?mode=' + encodeURIComponent(S.mode))
-      .then(function (d) { S.policy = d; soft('policy'); });
+    fetchOnce('policy', '/api/policy?mode=' + encodeURIComponent(S.mode),
+      function (d) { S.policy = d; });
   }
   var p = S.policy;
 
@@ -3338,7 +3440,7 @@ function vPolicy() {
       'derived from the steam lever') +
     '<div class="grid g-7-5"><div>' +
       '<p class="small" style="max-width:var(--measure)">' +
-        'Steam would have to cost ' + inr(c.steam_increase_inr_per_kwh_th) +
+        'Steam would have to cost \u20b9' + num(c.steam_increase_inr_per_kwh_th, 3) +
         ' more per kWh of heat. Burning enough fuel to deliver that heat ' +
         'emits ' + num(c.boiler_co2e_kg_per_kwh_th, 3) + ' kg of CO&#8322;e, ' +
         'so the carbon price that produces the rise is simple division.</p>' +
@@ -3387,7 +3489,7 @@ function vPolicy() {
             ev(l.evidence) + '</div></td>' +
           '<td class="n">' + _fmtLv(l.current_value) + '</td>' +
           '<td class="n">' + (l.status === 'FOUND'
-            ? _fmtLv(l.switching_value)
+            ? _fmtLv(_swv(l))
             : '<span class="muted">not found</span>') + '</td>' +
           '<td class="n">' + (l.percent_change == null ? '—'
             : '<span class="delta ' +

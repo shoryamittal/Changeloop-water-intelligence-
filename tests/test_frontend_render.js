@@ -181,6 +181,7 @@ async function main() {
   S.pilot = pilot;
   S.cluster = cluster;
   S.businessCase = businessCase;
+  S.bcRef = (await get('/api/business-case')).reference_inputs;
   S.forecast = forecast;
   S.matrix = matrix.matrix;
   S.narrative = narrative;
@@ -227,8 +228,7 @@ async function main() {
         check('  band shows the salt half of the proof (-20.0%)',
           /pb-move[\s\S]{0,240}-20\.0%/.test(html));
         check('  band shows the published-band validation',
-          html.indexOf('published band 20–30%') !== -1 ||
-          html.indexOf('published band 20') !== -1);
+          html.indexOf('plants report 20–30%') !== -1);
         check('  band offers the reasoning ladder',
           html.indexOf('data-why="reasoning"') !== -1);
         check('  band states the equation',

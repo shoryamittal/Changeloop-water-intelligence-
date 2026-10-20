@@ -308,6 +308,15 @@ def build_ledger(site_id: str,
         baseline["water"]["freshwater_intake_l"]
         - achieved["water"]["freshwater_intake_l"])
 
+    # A process strategy is not free: counter-current rinsing costs pumping
+    # and tank turnover, low-salt chemistry costs a dye premium. The
+    # decision workbench nets that off, so the ledger must too, or the two
+    # screens report different savings for the same plan.
+    baseline_cost = (baseline["cost_inr"]["total"]
+                     + baseline.get("_strategy_cost_inr", 0.0))
+    achieved_cost = (achieved["cost_inr"]["total"]
+                     + achieved.get("_strategy_cost_inr", 0.0))
+
     return ImpactLedger(
         baseline_process_water_l=baseline["water"]["process_demand_l"]
         - baseline.get("_changeover_water_l", 0.0),
@@ -318,7 +327,7 @@ def build_ledger(site_id: str,
         baseline_reject_l=baseline["zld"]["reject_l"],
         baseline_mee_thermal_kwh=baseline["zld"]["mee_thermal_kwh"],
         baseline_co2e_kg=baseline["carbon"]["total_co2e_kg"],
-        baseline_cost_inr=baseline["cost_inr"]["total"],
+        baseline_cost_inr=round(baseline_cost, 2),
 
         sequencing_status=sequencing_status,
         sequencing_water_avoided_l=round(sequencing_water_avoided_l, 1),
@@ -336,7 +345,7 @@ def build_ledger(site_id: str,
         achieved_reject_l=achieved["zld"]["reject_l"],
         achieved_mee_thermal_kwh=achieved["zld"]["mee_thermal_kwh"],
         achieved_co2e_kg=achieved["carbon"]["total_co2e_kg"],
-        achieved_cost_inr=achieved["cost_inr"]["total"],
+        achieved_cost_inr=round(achieved_cost, 2),
 
         freshwater_avoided_l=round(fresh_avoided, 1),
         stress_equivalent_avoided_l_eq=basin.stress_equivalent_litres(
@@ -352,8 +361,7 @@ def build_ledger(site_id: str,
         co2e_avoided_kg=round(
             baseline["carbon"]["total_co2e_kg"]
             - achieved["carbon"]["total_co2e_kg"], 2),
-        cost_avoided_inr=round(
-            baseline["cost_inr"]["total"] - achieved["cost_inr"]["total"], 2),
+        cost_avoided_inr=round(baseline_cost - achieved_cost, 2),
 
         site_id=site_id,
         stress_weight=basin.stress_weight,
@@ -423,7 +431,8 @@ def trace(metric: str) -> Dict[str, Any]:
             "metric": "Cost avoided (INR)",
             "formula": "sum of avoided freshwater, recycled water, dyehouse "
                        "steam, electrolyte, evaporator steam, evaporator "
-                       "opex and RO power",
+                       "opex and RO power, less the operating cost of the "
+                       "process strategy adopted",
             "upstream": ["each cost line is priced independently so no term "
                          "is double counted"],
             "coefficients": ["freshwater_cost_inr_per_m3",

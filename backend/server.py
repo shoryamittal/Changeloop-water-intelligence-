@@ -283,8 +283,9 @@ def claim_register() -> Dict[str, Any]:
                                 "range, never a single figure.",
             },
             {
-                "claim": "Recycled water costs roughly INR 120-150 per "
-                         "kilolitre against INR 30-60 for fresh abstraction.",
+                "claim": "ZLD treatment at a well-utilised Tirupur CETP "
+                         "costs members INR 150-220 per kilolitre, against "
+                         "about INR 45 for piped river water.",
                 "level": "L4",
                 "safe_wording": "Quote as a reported range, and state that it "
                                 "is why avoiding demand beats recovering "
@@ -327,11 +328,14 @@ def claim_register() -> Dict[str, Any]:
                                 "remembered one.",
             },
             {
-                "claim": "A scheduler that optimises dyehouse water alone "
-                         "captures only a fraction of the available benefit.",
+                "claim": "Once water scarcity is priced, a scheduler that "
+                         "optimises dyehouse water alone captures only a "
+                         "fraction of the available benefit.",
                 "level": "L5",
                 "safe_wording": "Attribute to our own ablation study, "
-                                "reproducible at /api/ablation.",
+                                "reproducible at /api/ablation?mode=DROUGHT. "
+                                "Under Normal prices the water-only variant "
+                                "matches the full system; say so.",
             },
             {
                 "claim": "CPCB has mandated online effluent monitoring for 17 "
@@ -342,9 +346,11 @@ def claim_register() -> Dict[str, Any]:
                                 "data-availability objection directly.",
             },
             {
-                "claim": "Court-ordered closure of the Tirupur dyeing units "
-                         "was reported to have cost around INR 11 billion in "
-                         "exports and about 100,000 jobs.",
+                "claim": "The 2011 court-ordered closure shut over 700 "
+                         "Tirupur dyeing units, put 40,000-50,000 jobs at "
+                         "risk and cost about INR 50 crore a day (Dyers "
+                         "Association, quoted by the Economic Times, 25 "
+                         "June 2025).",
                 "level": "L4",
                 "safe_wording": "Attribute to the industry association's "
                                 "representation. Use it to size the stake, "
@@ -677,7 +683,10 @@ class App(SimpleHTTPRequestHandler):
                 return self.send_json({
                     "status": "INPUT_REQUIRED",
                     "required_inputs": economics.REQUIRED_INPUTS,
+                    "optional_inputs": economics.OPTIONAL_INPUTS,
                     "input_help": economics.INPUT_HELP,
+                    "reference_inputs": economics.reference_inputs(
+                        s.optimisation, len(s.lots)),
                     "notice": "POST your site's own tariffs and volumes. "
                               "ChangeLoop will not compute a business case "
                               "from assumed values.",

@@ -472,7 +472,7 @@ mockup.
 | | |
 |---|---|
 | API | 34 endpoints. Every saving is worked out on the server, so the browser cannot claim one |
-| Tests | 180, covering the physics, the safety rules, concurrency and the interface |
+| Tests | 190, covering the physics, the safety rules, concurrency and the interface |
 | Input numbers | 25, each labelled with its source. 17 published, 4 derived, 4 assumed, 0 measured |
 | Validation | Fed the water strength CPCB measured at a Tirupur unit, 18,340 mg/L, the model predicted 30.6% leftover. Indian plants report 20 to 30% |
 
@@ -666,7 +666,7 @@ own.
 | Boiler steam | Rs 2.03/kWh heat | Rs 3.13/kWh heat | 54% dearer |
 | Fresh water | Rs 45/m3 | Rs 251/m3 | 457% dearer |
 
-The steam row converts into a carbon price. Steam would need to rise Rs 1.09
+The steam row converts into a carbon price. Steam would need to rise Rs 1.095
 per kWh of heat, and making that heat gives off 0.452 kg of CO2, so the carbon
 price that produces the rise is **Rs 2,423 a tonne, about 21 euro**.
 

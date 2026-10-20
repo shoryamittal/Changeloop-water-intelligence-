@@ -51,7 +51,8 @@ CONSEQUENCE = (
     "at the wrong number. Cut effluent volume by 20% and the evaporator "
     "burns exactly the same fuel. Cut the salt by 20% and it burns 20% "
     "less. Two levers that both look like 'saving water' do completely "
-    "different things to the energy bill, and nobody on the dyehouse floor "
+    "different things to the evaporator's fuel bill, and nobody on the "
+    "dyehouse floor "
     "can see which is which."
 )
 
@@ -237,10 +238,15 @@ def validation() -> Dict[str, Any]:
         })
 
     return {
+        # Stated as the range it is. The top point, 30.6%, sits just past a
+        # band quoted to the nearest ten; calling it "inside" was not true.
         "headline": (
-            "Fed the TDS that CPCB measured at a real Tirupur unit, the "
-            "model predicts a reject fraction of {:.1f}% - inside the "
-            "20-30% that Indian ZLD operators independently report.".format(
+            "Fed the inlet strength real treatment plants see, {:,.0f} to "
+            "{:,.0f} mg/L (the top figure measured by CPCB at a Tirupur "
+            "unit), the model predicts {:.1f}% to {:.1f}% of the volume as "
+            "reject. Indian ZLD operators report 20-30%.".format(
+                points[0]["inlet_tds_mg_l"], points[-1]["inlet_tds_mg_l"],
+                points[0]["predicted_reject_frac_pct"],
                 points[-1]["predicted_reject_frac_pct"])
         ),
         "published_band_pct": [20.0, 30.0],
