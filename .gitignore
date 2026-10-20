@@ -16,3 +16,4 @@ submission/render_pdf/
 submission/qa_check/
 submission/deck_check/
 .tmpl/
+.shots/

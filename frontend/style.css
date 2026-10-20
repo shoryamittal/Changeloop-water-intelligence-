@@ -312,9 +312,12 @@ kbd {
 }
 .ctx-field {
   display: flex; flex-direction: column; justify-content: center; gap: 2px;
-  padding: 0 var(--s5);
+  padding: 0 var(--s4);
   border-right: 1px solid var(--hair);
-  min-width: 0;
+  /* Size to content and scroll if the bar runs out of room. Equal
+     flexible tracks truncated the status to "BREACH PROJECT...", which
+     hides the one field a reviewer most needs to read. */
+  flex: 0 0 auto; min-width: 0; max-width: 34vw;
 }
 .ctx-field > label {
   font-family: var(--mono); font-size: 9px; letter-spacing: 0.11em;
@@ -326,7 +329,12 @@ kbd {
   border: 0; background: none; padding: 0; appearance: none;
   max-width: 100%; text-overflow: ellipsis; cursor: pointer;
   font-family: var(--sans);
+  /* An asset id broken across two lines ("JET-" / "01") reads as a
+     rendering fault on the first screen a reviewer sees. */
+  white-space: nowrap; overflow: hidden;
 }
+.ctxbar { overflow-x: auto; scrollbar-width: none; }
+.ctxbar::-webkit-scrollbar { display: none; }
 .ctx-field > .v.mono { font-family: var(--mono); }
 .ctx-spacer { flex: 1; border-right: 1px solid var(--hair); }
 .ctx-actions {
@@ -949,24 +957,64 @@ dl.defs dd { margin: 0; font-size: var(--t-small); line-height: 1.5; }
   .phead { grid-template-columns: 1fr; }
 }
 @media (max-width: 768px) {
-  .app { grid-template-columns: 1fr; }
+  /* The rail stacks ABOVE the main column. .main carries grid-column: 2
+     from the desktop layout, and leaving it there put main in an implicit
+     second track: the rail collapsed to 0px wide and 3,053px tall, every
+     view but Command became unreachable, and the document ran 781px wide
+     in a 390px viewport. Both tracks are reset here. */
+  .app { grid-template-columns: 100%; grid-auto-flow: row; }
+  .rail, .main { grid-column: 1; min-width: 0; }
   .rail {
-    position: static; height: auto; flex-direction: row; align-items: center;
-    border-right: 0; border-bottom: 1px solid var(--hair); overflow-x: auto;
+    position: sticky; top: 0; z-index: 40; height: auto;
+    flex-direction: row; align-items: stretch;
+    border-right: 0; border-bottom: 1px solid var(--hair);
   }
-  .rail-brand { border-bottom: 0; border-right: 1px solid var(--hair); flex: none; padding: var(--s3) var(--s4); }
+  .rail-brand {
+    border-bottom: 0; border-right: 1px solid var(--hair); flex: none;
+    padding: var(--s3) var(--s4); display: flex; align-items: center;
+  }
   .brand-ctx { display: none; }
-  .nav { display: flex; padding: 0; flex: 1; }
   .nav-group, .rail-foot { display: none; }
-  .nav-item {
-    flex: none; border-left: 0; border-bottom: 2px solid transparent;
-    padding: var(--s3) var(--s3);
+
+  /* A horizontal scroller that snaps, with labels kept. Ten unlabelled
+     icons is not navigation. */
+  .nav {
+    display: flex; padding: 0; flex: 1; min-width: 0;
+    overflow-x: auto; overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
-  .nav-item[aria-current="page"] { border-left-color: transparent; border-bottom-color: var(--water); }
-  .nav-item .lbl { display: none; }
-  .ctxbar { height: auto; flex-wrap: wrap; }
-  .ctx-field { padding: var(--s2) var(--s4); }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav-item {
+    /* The desktop rail sizes these to its full width. Inside a horizontal
+       scroller that made each one 244px, so ten of them ran 2,440px. */
+    flex: 0 0 auto; width: auto;
+    border-left: 0; border-bottom: 2px solid transparent;
+    padding: var(--s3) var(--s4); gap: var(--s2);
+    scroll-snap-align: center; white-space: nowrap;
+  }
+  .nav-item[aria-current="page"] {
+    border-left-color: transparent; border-bottom-color: var(--water);
+  }
+  .nav-item .lbl { display: inline; font-size: var(--t-label); }
+
+  /* a hint that the rail scrolls, rather than a hard edge */
+  .rail::after {
+    content: ''; position: absolute; right: 0; top: 0; bottom: 1px;
+    width: 28px; pointer-events: none;
+    background: linear-gradient(to right, transparent, var(--surface));
+  }
+
+  /* Wrapping put five stacked rows, about 440px, between the top of a
+     844px screen and the first line of content. One scrolling strip
+     gives that back. */
+  .ctxbar { height: auto; flex-wrap: nowrap; }
+  .ctx-field { padding: var(--s2) var(--s4); max-width: 60vw; }
+  .ctx-field.opt-1, .ctx-field.opt-2 { display: none; }
   .ctx-spacer { display: none; }
+  .ctx-actions { padding: 0 var(--s3); flex: 0 0 auto; }
+  .ctx-actions .btn { white-space: nowrap; }
   .strip { grid-template-columns: 1fr 1fr; }
   .strip > .readout { padding-left: var(--s3); border-right: 1px solid var(--hair); }
   .readout-v { font-size: 23px; }
@@ -1421,4 +1469,99 @@ dl.defs dd { margin: 0; font-size: var(--t-small); line-height: 1.5; }
   font: 500 10px/1 var(--sans);
   letter-spacing: .04em;
   fill: var(--water);
+}
+
+/* Below this the bar would have to scroll, so the two fields a reviewer
+   never acts on step aside first. */
+@media (max-width: 1180px) {
+  .ctx-field.opt-2 { display: none; }
+}
+@media (max-width: 980px) {
+  .ctx-field.opt-1 { display: none; }
+}
+
+/* --- overflow containment -------------------------------------------
+   A grid or flex item defaults to min-width:auto, so it refuses to
+   shrink below its content. The flow field carries min-width:760px to
+   stay legible, and that pushed the whole document to 781px wide in a
+   390px viewport. Letting the tracks shrink lets .viz do its own
+   horizontal scrolling, which is what it was built to do.
+   -------------------------------------------------------------------- */
+.grid > *, .stack > *, .main, .page { min-width: 0; }
+.viz { max-width: 100%; }
+body { overflow-x: hidden; }
+
+/* ==========================================================================
+   25. MOTION
+   The interface was entirely static. A plan arriving, a number moving and
+   a view changing are the three moments worth marking, and nothing else.
+   All of it sits inside prefers-reduced-motion, so a reader who has asked
+   for stillness gets a product that simply never animates.
+   ========================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+
+  /* a view arriving: content rises a few pixels, once */
+  #view > .sec,
+  #view > .phead { animation: rise var(--m-slow) var(--ease) both; }
+  #view > .sec:nth-child(2)  { animation-delay: 30ms; }
+  #view > .sec:nth-child(3)  { animation-delay: 60ms; }
+  #view > .sec:nth-child(4)  { animation-delay: 90ms; }
+  #view > .sec:nth-child(n+5){ animation-delay: 110ms; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* a figure that moved since the last render gets one quiet pulse.
+     markChanges() already tags these; nothing used to happen. */
+  .readout.changed .readout-v > span {
+    animation: tick var(--m-slow) var(--ease);
+  }
+  @keyframes tick {
+    0%   { color: var(--water-lift); transform: translateY(-2px); }
+    100% { color: inherit; transform: none; }
+  }
+
+  /* the flow field draws itself in, so the loop reads as a loop */
+  .vz-flow, .vz-flow-pale, .vz-flow-reuse, .vz-flow-salt, .vz-flow-loss {
+    animation: flow-in 620ms var(--ease) both;
+  }
+  @keyframes flow-in { from { opacity: 0; } to { opacity: 1; } }
+
+  /* bars grow from their origin rather than appearing at full length */
+  .pb-seg rect, .lv-far, .lv-near {
+    animation: grow 520ms var(--ease) both;
+    transform-origin: left center;
+  }
+  @keyframes grow { from { transform: scaleX(0); } to { transform: none; } }
+
+  .btn, .nav-item { transition: background var(--m-fast) var(--ease),
+                                color var(--m-fast) var(--ease),
+                                border-color var(--m-fast) var(--ease); }
+}
+
+/* Keyboard users were getting the browser default outline, which the dark
+   ground swallows. */
+:where(a, button, select, input, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--water-lift);
+  outline-offset: 2px;
+  border-radius: var(--r);
+}
+
+/* --- impact strip before any approval --------------------------------
+   The zeros are correct and must stay visible, but they should not be
+   the loudest thing on the page when the real message is that nobody
+   has approved anything yet.
+   -------------------------------------------------------------------- */
+.strip-pending .readout-v { opacity: .34; }
+.strip-pending .readout-k,
+.strip-pending .readout-f { opacity: .62; }
+.pending-note {
+  margin-top: var(--s3); font-size: var(--t-small); line-height: 1.55;
+  color: var(--slate); max-width: var(--measure);
+  border-left: 2px solid var(--hair-2); padding-left: var(--s3);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .strip-pending .readout-v { transition: opacity var(--m-slow) var(--ease); }
 }

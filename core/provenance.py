@@ -42,6 +42,7 @@ import hmac
 import json
 import os
 import sqlite3
+import threading
 import time
 import uuid
 
@@ -111,6 +112,7 @@ def key_provenance() -> Dict[str, Any]:
 
 # In-memory mirror so the ledger still works if the filesystem is read-only.
 _MEMORY: List[Dict[str, Any]] = []
+_LEDGER_LOCK = threading.RLock()
 
 
 def _payload_hash(payload: Any) -> str:
@@ -212,72 +214,74 @@ def append(action: str,
            actor: str = "system",
            db_path: Optional[Path] = None) -> Dict[str, Any]:
     """Append one record and return it, including its chain position."""
-    path = db_path or DEFAULT_DB_PATH
-    payload = payload or {}
+    with _LEDGER_LOCK:
+        path = db_path or DEFAULT_DB_PATH
+        payload = payload or {}
 
-    last_seq, prev_hash = _head(path)
-    seq = last_seq + 1
-    ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-    rid = str(uuid.uuid4())
-    ph = _payload_hash(payload)
-    rh = _link_hash(seq, ts, actor, action, detail, ph, prev_hash)
-    payload_json = json.dumps(payload, sort_keys=True, default=str)
+        last_seq, prev_hash = _head(path)
+        seq = last_seq + 1
+        ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        rid = str(uuid.uuid4())
+        ph = _payload_hash(payload)
+        rh = _link_hash(seq, ts, actor, action, detail, ph, prev_hash)
+        payload_json = json.dumps(payload, sort_keys=True, default=str)
 
-    rec = LedgerRecord(
-        seq=seq, record_id=rid, timestamp=ts, actor=actor, action=action,
-        detail=detail, payload_hash=ph, prev_hash=prev_hash,
-        record_hash=rh, payload_json=payload_json,
-    )
+        rec = LedgerRecord(
+            seq=seq, record_id=rid, timestamp=ts, actor=actor, action=action,
+            detail=detail, payload_hash=ph, prev_hash=prev_hash,
+            record_hash=rh, payload_json=payload_json,
+        )
 
-    stored = "memory"
-    try:
-        init_db(path)
-        conn = sqlite3.connect(str(path))
+        stored = "memory"
         try:
-            conn.execute(
-                "INSERT INTO decision_ledger VALUES (?,?,?,?,?,?,?,?,?,?)",
-                (seq, rid, ts, actor, action, detail, ph, prev_hash, rh,
-                 payload_json),
-            )
-            conn.commit()
-            stored = "sqlite"
-        finally:
-            conn.close()
-    except (sqlite3.Error, OSError):
-        pass
+            init_db(path)
+            conn = sqlite3.connect(str(path))
+            try:
+                conn.execute(
+                    "INSERT INTO decision_ledger VALUES (?,?,?,?,?,?,?,?,?,?)",
+                    (seq, rid, ts, actor, action, detail, ph, prev_hash, rh,
+                     payload_json),
+                )
+                conn.commit()
+                stored = "sqlite"
+            finally:
+                conn.close()
+        except (sqlite3.Error, OSError):
+            pass
 
-    _MEMORY.append({
-        "seq": seq, "record_id": rid, "timestamp": ts, "actor": actor,
-        "action": action, "detail": detail, "payload_hash": ph,
-        "prev_hash": prev_hash, "record_hash": rh,
-        "payload_json": payload_json,
-    })
+        _MEMORY.append({
+            "seq": seq, "record_id": rid, "timestamp": ts, "actor": actor,
+            "action": action, "detail": detail, "payload_hash": ph,
+            "prev_hash": prev_hash, "record_hash": rh,
+            "payload_json": payload_json,
+        })
 
-    out = rec.to_dict()
-    out["persistence"] = stored
-    return out
+        out = rec.to_dict()
+        out["persistence"] = stored
+        return out
 
 
 def records(limit: int = 500,
             db_path: Optional[Path] = None) -> List[Dict[str, Any]]:
     """Return ledger records, newest first."""
-    path = db_path or DEFAULT_DB_PATH
-    cols = ["seq", "record_id", "timestamp", "actor", "action", "detail",
-            "payload_hash", "prev_hash", "record_hash", "payload_json"]
-    try:
-        init_db(path)
-        conn = sqlite3.connect(str(path))
+    with _LEDGER_LOCK:
+        path = db_path or DEFAULT_DB_PATH
+        cols = ["seq", "record_id", "timestamp", "actor", "action", "detail",
+                "payload_hash", "prev_hash", "record_hash", "payload_json"]
         try:
-            rows = conn.execute(
-                "SELECT {} FROM decision_ledger ORDER BY seq DESC LIMIT ?"
-                .format(", ".join(cols)), (int(limit),)).fetchall()
-            return [LedgerRecord(**dict(zip(cols, r))).to_dict()
-                    for r in rows]
-        finally:
-            conn.close()
-    except (sqlite3.Error, OSError, TypeError):
-        return [LedgerRecord(**{k: m[k] for k in cols}).to_dict()
-                for m in reversed(_MEMORY[-int(limit):])]
+            init_db(path)
+            conn = sqlite3.connect(str(path))
+            try:
+                rows = conn.execute(
+                    "SELECT {} FROM decision_ledger ORDER BY seq DESC LIMIT ?"
+                    .format(", ".join(cols)), (int(limit),)).fetchall()
+                return [LedgerRecord(**dict(zip(cols, r))).to_dict()
+                        for r in rows]
+            finally:
+                conn.close()
+        except (sqlite3.Error, OSError, TypeError):
+            return [LedgerRecord(**{k: m[k] for k in cols}).to_dict()
+                    for m in reversed(_MEMORY[-int(limit):])]
 
 
 def verify_chain(db_path: Optional[Path] = None) -> Dict[str, Any]:
@@ -287,69 +291,70 @@ def verify_chain(db_path: Optional[Path] = None) -> Dict[str, Any]:
     trust the stored hashes; it recomputes each link from the record contents
     and compares.
     """
-    path = db_path or DEFAULT_DB_PATH
-    cols = ["seq", "record_id", "timestamp", "actor", "action", "detail",
-            "payload_hash", "prev_hash", "record_hash", "payload_json"]
-    rows: List[Dict[str, Any]] = []
-    try:
-        init_db(path)
-        conn = sqlite3.connect(str(path))
+    with _LEDGER_LOCK:
+        path = db_path or DEFAULT_DB_PATH
+        cols = ["seq", "record_id", "timestamp", "actor", "action", "detail",
+                "payload_hash", "prev_hash", "record_hash", "payload_json"]
+        rows: List[Dict[str, Any]] = []
         try:
-            raw = conn.execute(
-                "SELECT {} FROM decision_ledger ORDER BY seq ASC"
-                .format(", ".join(cols))).fetchall()
-            rows = [dict(zip(cols, r)) for r in raw]
-        finally:
-            conn.close()
-    except (sqlite3.Error, OSError):
-        rows = [{k: m[k] for k in cols} for m in _MEMORY]
+            init_db(path)
+            conn = sqlite3.connect(str(path))
+            try:
+                raw = conn.execute(
+                    "SELECT {} FROM decision_ledger ORDER BY seq ASC"
+                    .format(", ".join(cols))).fetchall()
+                rows = [dict(zip(cols, r)) for r in raw]
+            finally:
+                conn.close()
+        except (sqlite3.Error, OSError):
+            rows = [{k: m[k] for k in cols} for m in _MEMORY]
 
-    if not rows:
+        if not rows:
+            return {
+                "intact": True,
+                "records": 0,
+                "head_hash": GENESIS_HASH,
+                "first_break_at_seq": None,
+                "detail": "Ledger is empty. An empty chain is trivially intact.",
+                "method": "HMAC-SHA256 append-only hash chain, recomputed from "
+                          "record contents.",
+            }
+
+        prev = GENESIS_HASH
+        break_at: Optional[int] = None
+        reason = ""
+        for r in rows:
+            try:
+                payload = json.loads(r["payload_json"])
+            except (ValueError, TypeError):
+                break_at, reason = r["seq"], "payload is not valid JSON"
+                break
+            if _payload_hash(payload) != r["payload_hash"]:
+                break_at, reason = r["seq"], "payload does not match payload_hash"
+                break
+            if r["prev_hash"] != prev:
+                break_at, reason = r["seq"], "prev_hash does not match the chain"
+                break
+            expect = _link_hash(r["seq"], r["timestamp"], r["actor"],
+                                r["action"], r["detail"],
+                                r["payload_hash"], r["prev_hash"])
+            if not hmac.compare_digest(expect, r["record_hash"]):
+                break_at, reason = r["seq"], "record_hash does not verify"
+                break
+            prev = r["record_hash"]
+
         return {
-            "intact": True,
-            "records": 0,
-            "head_hash": GENESIS_HASH,
-            "first_break_at_seq": None,
-            "detail": "Ledger is empty. An empty chain is trivially intact.",
+            "intact": break_at is None,
+            "records": len(rows),
+            "head_hash": prev,
+            "first_break_at_seq": break_at,
+            "detail": ("Every link recomputed and verified." if break_at is None
+                       else "Chain broken at sequence {}: {}.".format(
+                           break_at, reason)),
             "method": "HMAC-SHA256 append-only hash chain, recomputed from "
                       "record contents.",
+            "key": key_provenance(),
         }
-
-    prev = GENESIS_HASH
-    break_at: Optional[int] = None
-    reason = ""
-    for r in rows:
-        try:
-            payload = json.loads(r["payload_json"])
-        except (ValueError, TypeError):
-            break_at, reason = r["seq"], "payload is not valid JSON"
-            break
-        if _payload_hash(payload) != r["payload_hash"]:
-            break_at, reason = r["seq"], "payload does not match payload_hash"
-            break
-        if r["prev_hash"] != prev:
-            break_at, reason = r["seq"], "prev_hash does not match the chain"
-            break
-        expect = _link_hash(r["seq"], r["timestamp"], r["actor"],
-                            r["action"], r["detail"],
-                            r["payload_hash"], r["prev_hash"])
-        if not hmac.compare_digest(expect, r["record_hash"]):
-            break_at, reason = r["seq"], "record_hash does not verify"
-            break
-        prev = r["record_hash"]
-
-    return {
-        "intact": break_at is None,
-        "records": len(rows),
-        "head_hash": prev,
-        "first_break_at_seq": break_at,
-        "detail": ("Every link recomputed and verified." if break_at is None
-                   else "Chain broken at sequence {}: {}.".format(
-                       break_at, reason)),
-        "method": "HMAC-SHA256 append-only hash chain, recomputed from "
-                  "record contents.",
-        "key": key_provenance(),
-    }
 
 
 def reset(db_path: Optional[Path] = None) -> Dict[str, Any]:
@@ -358,22 +363,23 @@ def reset(db_path: Optional[Path] = None) -> Dict[str, Any]:
     The reset itself is recorded as the first record of the new chain, so a
     reset is visible rather than silent.
     """
-    path = db_path or DEFAULT_DB_PATH
-    _MEMORY.clear()
-    try:
-        init_db(path)
-        conn = sqlite3.connect(str(path))
+    with _LEDGER_LOCK:
+        path = db_path or DEFAULT_DB_PATH
+        _MEMORY.clear()
         try:
-            conn.execute("DELETE FROM decision_ledger")
-            conn.commit()
-        finally:
-            conn.close()
-    except (sqlite3.Error, OSError):
-        pass
-    return append(
-        "LEDGER_RESET",
-        "Ledger cleared and a new chain started for a fresh demonstration.",
-        {"reason": "demonstration_reset"},
-        actor="system",
-        db_path=path,
-    )
+            init_db(path)
+            conn = sqlite3.connect(str(path))
+            try:
+                conn.execute("DELETE FROM decision_ledger")
+                conn.commit()
+            finally:
+                conn.close()
+        except (sqlite3.Error, OSError):
+            pass
+        return append(
+            "LEDGER_RESET",
+            "Ledger cleared and a new chain started for a fresh demonstration.",
+            {"reason": "demonstration_reset"},
+            actor="system",
+            db_path=path,
+        )

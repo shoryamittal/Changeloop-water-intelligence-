@@ -94,7 +94,10 @@ function readout(opts) {
     '><div class="readout-k">' + opts.label + '</div>' +
     '<div class="readout-v' + (opts.size ? ' ' + opts.size : '') + '">' +
     '<span>' + (opts.raw != null ? opts.raw : num(opts.value, opts.dp)) + '</span>' +
-    (opts.unit ? '<span class="u">' + esc(opts.unit) + '</span>' : '') + '</div>' +
+    /* Units are author-written strings and may carry entities such as
+       m&#179; or CO&#8322;. Escaping them here, while label and foot go
+       through unescaped, printed the entity source on screen. */
+    (opts.unit ? '<span class="u">' + opts.unit + '</span>' : '') + '</div>' +
     (opts.foot ? '<div class="readout-f">' + opts.foot + '</div>' : '') + '</div>';
 }
 
@@ -197,6 +200,11 @@ function boot() {
       S.loadedAt = Date.now();
       renderChrome(); renderNav(); render();
       prefetch();
+      /* Land on a working plan, not a page of zeros. Optimising is a
+         read-only search: it proposes, and changes nothing. Approval is
+         still a named human act, so the impact figures stay at zero
+         until somebody actually decides - which is the point. */
+      if (S.state && S.state.stage === 'READY') { autoOptimise(); }
     })
     .catch(function (e) {
       document.getElementById('view').innerHTML =
@@ -206,6 +214,19 @@ function boot() {
         '<span class="status-t">' + esc(e.message) +
         '. Start it with <span class="mono">python backend/server.py</span>' +
         '</span></div></div>';
+    });
+}
+
+function autoOptimise() {
+  if (S.busy) return;
+  S.busy = true;
+  post('/api/optimise', { mode: S.mode })
+    .then(function (x) { S.state = x; return api('/api/forecast'); })
+    .then(function (f) { S.forecast = f; })
+    .catch(function () { /* the manual button remains */ })
+    .then(function () {
+      S.busy = false; S.loadedAt = Date.now();
+      render(); renderNav(); updateCtx();
     });
 }
 
@@ -1132,7 +1153,10 @@ function vCommand() {
   /* ---------------- baseline -> changeloop ---------------- */
   '<div class="sec">' + srule('Baseline to ChangeLoop',
     'attributed to the decisions actually taken') +
-    '<div class="strip">' +
+    /* Before anything is approved every figure here is a correct zero,
+       and five large zeros shout louder than the sentence explaining
+       them. Quieten the strip until there is something to report. */
+    '<div class="strip' + (!decided && !released ? ' strip-pending' : '') + '">' +
       readout({ label: 'Freshwater avoided', k: 'fw', tone: 'water',
         value: i.freshwater_avoided_l, unit: 'L', dp: 0,
         foot: down(i.freshwater_avoided_l, 'L', 0) + ' &middot; ' +
@@ -1153,9 +1177,9 @@ function vCommand() {
         foot: 'per shift' }) +
     '</div>' +
     (!decided && !released
-      ? '<p class="small muted" style="margin-top:10px">Zero until a ' +
-        'decision is approved. These are the figures for the decisions ' +
-        'actually taken.</p>' : '') +
+      ? '<p class="pending-note">Nothing is counted until a named person ' +
+        'approves the plan. A recommendation that is not approved is worth ' +
+        'zero, and the ledger says so.</p>' : '') +
   '</div>' +
 
   /* ---------------- recommendation + proof ---------------- */
@@ -2995,7 +3019,7 @@ function plantBar(p) {
     '<text x="0" y="' + (yA + 17) + '" class="pb-lab">EACH MACHINE</text>' +
     '<text x="0" y="' + (yA + 33) + '" class="pb-lab pb-lab-2">optimises alone</text>' +
     segs(sel, yA, sel.utilisation_pct > 100 ? 'pb-over' : 'pb-fit') +
-    '<text x="' + (x(sel.utilisation_pct) + 10).toFixed(1) + '" y="' +
+    '<text x="' + _pbLabelX(x(sel.utilisation_pct), capX) + '" y="' +
       (yA + barH / 2 + 5) + '" class="pb-val' +
       (sel.utilisation_pct > 100 ? ' pb-val-bad' : '') + '">' +
       num(sel.reject_m3_per_day, 1) + ' m&#179; &#183; ' +
@@ -3005,7 +3029,7 @@ function plantBar(p) {
     (co ? '<text x="0" y="' + (yB + 17) + '" class="pb-lab">COORDINATED</text>' +
       '<text x="0" y="' + (yB + 33) + '" class="pb-lab pb-lab-2">cheapest that fits</text>' +
       segs(co, yB, 'pb-fit') +
-      '<text x="' + (x(co.utilisation_pct) + 10).toFixed(1) + '" y="' +
+      '<text x="' + _pbLabelX(x(co.utilisation_pct), capX) + '" y="' +
         (yB + barH / 2 + 5) + '" class="pb-val">' +
         num(co.reject_m3_per_day, 1) + ' m&#179; &#183; ' +
         pct(co.utilisation_pct, 1) + '</text>' : '') +
@@ -3254,6 +3278,14 @@ function leverBars(p) {
     '</svg><figcaption>Same scale for all three. The bar is the size of ' +
     'the price change needed, not the size of the saving &mdash; every ' +
     'one of them reaches the same plan.</figcaption></figure>';
+}
+
+/* A bar ending just short of the capacity line had its value printed
+   straight through the line. Push the label clear of it. */
+function _pbLabelX(barEnd, capX) {
+  var at = barEnd + 10;
+  if (at < capX + 6 && barEnd + 96 > capX) at = capX + 12;
+  return at.toFixed(1);
 }
 
 function _fmtLv(v) {
