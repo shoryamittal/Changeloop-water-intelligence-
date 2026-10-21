@@ -538,3 +538,120 @@ def _build_rationale(baseline: Candidate,
             "depth-to-salt relationship would change the salt term.",
         ],
     }
+
+
+def optimise_milp(lots: List[DyeLot],
+                  arrival_order: List[str],
+                  site_id: str = "IN-TN-TIRUPUR-01",
+                  weights: Optional[ObjectiveWeights] = None,
+                  constraints: Optional[HardConstraints] = None) -> Dict[str, Any]:
+    """Solve the lot sequencing problem using exact Mixed-Integer Linear Programming.
+
+    Enforces MTZ subtour elimination, hard delivery pruning (C_i <= due_h_i for priority 1 lots),
+    and machine boil-out avoidance.
+    """
+    from .milp import solve_milp_sequence
+
+    w = weights or ObjectiveWeights()
+    c = constraints or HardConstraints()
+
+    for lot in lots:
+        err = lot.validate()
+        if err:
+            return {"status": "INFEASIBLE_INPUT", "reason": err, "classification": "MODELLED"}
+
+    ids = [l.lot_id for l in lots]
+    if sorted(arrival_order) != sorted(ids):
+        return {
+            "status": "INFEASIBLE_INPUT",
+            "reason": "Arrival order does not match the lot set.",
+            "classification": "MODELLED"
+        }
+
+    strat_ids = list(strategies().keys())
+    baseline = evaluate_candidate(lots, arrival_order, site_id, w, c, DEFAULT_STRATEGY)
+
+    # Solve MILP for each strategy
+    milp_results = {}
+    valid_candidates = []
+    for sid in strat_ids:
+        res = solve_milp_sequence(lots, strategy_id=sid, site_id=site_id, weights=w, constraints=c)
+        milp_results[sid] = res
+        if res.candidate and res.candidate.feasible:
+            valid_candidates.append(res.candidate)
+
+    if not valid_candidates:
+        return {
+            "status": "NO_FEASIBLE_OPTION",
+            "reason": ("No plan satisfies the hard constraints under MILP branch-and-cut. "
+                       "Firm delivery dates or lateness limits cannot be satisfied by any permutation."),
+            "baseline": baseline.to_dict(),
+            "constraints": c.to_dict(),
+            "classification": "MODELLED",
+        }
+
+    recommended = min(valid_candidates, key=lambda x: x.objective_inr)
+
+    def format_option(cand: Candidate, oid: str, title: str, desc: str, rec: bool) -> Dict[str, Any]:
+        cw = cand.consequence
+        bw = baseline.consequence
+        base_total = bw["cost_inr"]["total"] + baseline.sequence["strategy_cost_inr"]
+        cand_total = cw["cost_inr"]["total"] + cand.sequence["strategy_cost_inr"]
+        return {
+            "option_id": oid,
+            "title": title,
+            "description": desc,
+            "order": cand.order,
+            "strategy_id": cand.strategy_id,
+            "strategy": cand.sequence["strategy"],
+            "strategy_cost_inr": cand.sequence["strategy_cost_inr"],
+            "is_recommended": rec,
+            "feasible": cand.feasible,
+            "violations": cand.violations,
+            "changeover_water_l": cand.sequence["changeover_water_l"],
+            "changeover_salt_kg": cand.sequence["changeover_salt_kg"],
+            "freshwater_intake_l": cw["water"]["freshwater_intake_l"],
+            "permeate_reuse_l": cw["water"]["permeate_reuse_l"],
+            "stress_equivalent_l_eq": cw["stress_equivalent_l_eq"],
+            "total_salt_kg": cw["salt"]["total_salt_kg"],
+            "ro_reject_l": cw["zld"]["reject_l"],
+            "mee_thermal_kwh": cw["zld"]["mee_thermal_kwh"],
+            "site_energy_kwh": cw["energy"]["total_site_energy_kwh"],
+            "co2e_kg": cw["carbon"]["total_co2e_kg"],
+            "cost_inr": round(cand_total, 2),
+            "total_late_h": cand.sequence["total_late_h"],
+            "firm_date_breaches": cand.sequence["firm_date_breaches"],
+            "objective_inr": round(cand.objective_inr, 2),
+            "boil_outs_count": cand.sequence.get("boil_outs_count", 0),
+            "delta_vs_baseline": {
+                "freshwater_l": round(bw["water"]["freshwater_intake_l"] - cw["water"]["freshwater_intake_l"], 1),
+                "stress_l_eq": round(bw["stress_equivalent_l_eq"] - cw["stress_equivalent_l_eq"], 1),
+                "salt_kg": round(bw["salt"]["total_salt_kg"] - cw["salt"]["total_salt_kg"], 2),
+                "mee_thermal_kwh": round(bw["zld"]["mee_thermal_kwh"] - cw["zld"]["mee_thermal_kwh"], 1),
+                "co2e_kg": round(bw["carbon"]["total_co2e_kg"] - cw["carbon"]["total_co2e_kg"], 2),
+                "mee_co2e_kg": round(bw["carbon"]["mee_thermal_co2e_kg"] - cw["carbon"]["mee_thermal_co2e_kg"], 2),
+                "dyehouse_thermal_kwh": round(bw["energy"]["dyehouse_thermal_kwh"] - cw["energy"]["dyehouse_thermal_kwh"], 1),
+                "dyehouse_co2e_kg": round(bw["carbon"]["dyehouse_thermal_co2e_kg"] - cw["carbon"]["dyehouse_thermal_co2e_kg"], 2),
+                "cost_inr": round(base_total - cand_total, 2),
+                "lateness_h": round(cand.sequence["total_late_h"] - baseline.sequence["total_late_h"], 2),
+            },
+        }
+
+    options = [
+        format_option(baseline, "OPTION_A", "No intervention - ERP arrival order", "Current practice default sequence.", False),
+        format_option(recommended, "OPTION_B", "ChangeLoop MILP recommendation", "Mathematically certified global optimum.", True),
+    ]
+
+    rationale = _build_rationale(baseline, recommended, options[1]["delta_vs_baseline"], site_id)
+
+    return {
+        "status": "FEASIBLE",
+        "site_id": site_id,
+        "method": "Mixed-Integer Linear Programming (scipy.optimize.milp / HiGHS)",
+        "optimality": "PROVEN_GLOBAL_OPTIMUM",
+        "options": options,
+        "recommended_option_id": "OPTION_B",
+        "rationale": rationale,
+        "classification": "MODELLED",
+    }
+

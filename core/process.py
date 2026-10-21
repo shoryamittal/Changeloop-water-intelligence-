@@ -96,6 +96,20 @@ def washoff_baths(depth_owf: float) -> int:
     return int(min(7, max(2, round(2.0 + 0.95 * d))))
 
 
+def shade_tier(depth_owf: float) -> str:
+    """Categorise shade depth into standard industrial dyehouse tiers:
+    LIGHT: pastels, bleach, ecru (< 1.0% owf)
+    MEDIUM: mid-shades, rose, olive (1.0% - 3.0% owf)
+    DARK: navy, carbon black, reactive turquoise (> 3.0% owf)
+    """
+    d = max(0.0, float(depth_owf))
+    if d < 1.0:
+        return "LIGHT"
+    if d <= 3.0:
+        return "MEDIUM"
+    return "DARK"
+
+
 # ---------------------------------------------------------------------------
 # Dye lots
 # ---------------------------------------------------------------------------
@@ -169,12 +183,17 @@ class DyeLot:
             "classification": "MODELLED",
         }
 
+    @property
+    def shade_tier(self) -> str:
+        return shade_tier(self.depth_owf)
+
     def to_dict(self) -> Dict[str, Any]:
         d = asdict(self)
         d["bath_litres"] = self.bath_litres
         d["salt_dose_g_per_l"] = salt_dose_g_per_l(self.depth_owf)
         d["shade_tolerance"] = shade_tolerance(self.depth_owf)
         d["washoff_baths"] = washoff_baths(self.depth_owf)
+        d["shade_tier"] = self.shade_tier
         return d
 
 
@@ -206,12 +225,18 @@ class Changeover:
     class_change: bool
     severity: str                # NONE | LOW | MODERATE | SEVERE
     drivers: List[str] = field(default_factory=list)
+    is_boil_out: bool = False
+    from_shade_tier: str = "LIGHT"
+    to_shade_tier: str = "LIGHT"
 
     def to_dict(self) -> Dict[str, Any]:
         d = asdict(self)
         d["water_l"] = round(self.water_l, 1)
         d["salt_kg"] = round(self.salt_kg, 3)
         d["minutes"] = round(self.minutes, 1)
+        d["is_boil_out"] = self.is_boil_out
+        d["from_shade_tier"] = self.from_shade_tier
+        d["to_shade_tier"] = self.to_shade_tier
         return d
 
 
@@ -300,6 +325,16 @@ def changeover_burden(from_lot: DyeLot, to_lot: DyeLot) -> Changeover:
     else:
         severity = "SEVERE"
 
+    from_tier = shade_tier(from_lot.depth_owf)
+    to_tier = shade_tier(to_lot.depth_owf)
+    is_boil_out = bool(direction == "DARK_TO_LIGHT" and (baths >= 3 or (from_tier == "DARK" and to_tier == "LIGHT")))
+    if is_boil_out:
+        drivers.append(
+            "Machine Boil-Out required: {} -> {} ({:.2f}% -> {:.2f}% owf) forces a "
+            "caustic soda/hydrosulfite boil-out to prevent off-shade cross-contamination."
+            .format(from_tier, to_tier, from_lot.depth_owf, to_lot.depth_owf)
+        )
+
     return Changeover(
         from_lot=from_lot.lot_id,
         to_lot=to_lot.lot_id,
@@ -313,6 +348,9 @@ def changeover_burden(from_lot: DyeLot, to_lot: DyeLot) -> Changeover:
         class_change=class_change,
         severity=severity,
         drivers=drivers,
+        is_boil_out=is_boil_out,
+        from_shade_tier=from_tier,
+        to_shade_tier=to_tier,
     )
 
 
@@ -515,6 +553,7 @@ def evaluate_sequence(lots: List[DyeLot], order: List[str],
         "total_salt_kg": round(process_salt + changeover_salt, 2),
         "total_minutes": round(process_minutes + changeover_minutes, 1),
         "transitions": transitions,
+        "boil_outs_count": sum(1 for t in transitions if t.get("is_boil_out")),
         "lateness": lateness,
         "total_late_h": round(total_late_h, 2),
         "firm_date_breaches": firm_breaches,

@@ -77,7 +77,7 @@
 
   /* --- type: one family, plus mono for data -------------------------- */
   --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   /* --- scale ---------------------------------------------------------- */
   --t-micro:  10px;
@@ -1577,3 +1577,277 @@ body { overflow-x: hidden; }
 @media (prefers-reduced-motion: no-preference) {
   .strip-pending .readout-v { transition: color var(--m-slow) var(--ease); }
 }
+
+/* ==========================================================================
+   PALANTIR FOR TEXTILES: HIGH-DENSITY INDUSTRIAL CONTROL ROOM STYLES
+   ========================================================================== */
+
+/* Badges & Monospace Tags */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  font-size: var(--t-micro);
+  font-family: var(--mono);
+  font-weight: 500;
+  border-radius: var(--r);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.badge-emerald { background: var(--emerald-pale); color: var(--emerald); border: 1px solid var(--emerald); }
+.badge-coral { background: var(--coral-pale); color: var(--coral); border: 1px solid var(--coral); }
+.badge-amber { background: var(--amber-pale); color: var(--amber); border: 1px solid var(--amber); }
+.badge-cyan { background: var(--cyan-pale); color: var(--cyan); border: 1px solid var(--cyan); }
+.badge-slate { background: var(--aquifer); color: var(--slate); border: 1px solid var(--hair-2); }
+.badge-subtle { background: transparent; color: var(--slate-2); border: 1px solid var(--hair); }
+
+/* Gantt Dual-Timeline Workbench */
+.gantt-panel {
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-lg);
+  padding: var(--s4);
+  margin-bottom: var(--s4);
+}
+.gantt-hd {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--s3);
+  padding-bottom: var(--s2);
+  border-bottom: 1px solid var(--hair);
+}
+.gantt-title {
+  font-size: var(--t-small);
+  font-weight: 600;
+  color: var(--graphite);
+}
+.gantt-meta {
+  font-size: var(--t-micro);
+  color: var(--slate-2);
+}
+.gantt-stream {
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  padding: var(--s2) 0;
+  gap: var(--s2);
+}
+.gantt-block {
+  flex: 0 0 170px;
+  background: var(--pearl);
+  border: 1px solid var(--hair-2);
+  border-radius: var(--r);
+  padding: var(--s3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  transition: border-color var(--m-fast) var(--ease);
+}
+.gantt-block:hover {
+  border-color: var(--water-lift);
+}
+.gantt-opt {
+  border-left: 3px solid var(--emerald);
+}
+.gantt-base {
+  border-left: 3px solid var(--slate-3);
+}
+.gantt-block-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2);
+}
+.swatch-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+.gantt-block-article {
+  color: var(--slate);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gantt-block-stats {
+  font-size: var(--t-micro);
+  color: var(--slate-2);
+}
+.gantt-block-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--s1);
+  padding-top: var(--s1);
+  border-top: 1px dashed var(--hair);
+  font-size: var(--t-micro);
+}
+.tag-on-time { color: var(--emerald); font-weight: 600; }
+.tag-late { color: var(--coral); font-weight: 600; }
+
+.gantt-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-width: 60px;
+  padding: 0 var(--s1);
+}
+.link-line {
+  height: 2px;
+  background: var(--hair-2);
+  width: 100%;
+  margin-bottom: var(--s1);
+}
+.link-boilout .link-line {
+  background: var(--coral);
+}
+.link-clean .link-line {
+  background: var(--emerald);
+}
+
+/* MEE Thermal Capacity Gauge */
+.mee-gauge-box {
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-lg);
+  padding: var(--s5);
+  margin-bottom: var(--s4);
+}
+.mee-meter-outer {
+  height: 20px;
+  background: var(--aquifer);
+  border-radius: var(--r);
+  overflow: hidden;
+  position: relative;
+  margin: var(--s3) 0;
+  border: 1px solid var(--hair-2);
+}
+.mee-meter-fill {
+  height: 100%;
+  transition: width var(--m-slow) var(--ease), background var(--m-fast) var(--ease);
+}
+.fill-overload {
+  background: linear-gradient(90deg, var(--amber), var(--coral));
+}
+.fill-safe {
+  background: linear-gradient(90deg, var(--water), var(--emerald));
+}
+.mee-meter-threshold {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 82%;
+  width: 2px;
+  background: var(--coral);
+  z-index: 2;
+}
+.overload-alert-banner {
+  background: var(--coral-pale);
+  border: 1px solid var(--coral);
+  color: var(--coral);
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r);
+  font-family: var(--mono);
+  font-size: var(--t-small);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--s3);
+}
+.safe-banner {
+  background: var(--emerald-pale);
+  border: 1px solid var(--emerald);
+  color: var(--emerald);
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r);
+  font-family: var(--mono);
+  font-size: var(--t-small);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--s3);
+}
+
+/* Ionic Calibration Lab & Titration Split-View */
+.titration-split-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s4);
+  margin-bottom: var(--s4);
+}
+@media (max-width: 800px) {
+  .titration-split-grid { grid-template-columns: 1fr; }
+}
+.titration-card {
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-lg);
+  padding: var(--s4);
+}
+.formula-callout {
+  background: var(--aquifer);
+  border-left: 3px solid var(--water);
+  padding: var(--s3);
+  border-radius: 0 var(--r) var(--r) 0;
+  font-family: var(--mono);
+  font-size: var(--t-micro);
+  margin: var(--s3) 0;
+  color: var(--graphite);
+}
+
+/* Scope-3 CBAM Certificate Styling */
+.cbam-cert-container {
+  background: var(--surface);
+  border: 2px solid var(--emerald);
+  border-radius: var(--r-lg);
+  padding: var(--s6);
+  position: relative;
+  margin-bottom: var(--s5);
+}
+.cbam-cert-hd {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--hair);
+  padding-bottom: var(--s4);
+  margin-bottom: var(--s4);
+}
+.cbam-cert-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--s4);
+  margin: var(--s4) 0;
+}
+.hash-block {
+  background: var(--pearl);
+  border: 1px solid var(--hair-2);
+  padding: var(--s3);
+  border-radius: var(--r);
+  font-family: var(--mono);
+  font-size: var(--t-micro);
+  word-break: break-all;
+  color: var(--slate);
+}
+
+/* Provenance Ledger & Tamper Detection */
+.chain-block-card {
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-radius: var(--r);
+  padding: var(--s3) var(--s4);
+  margin-bottom: var(--s2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all var(--m-fast) var(--ease);
+}
+.block-tampered {
+  border-color: var(--coral) !important;
+  background: var(--coral-pale) !important;
+}
+

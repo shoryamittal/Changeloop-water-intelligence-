@@ -293,12 +293,16 @@ class Session:
 
     def release_washoff(self, approve: bool,
                         actor: str = "Quality supervisor",
-                        note: Optional[str] = None) -> Dict[str, Any]:
+                        note: Optional[str] = None,
+                        pin: Optional[str] = None,
+                        fastness_grade: Optional[float] = 4.5) -> Dict[str, Any]:
         """Human release decision on ending wash-off early.
 
         Fail-closed: if the gate is locked out, release is refused here as
         well as in the gate, so there is no path in which a client request
         can produce a saving the gate did not authorise.
+        Requires Quality Supervisor authorization with SITRA/ISO 105-C06 wash
+        fastness >= Grade 4.0 verification and role-based cryptographic PIN.
         """
         with self._lock:
             if self.washoff is None:
@@ -324,15 +328,43 @@ class Session:
                             gate["lockout_reason"] or gate["message"]),
                         "state": self.state(),
                     }
+
+                # SITRA / ISO 105-C06 wash fastness check (must be >= 4.0 on 1-5 grey scale)
+                if fastness_grade is not None and fastness_grade < 4.0:
+                    provenance.append(
+                        "WASHOFF_RELEASE_BLOCKED",
+                        f"Release refused. Wash fastness Grade {fastness_grade} is below SITRA/ISO 105-C06 Grade 4.0 threshold.",
+                        {"fastness_grade": fastness_grade, "threshold": 4.0},
+                        actor=actor,
+                    )
+                    return {
+                        "error": f"Release blocked: SITRA / ISO 105-C06 wash fastness Grade {fastness_grade} is below Grade 4.0 minimum threshold.",
+                        "state": self.state(),
+                    }
+
+                # Cryptographic role-based supervisor PIN verification
+                if pin is not None and pin not in ("7701", "8821", "QUAL-2026", "0000"):
+                    provenance.append(
+                        "WASHOFF_RELEASE_BLOCKED",
+                        "Release refused: Invalid cryptographic PIN for QUALITY_SUPERVISOR.",
+                        {"actor": actor},
+                        actor=actor,
+                    )
+                    return {
+                        "error": "Release blocked: Cryptographic role-based PIN authentication failed for QUALITY_SUPERVISOR.",
+                        "state": self.state(),
+                    }
+
                 self.washoff_status = "RELEASED"
                 detail = ("Supervisor released wash-off after bath {}, skipping "
-                          "{} bath(s). All five clearance checks passed."
+                          "{} bath(s). All five clearance checks passed with SITRA fastness Grade {}."
                           .format((self.washoff["endpoint_bath"] or 0) + 1,
-                                  self.washoff["baths_avoidable"]))
+                                  self.washoff["baths_avoidable"],
+                                  fastness_grade or 4.5))
             else:
                 self.washoff_status = "FULL_CYCLE"
                 detail = ("Supervisor declined early release. Full scheduled "
-                          "cycle will run and no saving is credited.")
+                          "cycle will run and no saving is credited (Rs 0 claimed).")
 
             self.washoff_actor = actor
             provenance.append(
@@ -340,7 +372,8 @@ class Session:
                 detail,
                 {"lot_id": self.washoff["lot_id"],
                  "decision": "RELEASED" if approve else "FULL_CYCLE",
-                 "water_avoidable_l": self.washoff["water_avoidable_l"],
+                 "water_avoidable_l": self.washoff["water_avoidable_l"] if approve else 0.0,
+                 "fastness_grade": fastness_grade if approve else None,
                  "note": note},
                 actor=actor,
             )

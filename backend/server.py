@@ -30,6 +30,7 @@ import core
 from core import (
     factors, basin, process, zld, telemetry, provenance, economics,
     scenarios, ledger, forecast, narrative, plant, policy,
+    calibration, billing, milp,
 )
 from core.session import get_session
 
@@ -643,9 +644,19 @@ class App(SimpleHTTPRequestHandler):
                     ledger.trace(one("metric", "freshwater_avoided_l")))
 
             if route == "/api/evidence":
+                summary = factors.evidence_summary()
                 return self.send_json({
+                    "total_coefficients": len(factors.FACTORS),
+                    "evidence_mix": {
+                        "PUBLISHED": summary.get("PUBLISHED", 0),
+                        "DERIVED": summary.get("DERIVED", 0),
+                        "ASSUMED": summary.get("ASSUMED", 0),
+                        "MEASURED": summary.get("MEASURED", 0),
+                    },
+                    "pre_pilot_mode": True,
+                    "pre_pilot_measured_count": summary.get("MEASURED", 0),
                     "coefficients": factors.audit_trail(),
-                    "summary": factors.evidence_summary(),
+                    "summary": summary,
                     "basin_methodology": basin.methodology(),
                     "release_limits": telemetry.release_limits(),
                     "claim_register": claim_register(),
@@ -703,6 +714,46 @@ class App(SimpleHTTPRequestHandler):
                     lots_per_unit_per_year=int(num("lots", 900)),
                     salt_avoided_per_lot_kg=num("salt_per_lot", 12.5),
                 ))
+
+            if route == "/api/calibration/ionic":
+                hw = calibration.CALIBRATION_ENGINE.get_hardware_status()
+                cal = calibration.CALIBRATION_ENGINE.calibrate_tds(
+                    raw_conductivity_us_cm=float(one("conductivity", "18500.0")),
+                    ph=float(one("ph", "9.8")),
+                    temp_c=float(one("temp", "25.0")),
+                )
+                return self.send_json({"hardware": hw, "calibration": cal})
+
+            if route == "/api/billing":
+                imp = s.impact()
+                salt_avoided = imp.get("avoided_consequence", {}).get("salt", {}).get("total_salt_kg", 12.5)
+                cost_saved = imp.get("avoided_consequence", {}).get("cost_inr", {}).get("total", 5834.0)
+                quote = billing.calculate_billing(
+                    lots_processed=len(s.lots),
+                    salt_avoided_kg=salt_avoided,
+                    client_total_savings_inr=cost_saved,
+                    include_cbam=True,
+                    new_skids=0,
+                )
+                switching = billing.evaluate_switching_thresholds()
+                return self.send_json({
+                    "quote": quote.to_dict(),
+                    "switching_thresholds": switching,
+                })
+
+            if route == "/api/cbam/export":
+                imp = s.impact()
+                co2e_avoided = imp.get("avoided_consequence", {}).get("carbon", {}).get("total_co2e_kg", 18.5)
+                fabric_kg = sum(l.fabric_kg for l in s.lots)
+                lot_ids = [l.lot_id for l in s.lots]
+                cert = billing.generate_cbam_certificate(
+                    site_id=s.site_id,
+                    reporting_period="OCT-2026",
+                    production_kg=fabric_kg,
+                    co2e_avoided_kg=co2e_avoided,
+                    lot_ids=lot_ids,
+                )
+                return self.send_json(cert)
 
             if route.startswith("/api/"):
                 return self.send_error_json(
@@ -802,9 +853,19 @@ class App(SimpleHTTPRequestHandler):
                     return self.send_error_json(
                         400, "MISSING_DECISION",
                         "Send approve as an explicit true or false.")
+                pin = body.get("pin")
+                fg_val = body.get("fastness_grade")
+                try:
+                    fastness_grade = float(fg_val) if fg_val is not None else 4.5
+                except (ValueError, TypeError):
+                    fastness_grade = 4.5
                 out = s.release_washoff(
-                    approve, actor=self._actor(body, "Quality supervisor"),
-                    note=body.get("note"))
+                    approve,
+                    actor=self._actor(body, "Quality supervisor"),
+                    note=body.get("note"),
+                    pin=pin,
+                    fastness_grade=fastness_grade,
+                )
                 if "error" in out:
                     return self.send_error_json(
                         409, "RELEASE_BLOCKED", out["error"],
@@ -817,6 +878,71 @@ class App(SimpleHTTPRequestHandler):
                 code = 200 if out.get("status") == "CALCULATED" else 422
                 _idem_put(idem, out)
                 return self.send_json(out, code)
+
+            if route == "/api/calibration/ionic":
+                raw_cond = float(body.get("raw_conductivity_us_cm", 18500.0))
+                ph = float(body.get("ph", 9.8))
+                temp = float(body.get("temperature_c", 25.0))
+                titration_data = body.get("titration")
+                if titration_data and isinstance(titration_data, dict):
+                    titr = calibration.TitrationRecord(**titration_data)
+                    calibration.CALIBRATION_ENGINE.update_titration(titr)
+                out = calibration.CALIBRATION_ENGINE.calibrate_tds(raw_cond, ph, temp)
+                _idem_put(idem, out)
+                return self.send_json(out)
+
+            if route == "/api/billing":
+                quote = billing.calculate_billing(
+                    lots_processed=int(body.get("lots_processed", len(s.lots))),
+                    salt_avoided_kg=float(body.get("salt_avoided_kg", 0.0)),
+                    client_total_savings_inr=float(body.get("client_total_savings_inr", 0.0)),
+                    include_cbam=bool(body.get("include_cbam", True)),
+                    new_skids=int(body.get("new_skids", 0)),
+                )
+                _idem_put(idem, quote.to_dict())
+                return self.send_json(quote.to_dict())
+
+            if route == "/api/cbam/export":
+                imp = s.impact()
+                co2e_avoided = float(body.get("co2e_avoided_kg", imp.get("avoided_consequence", {}).get("carbon", {}).get("total_co2e_kg", 18.5)))
+                fabric_kg = float(body.get("production_kg", sum(l.fabric_kg for l in s.lots)))
+                lot_ids = body.get("lot_ids", [l.lot_id for l in s.lots])
+                cert = billing.generate_cbam_certificate(
+                    site_id=s.site_id,
+                    reporting_period=body.get("reporting_period", "OCT-2026"),
+                    production_kg=fabric_kg,
+                    co2e_avoided_kg=co2e_avoided,
+                    lot_ids=lot_ids,
+                )
+                _idem_put(idem, cert)
+                return self.send_json(cert)
+
+            if route == "/api/optimizer/milp":
+                mode_id = body.get("mode")
+                w = None
+                c = None
+                if mode_id:
+                    modes = scenarios.constraint_modes()
+                    if mode_id in modes:
+                        w = modes[mode_id].weights
+                        c = modes[mode_id].constraints
+                from core.optimizer import optimise_milp
+                out = optimise_milp(s.lots, s.arrival, site_id=s.site_id, weights=w, constraints=c)
+                _idem_put(idem, out)
+                return self.send_json(out)
+
+            if route == "/api/ledger/tamper-test":
+                seq = int(body.get("seq", 1))
+                detail = str(body.get("detail", "FORGED: Zero salt discharged - manually altered record"))
+                res = provenance.tamper_record(seq=seq, new_detail=detail)
+                integrity = provenance.verify_chain()
+                out = {
+                    "tamper_action": res,
+                    "post_tamper_integrity": integrity,
+                    "detection_confirmed": not integrity["intact"],
+                }
+                _idem_put(idem, out)
+                return self.send_json(out)
 
             return self.send_error_json(
                 404, "UNKNOWN_ROUTE",

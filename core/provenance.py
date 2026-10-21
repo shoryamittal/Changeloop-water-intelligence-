@@ -383,3 +383,45 @@ def reset(db_path: Optional[Path] = None) -> Dict[str, Any]:
             actor="system",
             db_path=path,
         )
+
+
+def tamper_record(seq: int = 1,
+                  new_detail: str = "FORGED: Zero salt discharged - manually altered record",
+                  db_path: Optional[Path] = None) -> Dict[str, Any]:
+    """Intentionally alter a record in the ledger to prove HMAC-SHA256 tamper-evidence.
+
+    Used by the Radical Transparency Inspector and Tamper Test interactive button.
+    """
+    with _LEDGER_LOCK:
+        path = db_path or DEFAULT_DB_PATH
+        tampered = False
+        # Alter in memory
+        for r in _MEMORY:
+            if r["seq"] == seq:
+                r["detail"] = new_detail
+                tampered = True
+                break
+
+        # Alter in sqlite
+        try:
+            init_db(path)
+            conn = sqlite3.connect(str(path))
+            try:
+                conn.execute(
+                    "UPDATE decision_ledger SET detail = ? WHERE seq = ?",
+                    (new_detail, seq)
+                )
+                conn.commit()
+                tampered = True
+            finally:
+                conn.close()
+        except (sqlite3.Error, OSError):
+            pass
+
+        return {
+            "status": "TAMPERED" if tampered else "NOT_FOUND",
+            "seq": seq,
+            "forged_detail": new_detail,
+            "message": "Record was manually edited. Running verify_chain() will now detect the cryptographic breach.",
+        }
+

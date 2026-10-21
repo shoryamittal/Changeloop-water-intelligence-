@@ -48,6 +48,9 @@ from . import economics
 from . import forecast
 from . import scenarios
 from . import session
+from . import calibration
+from . import billing
+from . import milp
 
 from .basin import Basin, BASINS, get_basin, all_basins, DEFAULT_SITE
 from .process import (
