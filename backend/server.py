@@ -155,6 +155,7 @@ def pilot_plan() -> Dict[str, Any]:
             "MODELLED. We will not describe a modelled number as a result, "
             "and the interface labels it on every screen."
         ),
+        "ab_tracker": telemetry.pilot_ab_statistical_tracker(),
     }
 
 
@@ -611,7 +612,20 @@ class App(SimpleHTTPRequestHandler):
                 # wants, so it changes whether the plant fits at all.
                 out["mode_id"] = mode.mode_id
                 out["mode_name"] = mode.name
+                out["consortium_procurement"] = plant.cetp_consortium_procurement()
                 return self.send_json(out)
+
+            if route == "/api/consortium-procurement":
+                def_mills = int(one("mills", "18"))
+                def_lots = int(one("lots", "5000"))
+                return self.send_json(plant.cetp_consortium_procurement(
+                    connected_mills=def_mills,
+                    lots_per_mill_per_year=def_lots,
+                ))
+
+            if route == "/api/policy/fuel":
+                fuel_key = one("fuel", "COAL_BASELINE")
+                return self.send_json(policy.boiler_fuel_analysis(fuel_key, site_id=s.site_id))
 
             # Switching prices. The only endpoint that answers a
             # question about policy rather than about this shift, and the
@@ -930,6 +944,22 @@ class App(SimpleHTTPRequestHandler):
                 out = optimise_milp(s.lots, s.arrival, site_id=s.site_id, weights=w, constraints=c)
                 _idem_put(idem, out)
                 return self.send_json(out)
+
+            if route == "/api/policy/fuel":
+                fuel_key = str(body.get("fuel", "COAL_BASELINE"))
+                res = policy.boiler_fuel_analysis(fuel_key, site_id=s.site_id)
+                _idem_put(idem, res)
+                return self.send_json(res)
+
+            if route == "/api/consortium-procurement":
+                def_mills = int(body.get("mills", 18))
+                def_lots = int(body.get("lots", 5000))
+                res = plant.cetp_consortium_procurement(
+                    connected_mills=def_mills,
+                    lots_per_mill_per_year=def_lots,
+                )
+                _idem_put(idem, res)
+                return self.send_json(res)
 
             if route == "/api/ledger/tamper-test":
                 seq = int(body.get("seq", 1))

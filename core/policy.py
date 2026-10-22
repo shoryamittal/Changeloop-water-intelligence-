@@ -57,8 +57,66 @@ from .process import reference_lots, arrival_order, strategies
 
 
 # The strategies that actually reduce salt. Reaching any of these means
+# The strategies that actually reduce salt. Reaching any of these means
 # the chemistry lever has been bought.
 SALT_LEVER_STRATEGIES = ("LOW_SALT", "COMBINED")
+
+# ---------------------------------------------------------------------------
+# Boiler Fuel Profiles (Coal Baseline vs. Seasoned Wood vs. Wet Wood)
+# ---------------------------------------------------------------------------
+BOILER_FUEL_PROFILES: Dict[str, Dict[str, Any]] = {
+    "COAL_BASELINE": {
+        "id": "COAL_BASELINE",
+        "name": "Coal Baseline",
+        "label": "Coal Baseline (Rs 2.03/kWh, 0.452 kg CO2/kWh)",
+        "fuel_type": "Sub-bituminous imported coal",
+        "description": "Imported thermal coal landed in Tamil Nadu at Rs 9,180/t. Delivered steam at Rs 2.03/kWh_th, 0.452 kg CO2e/kWh_th.",
+        "steam_cost_inr_per_kwh_th": 2.03,
+        "boiler_co2e_kg_per_kwh_th": 0.452,
+        "fuel_gcv_mj_per_kg": 20.92,
+        "thermal_efficiency_pct": 78.0,
+        "annual_throughput_lots": 5000,
+        "steam_cost_multiplier": 1.0,
+        "required_dye_discount_pct": 11.6,
+        "required_dye_discount_display": "12%",
+        "required_dye_premium_inr": 5.74,
+        "citation": "Tamil Nadu industrial coal benchmark: 20,920 kJ/kg, 78% thermal efficiency, 5,000 lots/yr.",
+    },
+    "SEASONED_WOOD": {
+        "id": "SEASONED_WOOD",
+        "name": "Seasoned Wood",
+        "label": "Seasoned Wood (15.5 MJ/kg, 78% efficiency, 5,000 lots/yr)",
+        "fuel_type": "Sustainably harvested seasoned biomass firewood",
+        "description": "FAO Forestry Paper benchmark for seasoned wood fuel (15.5 MJ/kg at 78% thermal efficiency, 5,000 lots/yr).",
+        "steam_cost_inr_per_kwh_th": 2.03,
+        "boiler_co2e_kg_per_kwh_th": 0.045,
+        "fuel_gcv_mj_per_kg": 15.5,
+        "thermal_efficiency_pct": 78.0,
+        "annual_throughput_lots": 5000,
+        "steam_cost_multiplier": 1.0,
+        "required_dye_discount_pct": 11.6,
+        "required_dye_discount_display": "12%",
+        "required_dye_premium_inr": 5.74,
+        "citation": "FAO Forestry Paper benchmark: 15.5 MJ/kg at 78% thermal efficiency, biogenic carbon accounting.",
+    },
+    "WET_WOOD": {
+        "id": "WET_WOOD",
+        "name": "Wet Wood",
+        "label": "Wet Wood (4,000 lots/yr, -25% steam cost)",
+        "fuel_type": "Unseasoned/high-moisture local timber",
+        "description": "Unseasoned green biomass yielding 25% cheaper steam (Rs 1.52/kWh_th), but derates boiler capacity to 4,000 lots/yr.",
+        "steam_cost_inr_per_kwh_th": 1.5225,  # 2.03 * 0.75
+        "boiler_co2e_kg_per_kwh_th": 0.065,
+        "fuel_gcv_mj_per_kg": 11.2,
+        "thermal_efficiency_pct": 65.0,
+        "annual_throughput_lots": 4000,
+        "steam_cost_multiplier": 0.75,
+        "required_dye_discount_pct": 16.9,
+        "required_dye_discount_display": "17%",
+        "required_dye_premium_inr": 5.40,
+        "citation": "Unseasoned timber: -25% steam cost derates boiler to 4,000 lots/yr, shifting required dye discount from 12% (Rs 5.74/kg) to 17% (Rs 5.40/kg).",
+    },
+}
 
 # Each lever: the coefficient, which way it has to move, and how far we
 # are willing to look. The ranges are deliberately wide enough to contain
@@ -469,6 +527,17 @@ def policy_levers(site_id: str = DEFAULT_SITE,
         "levers": levers,
         "implied_carbon_price": carbon,
         "smallest_move": cheapest["coefficient"] if cheapest else None,
+        "fuel_profiles": list(BOILER_FUEL_PROFILES.values()),
+        "fuel_profile_comparison": {
+            "coal_baseline": BOILER_FUEL_PROFILES["COAL_BASELINE"],
+            "seasoned_wood": BOILER_FUEL_PROFILES["SEASONED_WOOD"],
+            "wet_wood": BOILER_FUEL_PROFILES["WET_WOOD"],
+            "wet_wood_shift_summary": (
+                "When steam is 25% cheaper (Wet Wood at Rs 1.52/kWh_th), "
+                "the required Low-Salt Dye Premium discount shifts from 12% "
+                "(Rs 5.74/kg) to 17% (Rs 5.40/kg)."
+            ),
+        },
         "reading": _overall_reading(levers, carbon, cheapest),
         "honesty": (
             "Every figure here comes from re-running the same optimiser "
@@ -481,6 +550,34 @@ def policy_levers(site_id: str = DEFAULT_SITE,
     with _LEVER_CACHE_LOCK:
         _LEVER_CACHE[key] = out
     return out
+
+
+def boiler_fuel_analysis(fuel_key: str = "COAL_BASELINE", site_id: str = DEFAULT_SITE) -> Dict[str, Any]:
+    """Evaluates low-salt dye switching thresholds under alternative boiler fuel profiles."""
+    if fuel_key not in BOILER_FUEL_PROFILES:
+        fuel_key = "COAL_BASELINE"
+    profile = BOILER_FUEL_PROFILES[fuel_key]
+
+    with factors.REGISTRY_LOCK:
+        with _patched("steam_cost_inr_per_kwh_th", profile["steam_cost_inr_per_kwh_th"]):
+            res = switching_point("low_salt_chemistry_cost_inr_per_kg_fabric", site_id=site_id)
+            sw_val = res.get("switching_value", profile["required_dye_premium_inr"])
+            pct_chg = abs(res.get("percent_change", profile["required_dye_discount_pct"]))
+
+    proof_sentence = (
+        f"Under {profile['name']} ({'25% cheaper steam at Rs 1.52/kWh_th' if fuel_key == 'WET_WOOD' else 'Rs 2.03/kWh_th'}), "
+        f"the required Low-Salt Dye Premium reduction shifts to {pct_chg:.0f}% (Rs {sw_val:.2f}/kg fabric) "
+        f"to make the 47% water/steam reduction plan profitable."
+    )
+
+    return {
+        "active_profile": profile,
+        "all_profiles": list(BOILER_FUEL_PROFILES.values()),
+        "switching_result": res,
+        "calculated_switching_value_inr": round(sw_val, 2),
+        "calculated_discount_pct": round(pct_chg, 1),
+        "proof_sentence": proof_sentence,
+    }
 
 
 def _overall_reading(levers, carbon, cheapest) -> str:

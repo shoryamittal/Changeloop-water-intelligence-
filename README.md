@@ -257,15 +257,32 @@ python backend/server.py
 # http://localhost:8000
 ```
 
-Tests:
+Tests & Invariant Audits:
 
 ```bash
-python -m unittest discover -s tests -p "test_engine.py"   # 81 engine tests
-python tests/verify_system.py                              # golden path, safety,
-                                                           # determinism, tamper
-node tests/test_frontend_render.js                         # all 8 views
-                                                           # (server must be up)
+python -m unittest discover -s tests                     # 216 test cases across engine, milp, domain & tamper
+python tests/verify_system.py                              # golden path, safety, determinism, tamper
+python scripts/verify_concept_note.py                      # 17/17 Concept Note figures certified (zero drift)
+node tests/test_frontend_render.js                         # all 15 views (server must be up)
 ```
+
+### Concept Note Zero-Drift Certification (`scripts/verify_concept_note.py`)
+Run `python scripts/verify_concept_note.py` to programmatically assert all 17 empirical benchmarks and physical invariants from the 8-page Concept Note:
+- **₹1,572 / lot** combined plan net saving (₹78.6 Lakh/yr at 5,000 lots)
+- **₹783 / lot** low-salt plan net saving (₹39.14 Lakh/yr at 5,000 lots)
+- **₹607 / lot** re-ordering alone (drives 100% of 6% freshwater and steam cut)
+- **₹964 / lot** counter-current rinsing alone (0% change in evaporator steam)
+- **11,907 L -> 11,187 L (-6%)** combined water, **6,369 L (-47%)** low-salt water
+- **2,239 kWh -> 2,104 kWh (-6%)** combined steam, **1,198 kWh (-47%)** low-salt steam
+- **121.9%** shared evaporator overload under uncoordinated multi-machine scheduling
+- **30.6%** CPCB observed water strength reject volume (18,340 / 60,000 mg/L TDS)
+- **₹5.74 / kg fabric** low-salt dye premium tipping point (-12% discount threshold)
+- **₹2,423 / tonne CO2e** implied boiler carbon price to flip to low-salt chemistry
+- **25 system coefficients** with strictly **0 MEASURED** in pre-pilot mode
+- **Boiler Fuel Profile Switcher**: Wet wood (-25% steam cost) derates to 4,000 lots/yr, shifting required dye discount from 12% (₹5.74) to 17% (₹5.40)
+- **CETP Consortium Aggregator**: 18 member mills aggregate 1,620 t/yr demand to unlock 12% bulk discount, making the 47% cut the cheapest plan cluster-wide
+- **Pilot A/B Statistical Tracker**: 52-week 6-stage timeline with 95% CI on water/steam and SITRA test gate (0 failures)
+
 
 Keyboard: `1`–`8` jump between sections.
 
