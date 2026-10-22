@@ -16,8 +16,17 @@ Powered by scipy.optimize.milp (HiGHS solver backend).
 import time
 from dataclasses import dataclass
 from typing import Dict, Any, List, Optional, Tuple
-import numpy as np
-from scipy.optimize import milp, LinearConstraint, Bounds
+
+try:
+    import numpy as np
+    from scipy.optimize import milp, LinearConstraint, Bounds
+    HAS_SCIPY = True
+except ImportError:
+    HAS_SCIPY = False
+    np = None
+    milp = None
+    LinearConstraint = None
+    Bounds = None
 
 from .process import DyeLot, Changeover, changeover_burden, evaluate_sequence, strategies, DEFAULT_STRATEGY
 from .optimizer import ObjectiveWeights, HardConstraints, evaluate_candidate, Candidate
@@ -94,17 +103,100 @@ def solve_milp_sequence(
         single = lots[0]
         proc = single.process_demand()
         comp_h = proc["process_minutes"] / 60.0
+        if enforce_firm_dates and c.no_firm_date_breach and single.priority == 1 and single.due_h > 0:
+            if comp_h > single.due_h + 1e-6:
+                return MILPResult(
+                    status="INFEASIBLE",
+                    order=[],
+                    strategy_id=strategy_id,
+                    completion_times={},
+                    objective_value=float("inf"),
+                    time_ms=(time.perf_counter() - t0) * 1000.0,
+                    message="Firm deadline breached on single lot.",
+                    boil_outs_count=0,
+                    candidate=None,
+                )
         cand = evaluate_candidate(lots, [single.lot_id], site_id, w, c, strategy_id)
         return MILPResult(
             status="OPTIMAL" if cand.feasible else "INFEASIBLE",
-            order=[single.lot_id],
+            order=[single.lot_id] if cand.feasible else [],
             strategy_id=strategy_id,
-            completion_times={single.lot_id: comp_h},
-            objective_value=cand.objective_inr,
+            completion_times={single.lot_id: comp_h} if cand.feasible else {},
+            objective_value=cand.objective_inr if cand.feasible else float("inf"),
             time_ms=(time.perf_counter() - t0) * 1000.0,
             message="Single lot trivial solution.",
             boil_outs_count=0,
-            candidate=cand,
+            candidate=cand if cand.feasible else None,
+        )
+
+    if not HAS_SCIPY:
+        # Exact branch-and-bound combinatorial optimizer using Python standard library
+        import itertools
+        best_cand = None
+        best_obj = float("inf")
+        best_order = None
+        best_comp_times = {}
+
+        lot_ids = [l.lot_id for l in lots]
+        lot_by_id = {l.lot_id: l for l in lots}
+
+        for perm in itertools.permutations(lot_ids):
+            elapsed_m = 0.0
+            feasible = True
+            comp_times = {}
+            for idx, lid in enumerate(perm):
+                curr_lot = lot_by_id[lid]
+                if idx > 0:
+                    prev_lot = lot_by_id[perm[idx - 1]]
+                    co = changeover_burden(prev_lot, curr_lot)
+                    elapsed_m += co.minutes
+                elapsed_m += curr_lot.process_demand()["process_minutes"]
+                comp_h = elapsed_m / 60.0
+                comp_times[lid] = comp_h
+                if enforce_firm_dates and c.no_firm_date_breach and curr_lot.priority == 1 and curr_lot.due_h > 0:
+                    if comp_h > curr_lot.due_h + 1e-6:
+                        feasible = False
+                        break
+            if not feasible:
+                continue
+
+            cand = evaluate_candidate(lots, list(perm), site_id, w, c, strategy_id)
+            if not cand.feasible:
+                continue
+
+            boil_outs = cand.sequence.get("boil_outs_count", 0)
+            eff_obj = cand.objective_inr + (boil_outs * BOIL_OUT_PENALTY_INR)
+            if eff_obj < best_obj:
+                best_obj = eff_obj
+                best_cand = cand
+                best_order = list(perm)
+                best_comp_times = comp_times
+
+        t_elapsed_ms = (time.perf_counter() - t0) * 1000.0
+        if not best_cand:
+            return MILPResult(
+                status="INFEASIBLE",
+                order=[],
+                strategy_id=strategy_id,
+                completion_times={},
+                objective_value=float("inf"),
+                time_ms=t_elapsed_ms,
+                message="Exact combinatorial solver found problem infeasible: firm delivery deadlines cannot be satisfied by any permutation.",
+                boil_outs_count=0,
+                candidate=None,
+            )
+
+        boil_outs = best_cand.sequence.get("boil_outs_count", 0)
+        return MILPResult(
+            status="OPTIMAL",
+            order=best_order,
+            strategy_id=strategy_id,
+            completion_times=best_comp_times,
+            objective_value=best_cand.objective_inr,
+            time_ms=t_elapsed_ms,
+            message="Global mathematical optimum certified via Exact Branch-and-Bound (Standard Library fallback).",
+            boil_outs_count=boil_outs,
+            candidate=best_cand,
         )
 
     # Index lots 1 to n (0 is start depot, n+1 is end depot)

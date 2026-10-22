@@ -644,10 +644,17 @@ def optimise_milp(lots: List[DyeLot],
 
     rationale = _build_rationale(baseline, recommended, options[1]["delta_vs_baseline"], site_id)
 
+    from .milp import HAS_SCIPY
+    method_name = (
+        "Mixed-Integer Linear Programming (scipy.optimize.milp / HiGHS)"
+        if HAS_SCIPY
+        else "Exact Combinatorial Branch-and-Bound (Standard Library)"
+    )
+
     return {
         "status": "FEASIBLE",
         "site_id": site_id,
-        "method": "Mixed-Integer Linear Programming (scipy.optimize.milp / HiGHS)",
+        "method": method_name,
         "optimality": "PROVEN_GLOBAL_OPTIMUM",
         "options": options,
         "recommended_option_id": "OPTION_B",

@@ -15,10 +15,21 @@ Exposes fully typed OpenAPI 3.1 endpoints for:
 import sys
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-from pydantic import BaseModel, Field
-from fastapi import FastAPI, HTTPException, Request, Response
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+
+try:
+    from pydantic import BaseModel, Field
+    from fastapi import FastAPI, HTTPException, Request, Response
+    from fastapi.middleware.cors import CORSMiddleware
+    from fastapi.staticfiles import StaticFiles
+    HAS_FASTAPI = True
+except ImportError:
+    HAS_FASTAPI = False
+    BaseModel = object
+    Field = lambda *args, **kwargs: None
+    FastAPI = None
+    HTTPException = Exception
+    Request = None
+    Response = None
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -34,22 +45,25 @@ from core.session import get_session
 from core.optimizer import optimise_milp
 
 
-app = FastAPI(
-    title="ChangeLoop ZLD Cluster Operating System",
-    description="The Operating System for Industrial Zero Liquid Discharge (ZLD) Clusters.",
-    version="3.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
-)
+if HAS_FASTAPI:
+    app = FastAPI(
+        title="ChangeLoop ZLD Cluster Operating System",
+        description="The Operating System for Industrial Zero Liquid Discharge (ZLD) Clusters.",
+        version="3.0.0",
+        docs_url="/docs",
+        redoc_url="/redoc",
+    )
 
-# Enable CORS for Next.js / modern web frontend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+    # Enable CORS for Next.js / modern web frontend
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    app = None
 
 
 # ---------------------------------------------------------------------------
