@@ -17,7 +17,7 @@ import time
 from typing import Dict, Any, Optional, Tuple, List
 
 # Roles defined in the system
-ROLES = ("ADMIN", "OPERATOR", "AUDITOR", "VIEWER")
+ROLES = ("ADMIN", "PLANNER", "SUPERVISOR", "CETP_OPERATOR", "AUDITOR", "OPERATOR", "VIEWER")
 
 # PBKDF2 parameters per OWASP Password Storage Guidelines (2023/2024)
 PBKDF2_ITERATIONS = 600000
@@ -137,7 +137,7 @@ def seed_default_users() -> None:
     """Seed baseline cluster accounts if not already initialized."""
     if _USERS:
         return
-    # Default administrative account
+    # 1. Administrator / Chief Engineer
     _USERS["admin"] = {
         "username": "admin",
         "password_hash": hash_password("ChangeLoop#Admin2026!"),
@@ -145,21 +145,45 @@ def seed_default_users() -> None:
         "full_name": "Cluster Chief Engineer",
         "site_id": "tirupur_central_cetp",
     }
-    # Default plant operator account
-    _USERS["operator"] = {
-        "username": "operator",
-        "password_hash": hash_password("Operator#ZLD2026!"),
-        "role": "OPERATOR",
-        "full_name": "Shift Plant Operator",
+    # 2. Dyehouse Shift Planner
+    _USERS["planner"] = {
+        "username": "planner",
+        "password_hash": hash_password("Planner#2026!"),
+        "role": "PLANNER",
+        "full_name": "Shift Production Planner",
         "site_id": "tirupur_mill_04",
     }
-    # Auditor account
+    # 3. Quality & Wash-Off Supervisor
+    _USERS["supervisor"] = {
+        "username": "supervisor",
+        "password_hash": hash_password("Supervisor#2026!"),
+        "role": "SUPERVISOR",
+        "full_name": "Quality & Wash-Off Supervisor",
+        "site_id": "tirupur_mill_04",
+    }
+    # 4. Shared CETP Operations Engineer
+    _USERS["cetp_operator"] = {
+        "username": "cetp_operator",
+        "password_hash": hash_password("CETPOp#2026!"),
+        "role": "CETP_OPERATOR",
+        "full_name": "CETP Evaporator Shift Engineer",
+        "site_id": "tirupur_central_cetp",
+    }
+    # 5. Regulatory Compliance Auditor
     _USERS["auditor"] = {
         "username": "auditor",
         "password_hash": hash_password("Auditor#Audit2026!"),
         "role": "AUDITOR",
         "full_name": "TNPCB / CPCB Compliance Inspector",
         "site_id": "cpcb_south_zone",
+    }
+    # 6. Dyeing Machine Operator
+    _USERS["operator"] = {
+        "username": "operator",
+        "password_hash": hash_password("Operator#ZLD2026!"),
+        "role": "OPERATOR",
+        "full_name": "Shift Plant Operator",
+        "site_id": "tirupur_mill_04",
     }
 
 
@@ -222,3 +246,25 @@ def get_logout_cookie_header() -> str:
 
 # Initialize default users
 seed_default_users()
+
+def demo_switch_role(role: str) -> Tuple[bool, Optional[Dict[str, Any]], Optional[str], Optional[str]]:
+    """Instantly generate a signed token and cookie for one of the verified demo roles."""
+    seed_default_users()
+    r = role.strip().upper()
+    role_to_uname = {
+        "ADMIN": "admin",
+        "PLANNER": "planner",
+        "SUPERVISOR": "supervisor",
+        "CETP_OPERATOR": "cetp_operator",
+        "AUDITOR": "auditor",
+        "OPERATOR": "operator",
+    }
+    uname = role_to_uname.get(r)
+    if not uname or uname not in _USERS:
+        return False, None, None, f"Unknown demo role '{role}'. Valid roles: {list(role_to_uname.keys())}"
+    
+    user = {k: v for k, v in _USERS[uname].items() if k != "password_hash"}
+    token = create_token(user)
+    is_secure = os.environ.get("CHANGELOOP_ENV") == "production"
+    cookie_hdr = get_cookie_header(token, is_secure=is_secure)
+    return True, user, token, cookie_hdr

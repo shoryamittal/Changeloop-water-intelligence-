@@ -322,3 +322,191 @@ def cluster_projection(units: int = 400,
         ),
         "classification": "PROJECTED",
     }
+
+
+def commercial_roi_model(
+    annual_lots: int = 5000,
+    cetp_annual_salt_tonnes: float = 7700.0,
+    export_mills_subscribing_cbam: int = 3,
+) -> Dict[str, Any]:
+    """Three-Pillar Usage-Based Revenue Model & Solo-Founder Commercial Projection."""
+    # Pillar 1: Factory Wedge
+    factory_fee_per_lot = 15.0  # Rs 15 / scheduled lot
+    unit_compute_cost = 0.15     # Rs 0.15 / lot
+    rec_gross_saving_per_lot = 1571.80  # Rs 1,572 / lot
+    rec_annual_gross_saving = annual_lots * rec_gross_saving_per_lot
+    rec_annual_fee = annual_lots * factory_fee_per_lot
+    rec_net_benefit = rec_annual_gross_saving - rec_annual_fee
+    rec_roi_multiple = round(rec_net_benefit / rec_annual_fee, 1)
+
+    low_salt_saving_per_lot = 782.73    # Rs 783 / lot
+    low_salt_annual_gross = annual_lots * low_salt_saving_per_lot
+    low_salt_net_benefit = low_salt_annual_gross - rec_annual_fee
+
+    pillar_1_factory = {
+        "pillar": "Pillar 1: The Factory Wedge",
+        "pricing_model": "Usage-Based (Rs 15 / scheduled lot)",
+        "annual_lots_modeled": annual_lots,
+        "recommended_plan": {
+            "gross_savings_inr_yr": round(rec_annual_gross_saving, 2),
+            "software_fee_inr_yr": round(rec_annual_fee, 2),
+            "net_factory_benefit_inr_yr": round(rec_net_benefit, 2),
+            "fee_as_pct_of_saving": round((rec_annual_fee / rec_annual_gross_saving) * 100.0, 2),
+            "retained_by_factory_pct": round((rec_net_benefit / rec_annual_gross_saving) * 100.0, 2),
+            "roi_multiple": rec_roi_multiple,
+            "unit_compute_cost_inr": unit_compute_cost,
+            "software_gross_margin_pct": round(((factory_fee_per_lot - unit_compute_cost) / factory_fee_per_lot) * 100.0, 1),
+        },
+        "low_salt_pathway_comparison": {
+            "gross_savings_inr_yr": round(low_salt_annual_gross, 2),
+            "software_fee_inr_yr": round(rec_annual_fee, 2),
+            "net_factory_benefit_inr_yr": round(low_salt_net_benefit, 2),
+            "profit_deficit_vs_recommended_inr_yr": round(rec_net_benefit - low_salt_net_benefit, 2),
+            "economic_reason": "High-fixation dye Rs 6.50/kg fabric price premium erodes boiler savings.",
+        }
+    }
+
+    # Pillar 2: CETP Anchor Fee
+    cetp_fee_per_tonne_salt = 150.0  # Rs 150 / tonne of salt tracked
+    cetp_current_evap_cost_per_tonne = 9891.0  # Rs 9,891 / tonne salt
+    cetp_annual_evap_bill_inr = cetp_annual_salt_tonnes * cetp_current_evap_cost_per_tonne
+    cetp_software_fee = cetp_annual_salt_tonnes * cetp_fee_per_tonne_salt
+    cetp_salt_reduction_pct = 3.0  # 3% salt reduction
+    cetp_annual_savings_inr = cetp_annual_evap_bill_inr * (cetp_salt_reduction_pct / 100.0)
+    cetp_net_benefit_inr = cetp_annual_savings_inr - cetp_software_fee
+
+    pillar_2_cetp = {
+        "pillar": "Pillar 2: The CETP Anchor Fee",
+        "pricing_model": "Rs 150 / tonne of salt tracked",
+        "annual_salt_tonnes_treated": cetp_annual_salt_tonnes,
+        "current_evaporator_power_steam_bill_inr_yr": round(cetp_annual_evap_bill_inr, 2),
+        "current_evaporator_bill_crore_inr": round(cetp_annual_evap_bill_inr / 1e7, 2),
+        "changeloop_fee_inr_yr": round(cetp_software_fee, 2),
+        "changeloop_fee_lakh_inr": round(cetp_software_fee / 1e5, 2),
+        "cetp_gross_savings_at_3pct_cut_inr_yr": round(cetp_annual_savings_inr, 2),
+        "cetp_net_benefit_inr_yr": round(cetp_net_benefit_inr, 2),
+        "cetp_roi_multiple": round(cetp_annual_savings_inr / cetp_software_fee, 2),
+        "evaporator_headroom_recovered_pct": "10% to 15%",
+        "cooperative_alignment": "Member Production Quota Expansion (allows member mills to run more export batches without CAPEX).",
+    }
+
+    # Pillar 3: Export CBAM Tier
+    cbam_tier_annual_fee_per_mill = 100000.0  # Rs 1,00,000 / year
+    pillar_3_cbam = {
+        "pillar": "Pillar 3: Export Compliance Tier (EU CBAM)",
+        "pricing_model": "Rs 1,00,000 / year per exporting mill",
+        "service": "One-click automated Scope 3 CO2 & water footprint audit certificates from SHA-256 hash chain.",
+        "participating_export_mills": export_mills_subscribing_cbam,
+        "annual_revenue_inr": export_mills_subscribing_cbam * cbam_tier_annual_fee_per_mill,
+    }
+
+    # Hardware Onboarding Pass-Through
+    hardware_onboarding = {
+        "type": "Hardware Onboarding (Pass-Through)",
+        "setup_fee_per_cetp_inr": 250000.0,
+        "hardware_margin_pct": 0.0,
+        "items": [
+            "External clamp-on ultrasonic transit-time steam flow meters",
+            "Non-fouling toroidal inductive conductivity sensors",
+            "Industrial 4G/MQTT telemetry edge gateway",
+        ]
+    }
+
+    # 3-Year Solo-Founder ARR Growth Projection
+    arr_projection = {
+        "year_1_pilot": {
+            "year": "Year 1 (Pilot)",
+            "arr_inr": 0.0,
+            "arr_lakh_inr": 0.0,
+            "deployed_sites": "2-site neutral research pilot",
+            "narrative": "Run free of charge to maintain strict scientific and publication neutrality."
+        },
+        "year_2_beachhead": {
+            "year": "Year 2 (Beachhead CETP)",
+            "arr_inr": 2205000.0,
+            "arr_lakh_inr": 22.05,
+            "breakdown": "1 CETP (Rs 11.55L) + 10 Mills (Rs 7.50L) + 3 CBAM Tiers (Rs 3.00L)",
+            "blended_gross_margin_pct": 94.0,
+        },
+        "year_3_cluster_scale": {
+            "year": "Year 3 (Cluster Scale)",
+            "arr_inr": 6915000.0,
+            "arr_lakh_inr": 69.15,
+            "breakdown": "3 CETPs (Rs 34.65L) + 30 Mills (Rs 22.50L) + 12 CBAM Tiers (Rs 12.00L)",
+            "blended_gross_margin_pct": 94.0,
+        }
+    }
+
+    return {
+        "status": "SUCCESS",
+        "pillars": {
+            "pillar_1_factory_wedge": pillar_1_factory,
+            "pillar_2_cetp_anchor": pillar_2_cetp,
+            "pillar_3_cbam_export": pillar_3_cbam,
+            "hardware_onboarding": hardware_onboarding,
+        },
+        "growth_projection": arr_projection,
+        "pilot_budget": pilot_budget_breakdown(),
+        "cluster_macro_impact": cluster_macro_potential(),
+        "partnership_asks": non_monetary_partnership_asks(),
+    }
+
+
+def pilot_budget_breakdown() -> Dict[str, Any]:
+    """Two-site 52-week baseline pilot budget (Exact Rs 5,28,000)."""
+    items = [
+        {"item": "Clamp-on ultrasonic transit-time flow meters (2 sites)", "cost_inr": 120000.0},
+        {"item": "Non-fouling toroidal inductive conductivity sensors (2 sites)", "cost_inr": 100000.0},
+        {"item": "Mounting hardware, industrial wiring & AgNO3 titration reagents", "cost_inr": 80000.0},
+        {"item": "Industrial IoT edge loggers, 4G gateways & calibration checks", "cost_inr": 60000.0},
+        {"item": "Independent SITRA lab colour-fastness testing (~150 samples)", "cost_inr": 50000.0},
+        {"item": "Field engineering travel & on-site deployment in Tirupur (~12 visits)", "cost_inr": 60000.0},
+        {"item": "Cloud infrastructure (Rs 20k) + 10% contingency reserve (Rs 38k)", "cost_inr": 58000.0},
+    ]
+    total = sum(x["cost_inr"] for x in items)
+    return {
+        "items": items,
+        "total_budget_inr": total,
+        "total_budget_lakh_inr": round(total / 1e5, 2),
+        "target_amount_inr": 528000.0,
+        "reconciled": total == 528000.0,
+    }
+
+
+def cluster_macro_potential() -> Dict[str, Any]:
+    """Tirupur Cluster-Wide Macro Potential (400 Units @ 900 Lots/Year)."""
+    return {
+        "basis": "400 wet-processing units operating under Zero Liquid Discharge mandate",
+        "lots_per_unit_per_year": 900,
+        "total_annual_cluster_lots": 360000,
+        "freshwater_preserved_litres_per_year": 75000000,
+        "freshwater_preserved_million_litres_per_year": 75.0,
+        "hazardous_salt_prevented_tonnes_per_year": 4500.0,
+        "evaporator_thermal_steam_saved_mwh_per_year": 14106.0,
+        "co2e_emissions_avoided_tonnes_per_year": 6376.0,
+        "fuel_basis": "Coal-fired baseline (0.452 kg CO2e / kWh_th)",
+    }
+
+
+def non_monetary_partnership_asks() -> List[Dict[str, Any]]:
+    """Three Non-Monetary Partnership Asks Tracker."""
+    return [
+        {
+            "ask_id": 1,
+            "title": "CETP Host Introduction",
+            "description": "Introduction to a progressive Tirupur Common Effluent Treatment Plant (e.g., Arulpuram, Chinnakarai, Rayapuram, or Kasipalayam) for clamp-on sensor mounting on the common MEE reject header.",
+            "status": "OPEN",
+        },
+        {
+            "ask_id": 2,
+            "title": "Textile Effluent Specialist Peer Review",
+            "description": "Independent academic or senior process engineer review of the 25 physical coefficients in /api/evidence.",
+            "status": "UNDER_REVIEW",
+        },
+        {
+            "ask_id": 3,
+            "title": "Reactive-Dye Supplier Bulk Pricing Validation",
+            "description": "Commercial validation of the -12% bulk procurement discount (Rs 6.50 -> Rs 5.74/kg fabric) for aggregated low-salt reactive dye tenders.",
+            "status": "VALIDATED",
+        },
+    ]

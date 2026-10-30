@@ -15,9 +15,9 @@ from typing import Dict, List, Tuple
 
 # Rate Limit Configurations: (max_requests, window_seconds)
 LIMITS = {
-    "AUTH": (5, 900),     # 5 req / 15 min
-    "SOLVER": (10, 60),   # 10 req / 60 sec
-    "GENERAL": (100, 60), # 100 req / 60 sec
+    "AUTH": (5, 900),     # 5 req / 15 min per IP
+    "SOLVER": (30, 60),   # 30 req / 60 sec per IP/User
+    "GENERAL": (120, 60), # 120 req / 60 sec per IP
 }
 
 _WINDOWS: Dict[str, Dict[str, List[float]]] = {

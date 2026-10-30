@@ -54,6 +54,7 @@ from . import milp
 from . import auth
 from . import validator
 from . import ratelimit
+from . import simulator
 
 from .basin import Basin, BASINS, get_basin, all_basins, DEFAULT_SITE
 from .process import (

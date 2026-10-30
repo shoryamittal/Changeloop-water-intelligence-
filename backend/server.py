@@ -53,7 +53,7 @@ from core import (
     factors, basin, process, zld, telemetry, provenance, economics,
     scenarios, ledger, forecast, narrative, plant, policy,
     calibration, billing, milp, ingestion,
-    auth, validator, ratelimit,
+    auth, validator, ratelimit, simulator,
 )
 
 def _get_allowed_origins():
@@ -642,6 +642,31 @@ class App(SimpleHTTPRequestHandler):
                 ]
                 return self.send_json({"users": users_list, "count": len(users_list)})
 
+            if route == "/api/simulator/jury-stress-test":
+                scenario_id = one("scenario")
+                res = simulator.run_jury_stress_test(scenario_id)
+                return self.send_json(res)
+
+            if route == "/api/auth/demo-switch":
+                role = str(one("role", "PLANNER") or "PLANNER").strip().upper()
+                ok, user, token, cookie_hdr = auth.demo_switch_role(role)
+                if not ok:
+                    return self.send_error_json(400, "INVALID_ROLE", cookie_hdr or "Unknown role")
+                return self.send_json({"ok": True, "status": "SUCCESS", "user": user, "token": token, "active_role": role}, set_cookie=cookie_hdr)
+
+            if route == "/api/commercial/roi":
+                lots = int(one("lots", "5000") or 5000)
+                res = economics.commercial_roi_model(annual_lots=lots)
+                return self.send_json(res)
+
+            if route == "/api/policy/switching-points":
+                res = policy.policy_levers(site_id=s.site_id)
+                return self.send_json(res)
+
+            if route == "/api/pilot/status":
+                res = telemetry.pilot_ab_statistical_tracker()
+                return self.send_json(res)
+
             if route == "/api/state":
                 return self.send_json(s.state())
 
@@ -1046,7 +1071,7 @@ class App(SimpleHTTPRequestHandler):
                 )
                 if not ok:
                     return self.send_error_json(400, "REGISTRATION_FAILED", err_msg or "Registration failed.")
-                return self.send_json({"ok": True, "user": user}, code=201)
+                return self.send_json({"ok": True, "status": "SUCCESS", "user": user}, code=201)
 
             if route == "/api/auth/logout":
                 return self.send_json({"ok": True, "message": "Logged out successfully."}, set_cookie=auth.get_logout_cookie_header())
@@ -1054,6 +1079,20 @@ class App(SimpleHTTPRequestHandler):
             if route == "/api/admin/reset-limits":
                 ratelimit.reset_rate_limits()
                 return self.send_json({"ok": True, "message": "Rate limits reset."})
+
+            if route == "/api/simulator/jury-stress-test":
+                scenario_id = body.get("scenario") or body.get("scenario_id")
+                res = simulator.run_jury_stress_test(scenario_id)
+                _idem_put(idem, res)
+                return self.send_json(res)
+
+            if route == "/api/auth/demo-switch":
+                q_role = (parse_qs(urlparse(self.path).query).get("role") or [None])[0]
+                role = str(body.get("role") or q_role or "PLANNER").strip().upper()
+                ok, user, token, cookie_hdr = auth.demo_switch_role(role)
+                if not ok:
+                    return self.send_error_json(400, "INVALID_ROLE", cookie_hdr or "Unknown role")
+                return self.send_json({"ok": True, "status": "SUCCESS", "user": user, "token": token, "active_role": role}, set_cookie=cookie_hdr)
 
             if route == "/api/session/reset":
                 out = s.reset(body.get("site_id"))
