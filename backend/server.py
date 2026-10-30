@@ -30,7 +30,7 @@ import core
 from core import (
     factors, basin, process, zld, telemetry, provenance, economics,
     scenarios, ledger, forecast, narrative, plant, policy,
-    calibration, billing, milp,
+    calibration, billing, milp, ingestion,
 )
 from core.session import get_session
 
@@ -769,6 +769,40 @@ class App(SimpleHTTPRequestHandler):
                 )
                 return self.send_json(cert)
 
+            if route == "/api/ingestion/controllers":
+                return self.send_json(ingestion.INGESTION_ENGINE.get_controller_status())
+
+            if route == "/api/ledger/blocks":
+                limit_val = int(one("limit", "50"))
+                return self.send_json({
+                    "blocks": provenance.get_canonical_blocks(limit=limit_val),
+                    "evidence_registry_hash": provenance.evidence_registry_hash(),
+                    "total_blocks": len(provenance.get_canonical_blocks(limit=limit_val)),
+                    "format": "Canonical 10-Field SHA-256 Ledger Block",
+                })
+
+            if route == "/api/billing/calculator":
+                lots_num = int(one("lots", "5000"))
+                salt_kg_val = float(one("salt_kg", "62500.0"))
+                savings_val = float(one("savings_inr", "7860000.0"))
+                cbam_active = one("cbam", "true").lower() in ("true", "1", "yes")
+                skids_num = int(one("skids", "0"))
+                quote = billing.calculate_billing(
+                    lots_processed=lots_num,
+                    salt_avoided_kg=salt_kg_val,
+                    client_total_savings_inr=savings_val,
+                    include_cbam=cbam_active,
+                    new_skids=skids_num,
+                )
+                return self.send_json({
+                    "quote": quote.to_dict(),
+                    "switching_thresholds": billing.evaluate_switching_thresholds(),
+                    "annual_cluster_projections": {
+                        "factory_net_profit_retained_inr": quote.client_savings_inr - quote.total_invoice_inr,
+                        "software_fee_pct_of_savings": round((quote.total_invoice_inr / max(1.0, quote.client_savings_inr)) * 100.0, 2),
+                    },
+                })
+
             if route.startswith("/api/"):
                 return self.send_error_json(
                     404, "UNKNOWN_ROUTE",
@@ -901,7 +935,27 @@ class App(SimpleHTTPRequestHandler):
                 if titration_data and isinstance(titration_data, dict):
                     titr = calibration.TitrationRecord(**titration_data)
                     calibration.CALIBRATION_ENGINE.update_titration(titr)
-                out = calibration.CALIBRATION_ENGINE.calibrate_tds(raw_cond, ph, temp)
+                
+                alkali_dosage = float(body.get("recipe_alkali_dosage_g_l", 15.0))
+                stage_flag = str(body.get("batch_stage_flag", "RINSING"))
+                titr_chloride = float(body.get("daily_titration_chloride_mg_l", calibration.CALIBRATION_ENGINE.active_titration.chloride_mg_per_l))
+                
+                mv_out = ingestion.calibrate_multivariable_ionic(
+                    raw_toroidal_ec_ms_cm=raw_cond / 1000.0 if raw_cond > 100.0 else raw_cond,
+                    recipe_alkali_dosage_g_l=alkali_dosage,
+                    batch_stage_flag=stage_flag,
+                    daily_titration_chloride_mg_l=titr_chloride,
+                    ph=ph,
+                    temp_c=temp,
+                )
+                cal_engine_out = calibration.CALIBRATION_ENGINE.calibrate_tds(raw_cond, ph, temp)
+                out = {
+                    "standard_calibration": cal_engine_out,
+                    "multivariable_alkali_calibration": mv_out,
+                    "calibrated_salt_tds_mg_l": mv_out["true_salt_tds_mg_l"],
+                    "alkali_overestimate_pct": mv_out["alkali_overestimate_pct"],
+                    "status": mv_out["status"],
+                }
                 _idem_put(idem, out)
                 return self.send_json(out)
 
@@ -930,6 +984,22 @@ class App(SimpleHTTPRequestHandler):
                 )
                 _idem_put(idem, cert)
                 return self.send_json(cert)
+
+            if route == "/api/ingestion/queue":
+                lots_payload = body.get("lots")
+                new_lots = ingestion.INGESTION_ENGINE.ingest_queue(lots_payload)
+                s.lots = new_lots
+                s.arrival = [l.lot_id for l in new_lots]
+                s.current_order = list(s.arrival)
+                out = {
+                    "status": "INGESTED",
+                    "lots_count": len(new_lots),
+                    "lots": [l.to_dict() for l in new_lots],
+                    "total_fabric_kg": sum(l.fabric_kg for l in new_lots),
+                    "source_controller": body.get("controller", "SEDOMASTER_OPC_UA"),
+                }
+                _idem_put(idem, out)
+                return self.send_json(out)
 
             if route == "/api/optimizer/milp":
                 mode_id = body.get("mode")
