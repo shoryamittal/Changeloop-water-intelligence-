@@ -1,16 +1,68 @@
+# Environment variables and sensitive secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.cert
+*.crt
+*.pfx
+*.p12
+
+# Database & Persistent storage
 data/*.db*
-backend/__pycache__/
-scripts/__pycache__/
-tests/__pycache__/
-**/__pycache__/
-*.pyc
+data/*.sqlite*
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs & Runtime telemetry
+*.log
 server.log
 server.err
+
+# Python cache & compiled artifacts
 __pycache__/
 *.pyc
-data/*.db
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Node.js
 node_modules/
 package-lock.json
+
+# System & OS artifacts
+.DS_Store
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+
+# Testing & QA build outputs
+.coverage
+htmlcov/
+.pytest_cache/
 submission/render/
 submission/render_pdf/
 submission/qa_check/

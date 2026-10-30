@@ -26,6 +26,28 @@ import uuid
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+def _load_env_file() -> None:
+    """Load environment variables from .env.local or .env if present (zero external deps)."""
+    import os
+    for fname in [".env.local", ".env"]:
+        fpath = ROOT / fname
+        if fpath.is_file():
+            try:
+                with open(fpath, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line or line.startswith("#") or "=" not in line:
+                            continue
+                        k, v = line.split("=", 1)
+                        k, v = k.strip(), v.strip().strip("'\"")
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+                break
+            except Exception:
+                pass
+
+_load_env_file()
+
 import core
 from core import (
     factors, basin, process, zld, telemetry, provenance, economics,
@@ -402,21 +424,25 @@ class App(SimpleHTTPRequestHandler):
 
     # -- helpers ----------------------------------------------------------
 
-    def send_json(self, value: Any, code: int = 200) -> None:
-        """Write a JSON response.
+    def end_headers(self):
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("Referrer-Policy", "strict-origin-when-cross-origin")
+        self.send_header("Permissions-Policy", "geolocation=(), camera=(), microphone=()")
+        self.send_header(
+            "Content-Security-Policy",
+            "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self' data:"
+        )
+        super().end_headers()
 
-        A client that has gone away makes every socket write raise, and
-        end_headers() writes too - guarding only the body left the header
-        write to escape the handler and print a traceback. A disconnected
-        peer is normal, not an error, so the whole write is guarded.
-        """
+    def send_json(self, value: Any, code: int = 200) -> None:
+        """Write a JSON response."""
         raw = json.dumps(value, default=str).encode("utf-8")
         try:
             self.send_response(code)
             self.send_header("Content-Type",
                              "application/json; charset=utf-8")
             self.send_header("Cache-Control", "no-store")
-            self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("X-API-Version", API_VERSION)
             self.send_header("X-Request-ID", str(uuid.uuid4()))
             self.send_header("Content-Length", str(len(raw)))
@@ -440,6 +466,10 @@ class App(SimpleHTTPRequestHandler):
         except ValueError:
             return None, "Content-Length is not a number."
         if length < 0 or length > 1000000:
+            try:
+                self.rfile.read(min(length, 65536))
+            except Exception:
+                pass
             return None, "Request body too large."
         if length == 0:
             return {}, None
@@ -814,7 +844,24 @@ class App(SimpleHTTPRequestHandler):
                 "The request failed and no state was changed.",
                 {"detail": str(exc)[:300]})
 
-        self.path = "/frontend/index.html" if route == "/" else route
+        # Strict Static Path Whitelist & Directory Traversal Protection
+        if ".." in route or "\x00" in route:
+            return self.send_error_json(403, "FORBIDDEN", "Path traversal sequences are prohibited.")
+
+        clean_path = Path(route).as_posix().lower()
+        if (
+            clean_path.startswith(("/.", "/data", "/core", "/backend", "/tests", "/scripts", "/config", "/docs"))
+            or clean_path.endswith((".py", ".pyc", ".db", ".sqlite", ".key", ".pem", ".env", ".log", ".sh", ".bat"))
+        ):
+            return self.send_error_json(403, "FORBIDDEN", "Direct access to internal source files or data is prohibited.")
+
+        if route in ("/", "", "/index.html"):
+            self.path = "/frontend/index.html"
+        elif route.startswith(("/frontend/", "/assets/")) or route == "/favicon.ico":
+            self.path = route
+        else:
+            return self.send_error_json(404, "NOT_FOUND", "Resource not found.")
+
         return super().do_GET()
 
     def do_POST(self):
