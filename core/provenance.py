@@ -273,8 +273,7 @@ def records(limit: int = 500,
             conn = sqlite3.connect(str(path))
             try:
                 rows = conn.execute(
-                    "SELECT {} FROM decision_ledger ORDER BY seq DESC LIMIT ?"
-                    .format(", ".join(cols)), (int(limit),)).fetchall()
+                    "SELECT seq, record_id, timestamp, actor, action, detail, payload_hash, prev_hash, record_hash, payload_json FROM decision_ledger ORDER BY seq DESC LIMIT ?", (int(limit),)).fetchall()
                 return [LedgerRecord(**dict(zip(cols, r))).to_dict()
                         for r in rows]
             finally:
@@ -301,8 +300,7 @@ def verify_chain(db_path: Optional[Path] = None) -> Dict[str, Any]:
             conn = sqlite3.connect(str(path))
             try:
                 raw = conn.execute(
-                    "SELECT {} FROM decision_ledger ORDER BY seq ASC"
-                    .format(", ".join(cols))).fetchall()
+                    "SELECT seq, record_id, timestamp, actor, action, detail, payload_hash, prev_hash, record_hash, payload_json FROM decision_ledger ORDER BY seq ASC").fetchall()
                 rows = [dict(zip(cols, r)) for r in raw]
             finally:
                 conn.close()

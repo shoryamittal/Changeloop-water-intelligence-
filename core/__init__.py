@@ -51,6 +51,9 @@ from . import session
 from . import calibration
 from . import billing
 from . import milp
+from . import auth
+from . import validator
+from . import ratelimit
 
 from .basin import Basin, BASINS, get_basin, all_basins, DEFAULT_SITE
 from .process import (

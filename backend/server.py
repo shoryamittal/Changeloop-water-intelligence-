@@ -53,7 +53,23 @@ from core import (
     factors, basin, process, zld, telemetry, provenance, economics,
     scenarios, ledger, forecast, narrative, plant, policy,
     calibration, billing, milp, ingestion,
+    auth, validator, ratelimit,
 )
+
+def _get_allowed_origins():
+    import os
+    raw = os.environ.get("ALLOWED_ORIGINS", "")
+    origins = [o.strip() for o in raw.split(",") if o.strip()]
+    if not origins:
+        origins = [
+            "https://changeloop.ai",
+            "https://changeloop-water-intelligence.onrender.com",
+            "http://localhost:8000",
+            "http://127.0.0.1:8000",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ]
+    return origins
 from core.session import get_session
 
 API_VERSION = "3.0"
@@ -424,10 +440,43 @@ class App(SimpleHTTPRequestHandler):
 
     # -- helpers ----------------------------------------------------------
 
+    def get_client_ip(self) -> str:
+        xfwd = self.headers.get("X-Forwarded-For")
+        if xfwd:
+            return xfwd.split(",")[0].strip()
+        return self.client_address[0] if self.client_address else "127.0.0.1"
+
+    def get_auth_token(self):
+        auth_hdr = self.headers.get("Authorization", "")
+        if auth_hdr.startswith("Bearer "):
+            return auth_hdr[7:].strip()
+        cookie_hdr = self.headers.get("Cookie", "")
+        if cookie_hdr:
+            for part in cookie_hdr.split(";"):
+                part = part.strip()
+                if part.startswith("session_token="):
+                    return part.split("=", 1)[1].strip()
+        return None
+
+    def get_current_user(self):
+        token = self.get_auth_token()
+        if not token:
+            return None
+        ok, claims, _ = auth.verify_token(token)
+        return claims if ok else None
+
     def end_headers(self):
+        origin = self.headers.get("Origin")
+        allowed = _get_allowed_origins()
+        if origin and (origin in allowed or origin.startswith(("http://localhost:", "http://127.0.0.1:"))):
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Access-Control-Allow-Credentials", "true")
+            self.send_header("Vary", "Origin")
+
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("X-Frame-Options", "DENY")
         self.send_header("Referrer-Policy", "strict-origin-when-cross-origin")
+        self.send_header("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload")
         self.send_header("Permissions-Policy", "geolocation=(), camera=(), microphone=()")
         self.send_header(
             "Content-Security-Policy",
@@ -435,7 +484,7 @@ class App(SimpleHTTPRequestHandler):
         )
         super().end_headers()
 
-    def send_json(self, value: Any, code: int = 200) -> None:
+    def send_json(self, value: Any, code: int = 200, set_cookie=None) -> None:
         """Write a JSON response."""
         raw = json.dumps(value, default=str).encode("utf-8")
         try:
@@ -446,6 +495,8 @@ class App(SimpleHTTPRequestHandler):
             self.send_header("X-API-Version", API_VERSION)
             self.send_header("X-Request-ID", str(uuid.uuid4()))
             self.send_header("Content-Length", str(len(raw)))
+            if set_cookie:
+                self.send_header("Set-Cookie", set_cookie)
             self.end_headers()
             if self.command != "HEAD":
                 self.wfile.write(raw)
@@ -503,6 +554,14 @@ class App(SimpleHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(204)
         self.send_header("Allow", "GET, POST, HEAD, OPTIONS")
+        origin = self.headers.get("Origin")
+        allowed = _get_allowed_origins()
+        if origin and (origin in allowed or origin.startswith(("http://localhost:", "http://127.0.0.1:"))):
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Access-Control-Allow-Credentials", "true")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, HEAD, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, Idempotency-Key, X-Request-ID, Cookie")
+            self.send_header("Access-Control-Max-Age", "86400")
         self.end_headers()
 
     def do_HEAD(self):
@@ -518,6 +577,34 @@ class App(SimpleHTTPRequestHandler):
         q = parse_qs(parsed.query)
         s = get_session()
 
+        # Rate Limiting Guard
+        client_ip = self.get_client_ip()
+        cat = ratelimit.get_category_for_route(route)
+        allowed, retry_after = ratelimit.check_rate_limit(client_ip, cat)
+        if not allowed:
+            self.send_response(429)
+            self.send_header("Retry-After", str(retry_after))
+            return self.send_error_json(
+                429, "RATE_LIMIT_EXCEEDED",
+                f"Rate limit exceeded for category '{cat}'. Please retry in {retry_after} seconds.",
+                {"retry_after": retry_after, "category": cat}
+            )
+
+        # RBAC Middleware Guards
+        if route.startswith(("/admin/", "/api/admin/")):
+            u = self.get_current_user()
+            if not u:
+                return self.send_error_json(401, "UNAUTHORIZED", "Authentication required for administrative operations.")
+            if u.get("role") != "ADMIN":
+                return self.send_error_json(403, "FORBIDDEN", "Forbidden: Administrative privileges (role 'ADMIN') required.")
+
+        if route.startswith(("/dashboard/", "/api/secure/")):
+            u = self.get_current_user()
+            if not u:
+                return self.send_error_json(401, "UNAUTHORIZED", "Authentication required to access secure endpoints.")
+            if u.get("role") not in ("ADMIN", "OPERATOR"):
+                return self.send_error_json(403, "FORBIDDEN", "Forbidden: Operator or Administrator role required.")
+
         def one(name: str, default=None):
             return q.get(name, [default])[0]
 
@@ -530,6 +617,30 @@ class App(SimpleHTTPRequestHandler):
                     "calculation_version": core.CALCULATION_VERSION,
                     "ledger": provenance.verify_chain(),
                 })
+
+            if route == "/api/auth/me":
+                u = self.get_current_user()
+                if not u:
+                    return self.send_error_json(401, "UNAUTHORIZED", "Not authenticated.")
+                return self.send_json({"ok": True, "user": u})
+
+            if route == "/api/secure/diagnostics":
+                u = self.get_current_user()
+                return self.send_json({
+                    "status": "HEALTHY",
+                    "authenticated_as": u.get("username") if u else "unknown",
+                    "role": u.get("role") if u else "none",
+                    "active_lots": len(s.lots),
+                    "ledger_verified": provenance.verify_chain()["intact"],
+                    "system_time": time.time(),
+                })
+
+            if route == "/api/admin/users":
+                users_list = [
+                    {"username": u["username"], "role": u["role"], "full_name": u.get("full_name"), "site_id": u.get("site_id")}
+                    for u in auth._USERS.values()
+                ]
+                return self.send_json({"users": users_list, "count": len(users_list)})
 
             if route == "/api/state":
                 return self.send_json(s.state())
@@ -870,6 +981,37 @@ class App(SimpleHTTPRequestHandler):
         if err:
             return self.send_error_json(400, "BAD_REQUEST", err)
 
+        # Rate Limiting Guard
+        client_ip = self.get_client_ip()
+        cat = ratelimit.get_category_for_route(route)
+        allowed, retry_after = ratelimit.check_rate_limit(client_ip, cat)
+        if not allowed:
+            self.send_response(429)
+            self.send_header("Retry-After", str(retry_after))
+            return self.send_error_json(
+                429, "RATE_LIMIT_EXCEEDED",
+                f"Rate limit exceeded for category '{cat}'. Please retry in {retry_after} seconds.",
+                {"retry_after": retry_after, "category": cat}
+            )
+
+        # Sanitize body against XSS
+        body = validator.sanitize_payload(body)
+
+        # RBAC Middleware Guards
+        if route.startswith(("/admin/", "/api/admin/")):
+            u = self.get_current_user()
+            if not u:
+                return self.send_error_json(401, "UNAUTHORIZED", "Authentication required for administrative operations.")
+            if u.get("role") != "ADMIN":
+                return self.send_error_json(403, "FORBIDDEN", "Forbidden: Administrative privileges (role 'ADMIN') required.")
+
+        if route.startswith(("/dashboard/", "/api/secure/")):
+            u = self.get_current_user()
+            if not u:
+                return self.send_error_json(401, "UNAUTHORIZED", "Authentication required to access secure endpoints.")
+            if u.get("role") not in ("ADMIN", "OPERATOR"):
+                return self.send_error_json(403, "FORBIDDEN", "Forbidden: Operator or Administrator role required.")
+
         idem = (self.headers.get("Idempotency-Key")
                 or body.get("idempotency_key"))
         cached = _idem_get(idem)
@@ -879,6 +1021,40 @@ class App(SimpleHTTPRequestHandler):
         s = get_session()
 
         try:
+            if route == "/api/auth/login":
+                try:
+                    valid_data = validator.validate_auth_login(body)
+                except validator.ValidationError as ve:
+                    return self.send_error_json(400, "VALIDATION_ERROR", ve.message)
+                ok, user, err_msg = auth.authenticate_user(valid_data["username"], valid_data["password"])
+                if not ok:
+                    return self.send_error_json(401, "INVALID_CREDENTIALS", err_msg or "Invalid credentials.")
+                token = auth.create_token(user)
+                import os
+                is_secure = (os.environ.get("CHANGELOOP_ENV") == "production")
+                cookie_hdr = auth.get_cookie_header(token, is_secure=is_secure)
+                return self.send_json({"ok": True, "token": token, "user": user}, set_cookie=cookie_hdr)
+
+            if route == "/api/auth/register":
+                try:
+                    valid_data = validator.validate_auth_register(body)
+                except validator.ValidationError as ve:
+                    return self.send_error_json(400, "VALIDATION_ERROR", ve.message)
+                ok, user, err_msg = auth.register_user(
+                    valid_data["username"], valid_data["password"], valid_data["role"],
+                    valid_data["full_name"], valid_data["site_id"]
+                )
+                if not ok:
+                    return self.send_error_json(400, "REGISTRATION_FAILED", err_msg or "Registration failed.")
+                return self.send_json({"ok": True, "user": user}, code=201)
+
+            if route == "/api/auth/logout":
+                return self.send_json({"ok": True, "message": "Logged out successfully."}, set_cookie=auth.get_logout_cookie_header())
+
+            if route == "/api/admin/reset-limits":
+                ratelimit.reset_rate_limits()
+                return self.send_json({"ok": True, "message": "Rate limits reset."})
+
             if route == "/api/session/reset":
                 out = s.reset(body.get("site_id"))
                 _idem_put(idem, out)
